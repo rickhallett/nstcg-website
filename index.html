@@ -107,16 +107,8 @@
     </div>
 
     <div class="thought-bubbles-section">
-      <div class="thought-bubbles-grid">
-        <div class="thought-bubble">
-          I'm worried about increased traffic on our residential street. My kids play here!
-        </div>
-        <div class="thought-bubble">
-          The speeding on Shore Road is already dangerous. This could make it worse.
-        </div>
-        <div class="thought-bubble">
-          We need to make sure our voices are heard before it's too late to change things.
-        </div>
+      <div class="thought-bubbles-grid" id="thought-bubbles-container">
+        <!-- Thought bubbles will be dynamically loaded here -->
       </div>
     </div>
 
@@ -149,6 +141,21 @@
       <p style="color: #00ff00; font-weight: bold;">
         Check your email for next steps and community updates.
       </p>
+      <button id="continue-survey-btn" class="survey-continue-btn" style="
+        margin-top: 20px;
+        background: #00ff00;
+        color: #1a1a1a;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 5px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+      " onmouseover="this.style.background='#00cc00'" onmouseout="this.style.background='#00ff00'">
+        Continue to Official Survey →
+      </button>
     </div>
 
     <footer class="footer">
@@ -185,7 +192,7 @@
             </div>
 
             <button type="submit" class="modal-submit-btn">
-              Submit Survey
+              Join the Movement!
             </button>
           </form>
         </main>

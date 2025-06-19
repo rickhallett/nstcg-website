@@ -214,6 +214,14 @@ h1 {
   overflow: hidden;
   max-width: 100%;
   height: 500px;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 1.5s ease-out, transform 1.5s ease-out;
+}
+
+.map-image.fade-in {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .map-image img {
@@ -229,14 +237,29 @@ h1 {
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(ellipse at center,
-      red 0%,
-      red 25%,
-      #ff6600 40%,
-      #ffbf00 60%,
-      transparent 80%);
+  background: radial-gradient(ellipse 60% 95% at center,
+      rgba(255, 0, 0, 0.8) 0%,       /* Deep red core - severe impact */
+      rgba(255, 0, 0, 0.75) 65%,     /* Red zone - severe impact (65% of map) */
+      rgba(255, 50, 0, 0.7) 70%,     /* Red-orange transition */
+      rgba(255, 102, 0, 0.7) 75%,    /* Orange zone - strong impact (75% total) */
+      rgba(255, 153, 0, 0.65) 85%,   /* Amber zone - moderate impact */
+      rgba(255, 204, 0, 0.6) 95%,    /* Yellow zone - mild impact */
+      rgba(255, 255, 0, 0.5) 100%);  /* Light yellow to edges - affects everywhere */
   opacity: 0.5;
   pointer-events: none;
+  animation: pulseOverlay 3s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+@keyframes pulseOverlay {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.01);
+  }
 }
 
 /* Community Counter */
@@ -528,6 +551,78 @@ input[type="email"]:focus {
 
 .avatar:nth-child(5) {
   z-index: 1;
+}
+
+/* Survey Instructions */
+.survey-instructions {
+  max-width: 800px;
+  margin: 30px auto;
+  background: #2a2a2a;
+  padding: 25px;
+  border-radius: 10px;
+  border: 2px solid #00ff00;
+}
+
+.survey-instructions-content {
+  background: #1a1a1a;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.survey-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.survey-step-number {
+  color: #00ff00;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.survey-ranking-box {
+  background: #333;
+  padding: 15px;
+  border-left: 4px solid #00ff00;
+  margin-top: 10px;
+}
+
+.survey-ranking-item {
+  margin: 8px 0;
+}
+
+.survey-checkbox-container {
+  background: #1a1a1a;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .survey-instructions {
+    padding: 15px;
+    margin: 20px 10px;
+  }
+  
+  .survey-instructions-content {
+    padding: 12px;
+  }
+  
+  .survey-step {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+  
+  .survey-ranking-box {
+    margin-left: 0;
+    padding: 12px;
+  }
 }
 
 /* Footer */
