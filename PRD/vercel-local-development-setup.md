@@ -36,7 +36,6 @@ nstcg-website/
 #### 1. submit-form.js
 - **Purpose**: Handles form submissions from the website
 - **Features**:
-  - Rate limiting (10 requests/minute per IP)
   - Input validation (name length, email format)
   - Honeypot field support
   - CORS headers
@@ -46,11 +45,11 @@ nstcg-website/
   - `NOTION_DATABASE_ID`
 
 #### 2. get-count.js
-- **Purpose**: Retrieves and caches visitor count
+- **Purpose**: Retrieves and caches lead generation count
 - **Features**:
   - 1-minute cache for performance
   - Pagination handling for large datasets
-  - Base count offset (847)
+  - Base count offset (603)
   - Error fallback
 - **Environment Variables Required**:
   - `NOTION_TOKEN`
@@ -78,41 +77,6 @@ nstcg-website/
 - Must maintain rate limiting functionality
 
 ## Implementation Plan
-
-### Phase 1: Project Initialization
-
-#### 1.1 Create package.json
-```json
-{
-  "name": "nstcg-website",
-  "version": "1.0.0",
-  "description": "North Swanage Traffic Consultation Group Website",
-  "scripts": {
-    "dev": "vercel dev",
-    "build": "echo 'No build required for static site'",
-    "start": "vercel dev"
-  },
-  "devDependencies": {
-    "vercel": "latest"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
-}
-```
-
-### Phase 3: Vercel Configuration
-
-#### 3.1 Link Project to Vercel
-```bash
-# Connect local project to Vercel
-vercel link
-
-# Follow prompts to:
-# 1. Select or create Vercel account
-# 2. Select existing project or create new
-# 3. Confirm project settings
-```
 
 #### 3.2 Verify vercel.json
 The existing `vercel.json` configuration is already properly set up with:
