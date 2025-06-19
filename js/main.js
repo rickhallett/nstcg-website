@@ -61,7 +61,8 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     email: document.getElementById('email').value.trim(),
     comment: document.getElementById('comment').value.trim(),
     timestamp: new Date().toISOString(),
-    source: 'main_form'
+    source: 'main_form',
+    referrer: sessionStorage.getItem('referrer') || null
   };
 
   try {
@@ -82,6 +83,9 @@ document.getElementById('signupForm').addEventListener('submit', async function 
 
     // Scroll to confirmation
     document.getElementById('confirmation').scrollIntoView({ behavior: 'smooth' });
+    
+    // Store user comment for sharing
+    const userComment = formData.comment;
 
     // Wait a moment for database to update, then fetch fresh count
     setTimeout(async () => {
@@ -101,6 +105,9 @@ document.getElementById('signupForm').addEventListener('submit', async function 
       if (submitBtnText) {
         submitBtnText.textContent = `JOIN ${newCount} NEIGHBORS NOW`;
       }
+      
+      // Add social share buttons after count is loaded
+      addSocialShareButtons('confirmation', newCount, userComment);
     }, 500);
   } catch (error) {
     // Error - Replace form with error state
@@ -339,8 +346,28 @@ async function updateLiveFeed() {
   }
 }
 
+// Check for referral parameter
+function checkReferral() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const referrer = urlParams.get('ref');
+  
+  if (referrer) {
+    // Store referrer in session storage
+    sessionStorage.setItem('referrer', referrer);
+    
+    // Clean URL without reload
+    const cleanUrl = window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+  }
+  
+  return referrer;
+}
+
 // Initialize counts on page load
 window.addEventListener('load', async function () {
+  // Check for referral
+  const referrer = checkReferral();
+  
   // Load thought bubbles
   loadThoughtBubbles();
   
@@ -437,7 +464,8 @@ async function handleModalFormSubmit(e) {
     email: document.getElementById('modalEmail').value.trim(),
     comment: document.getElementById('modalComment').value.trim(),
     timestamp: new Date().toISOString(),
-    source: 'survey_modal'
+    source: 'survey_modal',
+    referrer: sessionStorage.getItem('referrer') || null
   };
 
   // Basic validation
@@ -480,6 +508,7 @@ async function handleModalFormSubmit(e) {
         <p style="color: #00ff00; font-weight: bold; font-size: 16px;">
           Check your email for community updates.
         </p>
+        <div id="modal-share-container"></div>
         <button class="modal-survey-continue-btn" style="
           margin-top: 20px;
           background: #00ff00;
@@ -565,6 +594,9 @@ async function handleModalFormSubmit(e) {
       modalContent.style.opacity = '1';
     }, 100);
 
+    // Store user comment for sharing
+    const userComment = formData.comment;
+    
     // Wait a moment for database to update, then fetch fresh count
     setTimeout(async () => {
       const counterEl = document.querySelector('.counter-number');
@@ -584,6 +616,9 @@ async function handleModalFormSubmit(e) {
       if (submitBtnText) {
         submitBtnText.textContent = `JOIN ${newCount} NEIGHBORS NOW`;
       }
+      
+      // Add social share buttons to modal
+      addSocialShareButtons('modal-share-container', newCount, userComment);
     }, 500);
 
   } catch (error) {
@@ -737,6 +772,125 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 });
+
+// Generate simple user ID for referral tracking
+function generateUserId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+}
+
+// Social Sharing Functions
+function generateShareText(count, userComment) {
+  const baseMessage = `I just joined ${count} neighbors fighting for safer streets in North Swanage! The Nassau traffic plan could flood our residential streets with dangerous traffic.`;
+  
+  if (userComment) {
+    return `${baseMessage} My reason: "${userComment}" Take action now:`;
+  }
+  
+  return `${baseMessage} Take action before it's too late:`;
+}
+
+function getShareUrl() {
+  const userId = sessionStorage.getItem('userId') || generateUserId();
+  sessionStorage.setItem('userId', userId);
+  return `https://nstcg.org?ref=${userId}`;
+}
+
+function shareOnTwitter(count, userComment) {
+  const text = generateShareText(count, userComment);
+  const url = getShareUrl();
+  const hashtags = 'SaveNorthSwanage,TrafficSafety';
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${hashtags}`;
+  window.open(twitterUrl, '_blank', 'width=550,height=420');
+}
+
+function shareOnFacebook() {
+  const url = getShareUrl();
+  const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+  window.open(facebookUrl, '_blank', 'width=550,height=420');
+}
+
+function shareOnWhatsApp(count, userComment) {
+  const text = generateShareText(count, userComment);
+  const url = getShareUrl();
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+  window.open(whatsappUrl, '_blank');
+}
+
+function shareByEmail(count, userComment) {
+  const subject = 'Urgent: North Swanage Traffic Crisis - We Need Your Help!';
+  const text = generateShareText(count, userComment);
+  const url = getShareUrl();
+  const body = `${text}
+
+Visit: ${url}
+
+The Nassau initiative threatens to turn Shore Road into a one-way system, pushing dangerous levels of traffic onto our quiet residential streets. This affects everyone - our children's safety, property values, and quality of life.
+
+Please take 2 minutes to join us and share with other neighbors. Time is running out!`;
+  
+  const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailtoUrl;
+}
+
+async function shareNative(count, userComment) {
+  const text = generateShareText(count, userComment);
+  const url = getShareUrl();
+  const shareData = {
+    title: 'North Swanage Traffic Crisis',
+    text: text,
+    url: url
+  };
+  
+  try {
+    await navigator.share(shareData);
+    // Track successful share if analytics are implemented
+  } catch (err) {
+    console.log('Share cancelled or failed:', err);
+  }
+}
+
+function addSocialShareButtons(containerId, count, userComment) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  const shareSection = document.createElement('div');
+  shareSection.className = 'social-share-section';
+  
+  // Check if Web Share API is available (mobile)
+  if (navigator.share) {
+    shareSection.innerHTML = `
+      <h4 class="social-share-title">🔊 Spread the Word - Every Share Matters!</h4>
+      <div class="social-share-buttons">
+        <button class="share-btn whatsapp" style="background: #3498db;" onclick="shareNative(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})">
+          <span>Share This Campaign</span>
+        </button>
+      </div>
+      <p class="share-impact-text">Your voice amplifies our message. Together we're stronger! 💪</p>
+    `;
+  } else {
+    // Desktop version with individual buttons
+    shareSection.innerHTML = `
+      <h4 class="social-share-title">🔊 Spread the Word - Every Share Matters!</h4>
+      <div class="social-share-buttons">
+        <button class="share-btn twitter" onclick="shareOnTwitter(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})">
+          <span>Twitter</span>
+        </button>
+        <button class="share-btn facebook" onclick="shareOnFacebook()">
+          <span>Facebook</span>
+        </button>
+        <button class="share-btn whatsapp" onclick="shareOnWhatsApp(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})">
+          <span>WhatsApp</span>
+        </button>
+        <button class="share-btn email" onclick="shareByEmail(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})">
+          <span>Email</span>
+        </button>
+      </div>
+      <p class="share-impact-text">Your voice amplifies our message. Together we're stronger! 💪</p>
+    `;
+  }
+  
+  container.appendChild(shareSection);
+}
 
 // Modal survey instructions functions
 function showModalSurveyInstructions() {
