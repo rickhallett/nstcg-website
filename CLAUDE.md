@@ -8,8 +8,6 @@ This is a community action website for the North Swanage Traffic Consultation Gr
 
 ## Development Commands
 
-Since there's no package.json currently, development requires:
-- Install Vercel CLI globally: `npm i -g vercel`
 - Run local development server: `vercel dev`
 - Deploy to production: `vercel --prod`
 
@@ -50,7 +48,7 @@ Both API functions require environment variables:
 
 4. **Security Headers**: Configured in `vercel.json` including CSP, X-Frame-Options, etc.
 
-5. **Modal Forms**: Two forms exist - main form and survey modal. Both submit to the same endpoint but with different purposes.
+5. **Modal Forms**: Two forms exist - main form and survey modal. Both submit to the same endpoint; these should be refactored to use the same form as it has the same purpose, endpoint and validation.
 
 ## Testing Locally
 

@@ -22,7 +22,7 @@ Before deploying, you need to set up the following environment variables in Verc
    - Email (Email property)
    - Source (Text property)
    - Timestamp (Date property)
-   - Status (Select property with options: New, Contacted, Completed)
+   <!-- - Status (Select property with options: New, Contacted, Completed) -->
 
 2. Share the database with your integration:
    - Click "..." menu on the database
@@ -38,11 +38,6 @@ Before deploying, you need to set up the following environment variables in Verc
 
 #### Option A: Using Vercel CLI
 ```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-cd deployment
 vercel
 
 # Set environment variables
@@ -53,7 +48,7 @@ vercel env add NOTION_DATABASE_ID
 #### Option B: Using GitHub
 1. Push this repository to GitHub
 2. Connect your GitHub repo to Vercel
-3. Set the root directory to `deployment`
+3. Set the root directory to `nstcg-website`
 4. Add environment variables in Vercel dashboard
 
 ### 4. Add Honeypot Field (Optional)

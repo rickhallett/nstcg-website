@@ -77,23 +77,6 @@ nstcg-website/
 - Must support CORS headers in local environment
 - Must maintain rate limiting functionality
 
-### Non-Functional Requirements
-
-#### NFR1: Development Experience
-- Setup process should take less than 10 minutes
-- Clear documentation and error messages
-- Minimal configuration required
-
-#### NFR2: Security
-- Environment variables must be kept secure
-- `.env.local` must be gitignored
-- No hardcoded secrets in code
-
-#### NFR3: Compatibility
-- Must work on macOS, Windows, and Linux
-- Must support Node.js 18.x or higher
-- Must be compatible with Vercel's production environment
-
 ## Implementation Plan
 
 ### Phase 1: Project Initialization
@@ -116,43 +99,6 @@ nstcg-website/
     "node": ">=18.0.0"
   }
 }
-```
-
-#### 1.2 Install Dependencies
-```bash
-# Install Vercel CLI globally
-npm i -g vercel@latest
-
-# Install project dependencies
-npm install
-```
-
-### Phase 2: Environment Configuration
-
-#### 2.1 Create .env.local
-```env
-# Notion Integration Token
-NOTION_TOKEN=your_notion_integration_token_here
-
-# Notion Database ID
-NOTION_DATABASE_ID=your_notion_database_id_here
-```
-
-#### 2.2 Update .gitignore
-```gitignore
-# Environment variables
-.env.local
-.env*.local
-
-# Vercel
-.vercel
-
-# Dependencies
-node_modules/
-
-# OS files
-.DS_Store
-Thumbs.db
 ```
 
 ### Phase 3: Vercel Configuration
