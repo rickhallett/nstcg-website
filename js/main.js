@@ -353,7 +353,7 @@ window.addEventListener('load', async function () {
   // Initial live feed update
   await updateLiveFeed();
 
-  // Update count and live feed every 30 seconds
+  // Update count and live feed every 5 minutes
   setInterval(async () => {
     realCount = await fetchRealCount();
     const counterEl = document.querySelector('.counter-number');
@@ -368,7 +368,7 @@ window.addEventListener('load', async function () {
     
     // Update live feed
     await updateLiveFeed();
-  }, 30000);
+  }, 1000 * 60 * 5);
 
   // Show map after a delay
   setTimeout(() => {
