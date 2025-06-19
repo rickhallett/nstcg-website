@@ -1,3 +1,5 @@
+import { title } from "process";
+
 // Simple in-memory rate limiting (consider Redis for production)
 const rateLimits = new Map();
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
@@ -69,6 +71,7 @@ export default async function handler(req, res) {
     // Log submission (partial email for privacy)
     console.log('Form submission:', {
       timestamp: new Date().toISOString(),
+      name: name,
       email: email.substring(0, 3) + '***',
       source,
       ip: clientIp
@@ -87,8 +90,15 @@ export default async function handler(req, res) {
           database_id: process.env.NOTION_DATABASE_ID
         },
         properties: {
-          'Name': {
+          'Request Name': {
             title: [{
+              text: {
+                content: 'nstcg.org - Lead Generation'
+              }
+            }]
+          },
+          'Name': {
+            rich_text: [{
               text: {
                 content: name
               }
@@ -109,11 +119,6 @@ export default async function handler(req, res) {
               start: timestamp || new Date().toISOString()
             }
           },
-          'Status': {
-            select: {
-              name: 'New'
-            }
-          }
         }
       })
     });
