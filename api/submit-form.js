@@ -43,7 +43,7 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Too many requests. Please try again later.' });
   }
 
-  const { name, email, timestamp, source, website } = req.body;
+  const { name, email, timestamp, source, website, comment } = req.body;
 
   // Honeypot check
   if (website) {
@@ -65,6 +65,11 @@ export default async function handler(req, res) {
   // Name validation (basic)
   if (name.length < 2 || name.length > 100) {
     return res.status(400).json({ error: 'Name must be between 2 and 100 characters' });
+  }
+
+  // Comment validation (optional)
+  if (comment && comment.length > 150) {
+    return res.status(400).json({ error: 'Comment must be 150 characters or less' });
   }
 
   try {
@@ -119,6 +124,13 @@ export default async function handler(req, res) {
               start: timestamp || new Date().toISOString()
             }
           },
+          'Comments': comment ? {
+            rich_text: [{
+              text: {
+                content: comment
+              }
+            }]
+          } : undefined
         }
       })
     });

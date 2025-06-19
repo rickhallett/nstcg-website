@@ -366,6 +366,15 @@ h1 {
   color: #ccc;
 }
 
+.feed-comment {
+  margin-top: 8px;
+  color: #999;
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.4;
+  padding-left: 10px;
+}
+
 /* Thought Bubbles Section */
 .thought-bubbles-section {
   margin: 40px 0;
@@ -448,7 +457,8 @@ label {
 }
 
 input[type="text"],
-input[type="email"] {
+input[type="email"],
+textarea {
   width: 100%;
   padding: 15px;
   background: rgba(255, 255, 255, 0.1);
@@ -457,14 +467,21 @@ input[type="email"] {
   color: #fff;
   font-size: 16px;
   transition: all 0.3s ease;
+  font-family: inherit;
 }
 
 input[type="text"]:focus,
-input[type="email"]:focus {
+input[type="email"]:focus,
+textarea:focus {
   outline: none;
   border-color: #3498db;
   background: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+textarea::placeholder {
+  color: #999;
+  opacity: 0.8;
 }
 
 .submit-btn {
@@ -807,7 +824,8 @@ input[type="email"]:focus {
   transition: all 0.3s ease;
 }
 
-.modal-form-group input:focus {
+.modal-form-group input:focus,
+.modal-form-group textarea:focus {
   outline: none;
   border-color: #3498db;
   background: rgba(255, 255, 255, 0.15);

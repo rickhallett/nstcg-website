@@ -59,6 +59,7 @@ document.getElementById('signupForm').addEventListener('submit', async function 
   const formData = {
     name: document.getElementById('name').value.trim(),
     email: document.getElementById('email').value.trim(),
+    comment: document.getElementById('comment').value.trim(),
     timestamp: new Date().toISOString(),
     source: 'main_form'
   };
@@ -317,10 +318,17 @@ async function updateLiveFeed() {
         const relativeTime = getRelativeTime(signup.timestamp);
         const action = getRandomAction();
         
-        feedItem.innerHTML = `
+        let feedContent = `
           <div class="feed-time">${relativeTime}</div>
           <div class="feed-message">${signup.name} ${action}</div>
         `;
+        
+        // Add comment if present
+        if (signup.comment) {
+          feedContent += `<div class="feed-comment">"${signup.comment}"</div>`;
+        }
+        
+        feedItem.innerHTML = feedContent;
         
         feedContainer.appendChild(feedItem);
       });
@@ -427,6 +435,7 @@ async function handleModalFormSubmit(e) {
   const formData = {
     name: document.getElementById('modalName').value.trim(),
     email: document.getElementById('modalEmail').value.trim(),
+    comment: document.getElementById('modalComment').value.trim(),
     timestamp: new Date().toISOString(),
     source: 'survey_modal'
   };
