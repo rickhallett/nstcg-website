@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Neighbors Are Taking Action - North Swanage Traffic Safety</title>
+
+  <!-- Animate.css CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  
+  <!-- Local Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+  <header class="alert-header">
+    <div class="header-content">
+      <div class="alert-badge">
+        <span class="pulse-dot"></span>
+        <span>COMMUNITY ACTION REQUIRED</span>
+      </div>
+      <div class="header-countdown">
+        <div class="header-time-unit days">
+          <span class="header-time-value header-days">00</span>
+          <span class="header-time-label">Days</span>
+        </div>
+        <div class="header-time-unit hours">
+          <span class="header-time-value header-hours">00</span>
+          <span class="header-time-label">Hours</span>
+        </div>
+        <div class="header-time-unit minutes">
+          <span class="header-time-value header-minutes">00</span>
+          <span class="header-time-label">Min</span>
+        </div>
+        <div class="header-time-unit seconds">
+          <span class="header-time-value header-seconds">00</span>
+          <span class="header-time-label">Sec</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="hero">
+      <h1>
+        <span class="highlight">YOUR NEIGHBORS</span><br>
+        ARE TAKING ACTION<br>
+        RIGHT NOW
+      </h1>
+      <p style="margin-top: 20px;">
+        The North Swanage Traffic Safety Consultation is happening NOW,
+        and your community is speaking up. Don't let others decide your future.
+      </p>
+    </div>
+
+    <div class="impact-map">
+      <h2>Shore Road Impact Zone</h2>
+      <div id="map-container">
+        <div class="map-placeholder">
+          <div class="map-overlay">
+            <p style="font-size: 24px; font-weight: bold; color: #3498db;">
+              Traffic Impact Map Loading...
+            </p>
+            <p style="margin-top: 10px; color: #ccc;">
+              See how the Nassau initiative will affect YOUR street
+            </p>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top: 20px; font-size: 18px; color: #ff6b6b; font-weight: bold;">
+        ⚠️ Properties within 1km of Shore Road face immediate traffic changes
+      </p>
+    </div>
+
+    <div class="survey-button-section">
+      <button class="survey-btn" onclick="MicroModal.show('modal-survey');">
+        TAKE SURVEY
+      </button>
+    </div>
+
+    <div class="community-counter">
+      <div class="counter-number">0</div>
+      <div class="counter-label">Neighbors Have Already Signed Up</div>
+    </div>
+
+    <div class="live-feed">
+      <div class="feed-header">
+        <div class="live-indicator">
+          <span class="pulse-dot"></span>
+          <span>LIVE</span>
+        </div>
+        <span>RECENT COMMUNITY ACTIVITY</span>
+      </div>
+      <div class="feed-item">
+        <div class="feed-time">2 minutes ago</div>
+        <div class="feed-message">Sarah M. from Beach Road joined the consultation</div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-time">5 minutes ago</div>
+        <div class="feed-message">James P. from High Street signed up with family</div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-time">12 minutes ago</div>
+        <div class="feed-message">The Williams family from Shore Road added their voice</div>
+      </div>
+    </div>
+
+    <div class="thought-bubbles-section">
+      <div class="thought-bubbles-grid">
+        <div class="thought-bubble">
+          I'm worried about increased traffic on our residential street. My kids play here!
+        </div>
+        <div class="thought-bubble">
+          The speeding on Shore Road is already dangerous. This could make it worse.
+        </div>
+        <div class="thought-bubble">
+          We need to make sure our voices are heard before it's too late to change things.
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-header">
+        <h2 class="form-title">DON'T BE LEFT OUT</h2>
+        <p class="form-subtitle">Add Your Voice to the Community Consensus NOW</p>
+      </div>
+      <form id="signupForm" class="signup-form">
+        <div class="form-group">
+          <label for="name">Your Name</label>
+          <input type="text" id="name" name="name" required placeholder="Join your neighbors">
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="Stay connected with updates">
+        </div>
+        <button type="submit" class="submit-btn">
+          JOIN 847 NEIGHBORS NOW
+        </button>
+      </form>
+    </div>
+
+    <div id="confirmation" class="confirmation">
+      <h3>✓ WELCOME TO THE MOVEMENT!</h3>
+      <p style="font-size: 18px; margin-bottom: 20px;">
+        You are now part of <strong>848 neighbors</strong> fighting for safer streets.
+      </p>
+      <p style="color: #00ff00; font-weight: bold;">
+        Check your email for next steps and community updates.
+      </p>
+    </div>
+
+    <footer class="footer">
+      <p>
+        North Swanage Community Group | Protecting Our Neighborhoods Since 2020
+      </p>
+    </footer>
+  </div>
+
+  <!-- Survey Modal -->
+  <div id="modal-survey" class="modal" aria-hidden="true">
+    <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+      <div class="modal__container animate__animated animate__fadeInUp" role="dialog" aria-modal="true"
+        aria-labelledby="modal-survey-title">
+        <header class="modal__header">
+          <h2 class="modal__title" id="modal-survey-title">
+            Community Safety Survey
+          </h2>
+          <button class="modal__close" aria-label="Close modal" data-micromodal-close>×</button>
+        </header>
+
+        <main class="modal__content" id="modal-survey-content">
+          <div id="modalMessage" class="message"></div>
+
+          <form id="surveyModalForm">
+            <div class="modal-form-group">
+              <label for="modalName">Your Name</label>
+              <input type="text" id="modalName" name="name" required placeholder="Enter your name">
+            </div>
+
+            <div class="modal-form-group">
+              <label for="modalEmail">Email Address</label>
+              <input type="email" id="modalEmail" name="email" required placeholder="Enter your email">
+            </div>
+
+            <button type="submit" class="modal-submit-btn">
+              Submit Survey
+            </button>
+          </form>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- Micromodal CDN -->
+  <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
+  
+  <!-- Local JavaScript -->
+  <script src="js/main.js"></script>
+</body>
+
+</html>
