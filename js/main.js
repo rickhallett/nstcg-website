@@ -245,15 +245,107 @@ async function loadThoughtBubbles() {
   }
 }
 
+// Function to format relative time
+function getRelativeTime(timestamp) {
+  const now = new Date();
+  const then = new Date(timestamp);
+  const diffMs = now - then;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) return 'just now';
+  if (diffMins === 1) return '1 minute ago';
+  if (diffMins < 60) return `${diffMins} minutes ago`;
+  if (diffHours === 1) return '1 hour ago';
+  if (diffHours < 24) return `${diffHours} hours ago`;
+  if (diffDays === 1) return '1 day ago';
+  return `${diffDays} days ago`;
+}
+
+// Store feed actions for random selection
+let feedActions = [];
+
+// Function to load feed actions
+async function loadFeedActions() {
+  try {
+    const response = await fetch('/data/feed-actions.json');
+    const data = await response.json();
+    feedActions = data.feedActions;
+  } catch (error) {
+    console.error('Error loading feed actions:', error);
+    // Fallback actions
+    feedActions = [
+      'joined the consultation',
+      'signed up with family',
+      'added their voice'
+    ];
+  }
+}
+
+// Function to get a random action
+function getRandomAction() {
+  return feedActions[Math.floor(Math.random() * feedActions.length)];
+}
+
+// Function to update live feed with real data
+async function updateLiveFeed() {
+  try {
+    const response = await fetch('/api/get-recent-signups');
+    if (!response.ok) throw new Error('Failed to fetch signups');
+    
+    const data = await response.json();
+    const signups = data.signups;
+    
+    if (signups && signups.length > 0) {
+      const feedContainer = document.querySelector('.live-feed');
+      if (!feedContainer) return;
+      
+      // Keep the header
+      const feedHeader = feedContainer.querySelector('.feed-header');
+      
+      // Clear existing items
+      const existingItems = feedContainer.querySelectorAll('.feed-item');
+      existingItems.forEach(item => item.remove());
+      
+      // Add new items
+      signups.forEach((signup, index) => {
+        const feedItem = document.createElement('div');
+        feedItem.className = 'feed-item';
+        feedItem.style.animationDelay = `${index * 0.1}s`;
+        
+        const relativeTime = getRelativeTime(signup.timestamp);
+        const action = getRandomAction();
+        
+        feedItem.innerHTML = `
+          <div class="feed-time">${relativeTime}</div>
+          <div class="feed-message">${signup.name} ${action}</div>
+        `;
+        
+        feedContainer.appendChild(feedItem);
+      });
+    }
+  } catch (error) {
+    console.error('Error updating live feed:', error);
+    // Keep existing mock data on error
+  }
+}
+
 // Initialize counts on page load
 window.addEventListener('load', async function () {
   // Load thought bubbles
   loadThoughtBubbles();
   
+  // Load feed actions
+  await loadFeedActions();
+  
   // Initialize all counts immediately
   await initializeCounts();
+  
+  // Initial live feed update
+  await updateLiveFeed();
 
-  // Update count every 30 seconds
+  // Update count and live feed every 30 seconds
   setInterval(async () => {
     realCount = await fetchRealCount();
     const counterEl = document.querySelector('.counter-number');
@@ -265,6 +357,9 @@ window.addEventListener('load', async function () {
     if (submitBtnText) {
       submitBtnText.textContent = `JOIN ${realCount} NEIGHBORS NOW`;
     }
+    
+    // Update live feed
+    await updateLiveFeed();
   }, 30000);
 
   // Show map after a delay
