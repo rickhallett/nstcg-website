@@ -8,7 +8,7 @@
 
   <!-- Animate.css CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-  
+
   <!-- Local Styles -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -75,12 +75,12 @@
 
     <div class="survey-button-section">
       <button class="survey-btn" onclick="MicroModal.show('modal-survey');">
-        TAKE SURVEY
+        TAKE SURVEY NOW!
       </button>
     </div>
 
     <div class="community-counter">
-      <div class="counter-number">0</div>
+      <div class="counter-number">---</div>
       <div class="counter-label">Neighbors Have Already Signed Up</div>
     </div>
 
@@ -135,7 +135,7 @@
           <input type="email" id="email" name="email" required placeholder="Stay connected with updates">
         </div>
         <button type="submit" class="submit-btn">
-          JOIN 847 NEIGHBORS NOW
+          <span id="submit-btn-text">JOIN YOUR NEIGHBORS NOW</span>
         </button>
       </form>
     </div>
@@ -143,7 +143,8 @@
     <div id="confirmation" class="confirmation">
       <h3>✓ WELCOME TO THE MOVEMENT!</h3>
       <p style="font-size: 18px; margin-bottom: 20px;">
-        You are now part of <strong>848 neighbors</strong> fighting for safer streets.
+        You are now part of <strong><span id="confirmation-count">---</span> neighbors</strong> fighting for safer
+        streets.
       </p>
       <p style="color: #00ff00; font-weight: bold;">
         Check your email for next steps and community updates.
@@ -152,7 +153,7 @@
 
     <footer class="footer">
       <p>
-        North Swanage Community Group | Protecting Our Neighborhoods Since 2020
+        North Swanage Community Group | P rotecting Our Neighborhoods Since 2020
       </p>
     </footer>
   </div>
@@ -194,7 +195,7 @@
 
   <!-- Micromodal CDN -->
   <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
-  
+
   <!-- Local JavaScript -->
   <script src="js/main.js"></script>
 </body>

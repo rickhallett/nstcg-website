@@ -42,12 +42,12 @@ async function submitToNotion(formData) {
     },
     body: JSON.stringify(formData)
   });
-  
+
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || 'Submission failed');
   }
-  
+
   return response.json();
 }
 
@@ -76,7 +76,20 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     // Update counter with real count
     const counterEl = document.querySelector('.counter-number');
     const newCount = await fetchRealCount();
+    realCount = newCount; // Update global count
     counterEl.textContent = newCount;
+    
+    // Update confirmation message with real count
+    const confirmationCountEl = document.getElementById('confirmation-count');
+    if (confirmationCountEl) {
+      confirmationCountEl.textContent = newCount;
+    }
+    
+    // Update submit button for consistency
+    const submitBtnText = document.getElementById('submit-btn-text');
+    if (submitBtnText) {
+      submitBtnText.textContent = `JOIN ${newCount} NEIGHBORS NOW`;
+    }
 
     // Scroll to confirmation
     document.getElementById('confirmation').scrollIntoView({ behavior: 'smooth' });
@@ -104,7 +117,7 @@ document.getElementById('signupForm').addEventListener('submit', async function 
           font-size: 16px;
           transition: all 0.3s ease;
         " onmouseover="this.style.background='#cc0000'" onmouseout="this.style.background='#ff0000'">
-          CONTACT KAI AT OCEANHEART.AI
+          Tech Support
         </a>
       </div>
     `;
@@ -124,37 +137,72 @@ async function fetchRealCount() {
   } catch (error) {
     console.error('Error fetching count:', error);
   }
-  return 847; // Default fallback
+  return 603; // Default fallback
 }
 
-// Animate counter on page load
-window.addEventListener('load', async function () {
+// Global variable to store the real count
+let realCount = null;
+
+// Fetch and update all count displays
+async function initializeCounts() {
+  // Fetch the real count
+  realCount = await fetchRealCount();
+  
+  // Update the submit button text
+  const submitBtnText = document.getElementById('submit-btn-text');
+  if (submitBtnText) {
+    submitBtnText.textContent = `JOIN ${realCount} NEIGHBORS NOW`;
+  }
+  
+  // Update confirmation count (in case it's visible)
+  const confirmationCount = document.getElementById('confirmation-count');
+  if (confirmationCount) {
+    confirmationCount.textContent = realCount;
+  }
+  
+  // Animate the main counter
+  animateCounterFromZero(realCount);
+}
+
+// Separate function for counter animation
+function animateCounterFromZero(end) {
   let start = 0;
-  const end = await fetchRealCount(); // Get real count from API
   const duration = 2000;
   const startTime = Date.now();
+  const counterEl = document.querySelector('.counter-number');
 
-  function animateCounter() {
+  function animate() {
     const currentTime = Date.now();
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1);
 
     const current = Math.floor(start + (end - start) * progress);
-    document.querySelector('.counter-number').textContent = current;
+    counterEl.textContent = current;
 
     if (progress < 1) {
-      requestAnimationFrame(animateCounter);
+      requestAnimationFrame(animate);
     }
   }
 
-  animateCounter();
-  
+  animate();
+}
+
+// Initialize counts on page load
+window.addEventListener('load', async function () {
+  // Initialize all counts immediately
+  await initializeCounts();
+
   // Update count every 30 seconds
   setInterval(async () => {
-    const newCount = await fetchRealCount();
+    realCount = await fetchRealCount();
     const counterEl = document.querySelector('.counter-number');
     if (counterEl) {
-      counterEl.textContent = newCount;
+      counterEl.textContent = realCount;
+    }
+    // Also update submit button
+    const submitBtnText = document.getElementById('submit-btn-text');
+    if (submitBtnText) {
+      submitBtnText.textContent = `JOIN ${realCount} NEIGHBORS NOW`;
     }
   }, 30000);
 
@@ -164,7 +212,7 @@ window.addEventListener('load', async function () {
     if (mapContainer) {
       mapContainer.innerHTML = `
         <div class="map-image">
-          <img src="../src/images/impact_non_sat_height.png" alt="Map of North Swanage">
+          <img src="images/impact_non_sat_height.png" alt="Map of North Swanage">
           <div class="impact-overlay"></div>
         </div>
       `;
@@ -176,9 +224,9 @@ window.addEventListener('load', async function () {
 let originalModalContent;
 
 // Wait for DOM to be ready
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   originalModalContent = document.getElementById('modal-survey-content').innerHTML;
-  
+
   // Initialize Micromodal with all configurations
   MicroModal.init({
     awaitCloseAnimation: true,
@@ -199,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   });
-  
+
   // Attach event listener to form
   document.getElementById('surveyModalForm').addEventListener('submit', handleModalFormSubmit);
 });
@@ -248,7 +296,14 @@ async function handleModalFormSubmit(e) {
     // Update main counter with real count
     const counterEl = document.querySelector('.counter-number');
     const newCount = await fetchRealCount();
+    realCount = newCount; // Update global count
     counterEl.textContent = newCount;
+    
+    // Update submit button for consistency
+    const submitBtnText = document.getElementById('submit-btn-text');
+    if (submitBtnText) {
+      submitBtnText.textContent = `JOIN ${newCount} NEIGHBORS NOW`;
+    }
 
     // Replace modal content with success message
     const modalContent = document.getElementById('modal-survey-content');
@@ -262,7 +317,7 @@ async function handleModalFormSubmit(e) {
           Together, we're making North Swanage better for everyone.
         </p>
         <p style="color: #00ff00; font-weight: bold; font-size: 16px;">
-          Check your email for next steps and community updates.
+          Check your email for community updates.
         </p>
       </div>
     `;
@@ -298,11 +353,11 @@ async function handleModalFormSubmit(e) {
           font-size: 16px;
           transition: all 0.3s ease;
         " onmouseover="this.style.background='#cc0000'" onmouseout="this.style.background='#ff0000'">
-          CONTACT KAI AT OCEANHEART.AI
+          Tech Support
         </a>
       </div>
     `;
-    
+
     // Add fade-in animation
     modalContent.style.opacity = '0';
     setTimeout(() => {
