@@ -73,26 +73,34 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     // Show confirmation
     document.getElementById('confirmation').style.display = 'block';
 
-    // Update counter with real count
-    const counterEl = document.querySelector('.counter-number');
-    const newCount = await fetchRealCount();
-    realCount = newCount; // Update global count
-    counterEl.textContent = newCount;
-
-    // Update confirmation message with real count
+    // Show loading state in confirmation message
     const confirmationCountEl = document.getElementById('confirmation-count');
     if (confirmationCountEl) {
-      confirmationCountEl.textContent = newCount;
-    }
-
-    // Update submit button for consistency
-    const submitBtnText = document.getElementById('submit-btn-text');
-    if (submitBtnText) {
-      submitBtnText.textContent = `JOIN ${newCount} NEIGHBORS NOW`;
+      confirmationCountEl.textContent = '---';
     }
 
     // Scroll to confirmation
     document.getElementById('confirmation').scrollIntoView({ behavior: 'smooth' });
+
+    // Wait a moment for database to update, then fetch fresh count
+    setTimeout(async () => {
+      const counterEl = document.querySelector('.counter-number');
+      const newCount = await fetchRealCount();
+      realCount = newCount; // Update global count
+      
+      // Update all count displays with fresh data
+      counterEl.textContent = newCount;
+      
+      if (confirmationCountEl) {
+        confirmationCountEl.textContent = newCount;
+      }
+      
+      // Update submit button for consistency
+      const submitBtnText = document.getElementById('submit-btn-text');
+      if (submitBtnText) {
+        submitBtnText.textContent = `JOIN ${newCount} NEIGHBORS NOW`;
+      }
+    }, 500);
   } catch (error) {
     // Error - Replace form with error state
     const formSection = document.querySelector('.form-section');
@@ -354,19 +362,7 @@ async function handleModalFormSubmit(e) {
     // Submit to API
     await submitToNotion(formData);
 
-    // Update main counter with real count
-    const counterEl = document.querySelector('.counter-number');
-    const newCount = await fetchRealCount();
-    realCount = newCount; // Update global count
-    counterEl.textContent = newCount;
-
-    // Update submit button for consistency
-    const submitBtnText = document.getElementById('submit-btn-text');
-    if (submitBtnText) {
-      submitBtnText.textContent = `JOIN ${newCount} NEIGHBORS NOW`;
-    }
-
-    // Replace modal content with success message
+    // Replace modal content with success message (with loading state)
     const modalContent = document.getElementById('modal-survey-content');
     modalContent.innerHTML = `
       <div class="modal-success-content" style="text-align: center; padding: 40px 20px;">
@@ -374,7 +370,7 @@ async function handleModalFormSubmit(e) {
           ✓ WELCOME TO THE MOVEMENT!
         </h3>
         <p style="font-size: 18px; color: #ccc; margin-bottom: 20px; line-height: 1.5;">
-          You are now part of ${counterEl.textContent} neighbors fighting for safer streets.<br>
+          You are now part of <span id="modal-count-display">---</span> neighbors fighting for safer streets.<br>
           Together, we're making North Swanage better for everyone.
         </p>
         <p style="color: #00ff00; font-weight: bold; font-size: 16px;">
@@ -464,6 +460,27 @@ async function handleModalFormSubmit(e) {
       modalContent.style.transition = 'opacity 0.3s ease-in';
       modalContent.style.opacity = '1';
     }, 100);
+
+    // Wait a moment for database to update, then fetch fresh count
+    setTimeout(async () => {
+      const counterEl = document.querySelector('.counter-number');
+      const newCount = await fetchRealCount();
+      realCount = newCount; // Update global count
+      
+      // Update all count displays with fresh data
+      counterEl.textContent = newCount;
+      
+      const modalCountDisplay = document.getElementById('modal-count-display');
+      if (modalCountDisplay) {
+        modalCountDisplay.textContent = newCount;
+      }
+      
+      // Update submit button for consistency
+      const submitBtnText = document.getElementById('submit-btn-text');
+      if (submitBtnText) {
+        submitBtnText.textContent = `JOIN ${newCount} NEIGHBORS NOW`;
+      }
+    }, 500);
 
   } catch (error) {
     // Replace modal content with error state
