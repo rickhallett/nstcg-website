@@ -99,6 +99,10 @@ body {
 
 /* Desktop Header Styles */
 @media (min-width: 769px) {
+  .alert-header {
+    padding: 25px 20px; /* More vertical space on desktop */
+  }
+  
   .header-content {
     justify-content: space-between;
     position: relative;
@@ -114,7 +118,8 @@ body {
   .header-countdown {
     position: absolute;
     left: 50%;
-    transform: translateX(-50%);
+    top: 50%;
+    transform: translate(-50%, -50%);
     background: rgba(0, 0, 0, 0.3);
     padding: 12px 25px;
     border-radius: 25px;
