@@ -1,6 +1,6 @@
 // Countdown Timer
 function updateCountdown() {
-  const deadline = new Date('2025-06-29T23:59:59');
+  const deadline = new Date('2025-06-29T23:59:59+01:00'); // BST (British Summer Time)
   const now = new Date().getTime();
   const timeLeft = deadline - now;
 
@@ -58,7 +58,9 @@ document.getElementById('signupForm').addEventListener('submit', async function 
   // Get form data
   const userId = generateUserId();
   const formData = {
-    name: document.getElementById('name').value.trim(),
+    name: `${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`,
+    firstName: document.getElementById('firstName').value.trim(),
+    lastName: document.getElementById('lastName').value.trim(),
     email: document.getElementById('email').value.trim(),
     comment: document.getElementById('comment').value.trim(),
     user_id: userId,
@@ -77,7 +79,7 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     if (formData.comment) {
       localStorage.setItem('nstcg_comment', formData.comment);
     }
-    
+
     // Hide form section
     document.querySelector('.form-section').style.display = 'none';
 
@@ -96,7 +98,7 @@ document.getElementById('signupForm').addEventListener('submit', async function 
 
     // Store user comment for sharing
     const userComment = formData.comment;
-    
+
     // Add share buttons immediately in disabled state
     addSocialShareButtons('confirmation', 0, userComment, true);
 
@@ -168,7 +170,7 @@ async function fetchRealCount() {
   } catch (error) {
     console.error('Error fetching count:', error);
   }
-  return 603; // Default fallback
+  return 215; // Default fallback
 }
 
 // Global variable to store the real count
@@ -550,7 +552,7 @@ function checkReferral() {
   if (referrer) {
     // Store full referrer in session storage
     sessionStorage.setItem('referrer', referrer);
-    
+
     // Parse platform and user ID if format matches
     if (referrer.includes('-')) {
       const parts = referrer.split('-');
@@ -629,7 +631,7 @@ function setupSmartPolling() {
 function initializeRegistrationState() {
   const isRegistered = localStorage.getItem('nstcg_registered') === 'true';
   const userId = localStorage.getItem('nstcg_user_id');
-  
+
   if (isRegistered && userId) {
     // Transform UI for registered users
     transformSurveyButtonToShare();
@@ -643,7 +645,7 @@ function transformSurveyButtonToShare() {
   const surveySection = document.querySelector('.survey-button-section');
   if (surveySection) {
     const userComment = localStorage.getItem('nstcg_comment') || '';
-    
+
     // Replace entire section with share UI
     surveySection.innerHTML = `
       <div class="already-registered-banner" style="
@@ -661,7 +663,7 @@ function transformSurveyButtonToShare() {
       </div>
       <div id="registered-share-container"></div>
     `;
-    
+
     // Add share buttons after count is available
     setTimeout(() => {
       addSocialShareButtons('registered-share-container', realCount || 0, userComment, false);
@@ -674,7 +676,7 @@ function transformBottomFormToShare() {
   const formSection = document.querySelector('.form-section');
   if (formSection) {
     const userComment = localStorage.getItem('nstcg_comment') || '';
-    
+
     // Replace entire form section content
     formSection.innerHTML = `
       <div class="already-registered-banner" style="
@@ -692,7 +694,7 @@ function transformBottomFormToShare() {
       </div>
       <div id="bottom-share-container"></div>
     `;
-    
+
     // Add share buttons after count is available
     setTimeout(() => {
       addSocialShareButtons('bottom-share-container', realCount || 0, userComment, false);
@@ -719,14 +721,14 @@ function showModalButtonNotification() {
       transition: opacity 0.3s ease;
     `;
     notification.textContent = "You've already registered";
-    
+
     modalBtn.parentElement.appendChild(notification);
-    
+
     // Fade in
     setTimeout(() => {
       notification.style.opacity = '1';
     }, 100);
-    
+
     // Fade out after 5 seconds
     setTimeout(() => {
       notification.style.opacity = '0';
@@ -747,7 +749,7 @@ window.addEventListener('load', async function () {
 
   // Load feed actions
   await loadFeedActions();
-  
+
   // Load social referral codes
   await loadSocialCodes();
 
@@ -765,7 +767,7 @@ window.addEventListener('load', async function () {
 
   // Initialize all counts immediately
   await initializeCounts();
-  
+
   // Check registration status and update UI
   initializeRegistrationState();
 
@@ -839,7 +841,9 @@ async function handleModalFormSubmit(e) {
   // Get form data
   const userId = generateUserId();
   const formData = {
-    name: document.getElementById('modalName').value.trim(),
+    name: `${document.getElementById('modalFirstName').value.trim()} ${document.getElementById('modalLastName').value.trim()}`,
+    firstName: document.getElementById('modalFirstName').value.trim(),
+    lastName: document.getElementById('modalLastName').value.trim(),
     email: document.getElementById('modalEmail').value.trim(),
     comment: document.getElementById('modalComment').value.trim(),
     user_id: userId,
@@ -849,9 +853,9 @@ async function handleModalFormSubmit(e) {
   };
 
   // Basic validation
-  if (!formData.name || !formData.email) {
+  if (!formData.firstName || !formData.lastName || !formData.email) {
     messageEl.className = 'message error';
-    messageEl.textContent = 'Please fill in all fields.';
+    messageEl.textContent = 'Please fill in all required fields.';
     messageEl.style.display = 'block';
     return;
   }
@@ -873,7 +877,7 @@ async function handleModalFormSubmit(e) {
   try {
     // Submit to API
     await submitToNotion(formData);
-    
+
     // Success - Store user data in localStorage
     localStorage.setItem('nstcg_user_id', userId);
     localStorage.setItem('nstcg_registered', 'true');
@@ -915,12 +919,12 @@ async function handleModalFormSubmit(e) {
         
         <div id="modal-survey-instructions" style="display: none; margin-top: 30px; background: #2a2a2a; padding: 25px; border-radius: 10px; border: 2px solid #00ff00;">
           <h4 style="color: #00ff00; margin-bottom: 20px; font-size: 20px;">
-            Dorset Council Consultation Survey
+            Dorset Coast Forum Public Engagement Survey
           </h4>
           
           <div style="background: #1a1a1a; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
-            <p style="color: #ff6b6b; font-weight: bold; margin-bottom: 15px;">
-              ⚡ IMPORTANT: The survey contains a large number of questions about "Green Seafront" improvements (which won't cause traffic issues), but we ONLY need to address the TRAFFIC IMPACT questions:
+            <p style="color: #ccc; margin-bottom: 15px;">
+              The Dorset Coast Forum has launched a public engagement survey to gather community input on the Shore Road improvements. The survey contains approximately 30 questions covering various aspects including green spaces, pedestrian safety, and traffic management.
             </p>
             
             <div style="margin-left: 20px;">
@@ -936,8 +940,8 @@ async function handleModalFormSubmit(e) {
               <div style="background: #333; padding: 15px; margin-left: 20px; border-left: 4px solid #00ff00;">
                 <p style="color: #00ff00; margin: 5px 0;"><strong>1st Choice:</strong> Two-way traffic on Shore Road with removal of parking</p>
                 <p style="color: #ccc; margin: 5px 0;"><strong>2nd Choice:</strong> Do nothing / keep Shore Road as it is</p>
-                <p style="color: #ccc; margin: 5px 0;"><strong>3rd Choice:</strong> A one-way system on Shore Road</p>
-                <p style="color: #ccc; margin: 5px 0;"><strong>4th Choice:</strong> Full closure of Shore Road</p>
+                <p style="color: #ccc; margin: 5px 0;"><strong>3rd Choice:</strong> A one-way system on Shore Road - would <span style="color: #FFA500;">redirect significant</span> traffic</p>
+                <p style="color: #ccc; margin: 5px 0;"><strong>4th Choice:</strong> Full closure of Shore Road - would redirect <span style="color: #ff0000;">traffic to residential streets</span></p>
               </div>
             </div>
             
@@ -947,15 +951,23 @@ async function handleModalFormSubmit(e) {
             </p>
           </div>
           
-          <div style="background: #1a1a1a; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+          <div style="background: #1a1a1a; padding: 15px; border-radius: 5px; margin-bottom: 10px;">
             <label style="display: flex; align-items: center; cursor: pointer; color: #fff;">
-              <input type="checkbox" id="modal-understand-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
-                onchange="toggleModalSurveyButton()">
+              <input type="checkbox" id="bottom-understand-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
+                onchange="toggleBottomSurveyButton()">
               <span style="font-size: 16px;">I understand the survey structure and am ready to proceed</span>
             </label>
           </div>
           
-          <button id="modal-official-survey-btn" class="official-survey-btn" disabled style="
+          <div style="background: #1a1a1a; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            <label style="display: flex; align-items: center; cursor: pointer; color: #fff;">
+              <input type="checkbox" id="bottom-valid-survey-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
+                onchange="toggleBottomSurveyButton()">
+              <span style="font-size: 16px;">I understand that questions 1, 24, and 26 do constitute a valid and complete survey</span>
+            </label>
+          </div>
+          
+          <button id="bottom-official-survey-btn" class="official-survey-btn" disabled style="
             width: 100%;
             background: #666;
             color: #999;
@@ -990,7 +1002,7 @@ async function handleModalFormSubmit(e) {
     if (modalCountDisplay) {
       modalCountUpdater = createAnimatedPlaceholder(modalCountDisplay);
     }
-    
+
     // Add share buttons immediately in disabled state
     addSocialShareButtons('modal-share-container', 0, userComment, true);
 
@@ -1218,10 +1230,10 @@ async function loadSocialCodes() {
 
 async function getShareUrl(platform = 'direct') {
   const userId = localStorage.getItem('nstcg_user_id') || sessionStorage.getItem('userId') || generateUserId();
-  
+
   // Ensure social codes are loaded
   await loadSocialCodes();
-  
+
   const platformCode = socialCodes.platforms[platform] || 'dr';
   return `https://nstcg.org?ref=${platformCode}-${userId}`;
 }
@@ -1255,7 +1267,7 @@ async function shareOnLinkedIn(count, userComment) {
 
 async function shareOnInstagram() {
   const url = await getShareUrl('instagram');
-  
+
   // Copy to clipboard
   navigator.clipboard.writeText(url).then(() => {
     // Show toast notification
@@ -1281,7 +1293,7 @@ function showToast(message) {
   if (existingToast) {
     existingToast.remove();
   }
-  
+
   // Create new toast
   const toast = document.createElement('div');
   toast.className = 'toast-notification';
@@ -1289,14 +1301,14 @@ function showToast(message) {
     <i class="fas fa-check-circle"></i>
     <span>${message}</span>
   `;
-  
+
   document.body.appendChild(toast);
-  
+
   // Trigger animation
   setTimeout(() => {
     toast.classList.add('show');
   }, 10);
-  
+
   // Remove after 3 seconds
   setTimeout(() => {
     toast.classList.remove('show');
@@ -1407,12 +1419,12 @@ function showModalSurveyInstructions() {
     modalContent.innerHTML = `
       <div style="padding: 10px;">
         <h4 style="color: #00ff00; margin-bottom: 20px; font-size: 20px; text-align: center;">
-          Dorset Council Consultation Survey
+          Dorset Coast Forum Public Engagement Survey
         </h4>
         
         <div class="survey-instructions-content">
           <p style="color: #ccc; margin-bottom: 15px;">
-            The Dorset Council consultation survey contains approximately 30 questions covering various aspects of the Shore Road project, including green spaces, pedestrian improvements, and traffic management.
+            The Dorset Coast Forum has launched a public engagement survey to gather community input on the Shore Road improvements. The survey contains approximately 30 questions covering various aspects including green spaces, pedestrian safety, and traffic management.
           </p>
           
           <p style="color: #ccc; margin-bottom: 15px;">
@@ -1436,8 +1448,8 @@ function showModalSurveyInstructions() {
               <ul style="color: #999; font-size: 14px; margin-top: 10px; list-style-type: disc; margin-left: 20px;">
                 <li>Two-way with parking removal - <span style="color: #00ff00;">maintains current traffic flow patterns</span></li>
                 <li>Keep as is - no changes to current situation</li>
-                <li>One-way system - would redirect traffic to alternative routes</li>
-                <li>Full closure - <span style="color: red;">would redistribute all Shore Road traffic to other streets</span></li>
+                <li>One-way system - would <span style="color: #FFA500;">redirect significant</span> traffic to alternative routes</li>
+                <li>Full closure - would redirect <span style="color: red;">traffic to residential streets</span></li>
               </ul>
             </div>
           </div>
@@ -1448,11 +1460,19 @@ function showModalSurveyInstructions() {
           </p>
         </div>
         
-        <div class="survey-checkbox-container">
+        <div class="survey-checkbox-container" style="margin-bottom: 10px;">
           <label style="display: flex; align-items: center; cursor: pointer; color: #fff;">
             <input type="checkbox" id="modal-understand-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
               onchange="toggleModalSurveyButton()">
             <span style="font-size: 16px;">I understand the survey structure and am ready to proceed</span>
+          </label>
+        </div>
+        
+        <div class="survey-checkbox-container">
+          <label style="display: flex; align-items: center; cursor: pointer; color: #fff;">
+            <input type="checkbox" id="modal-valid-survey-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
+              onchange="toggleModalSurveyButton()">
+            <span style="font-size: 16px;">I understand that questions 1, 24, and 26 do constitute a valid and complete survey</span>
           </label>
         </div>
         
@@ -1477,11 +1497,36 @@ function showModalSurveyInstructions() {
 }
 
 function toggleModalSurveyButton() {
-  const checkbox = document.getElementById('modal-understand-checkbox');
+  const checkbox1 = document.getElementById('modal-understand-checkbox');
+  const checkbox2 = document.getElementById('modal-valid-survey-checkbox');
   const button = document.getElementById('modal-official-survey-btn');
 
-  if (checkbox && button) {
-    if (checkbox.checked) {
+  if (checkbox1 && checkbox2 && button) {
+    if (checkbox1.checked && checkbox2.checked) {
+      button.disabled = false;
+      button.style.background = '#00ff00';
+      button.style.color = '#1a1a1a';
+      button.style.cursor = 'pointer';
+      button.onmouseover = function () { this.style.background = '#00cc00'; };
+      button.onmouseout = function () { this.style.background = '#00ff00'; };
+    } else {
+      button.disabled = true;
+      button.style.background = '#666';
+      button.style.color = '#999';
+      button.style.cursor = 'not-allowed';
+      button.onmouseover = null;
+      button.onmouseout = null;
+    }
+  }
+}
+
+function toggleBottomSurveyButton() {
+  const checkbox1 = document.getElementById('bottom-understand-checkbox');
+  const checkbox2 = document.getElementById('bottom-valid-survey-checkbox');
+  const button = document.getElementById('bottom-official-survey-btn');
+
+  if (checkbox1 && checkbox2 && button) {
+    if (checkbox1.checked && checkbox2.checked) {
       button.disabled = false;
       button.style.background = '#00ff00';
       button.style.color = '#1a1a1a';

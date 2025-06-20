@@ -49,7 +49,7 @@ nstcg-website/
 - **Features**:
   - 1-minute cache for performance
   - Pagination handling for large datasets
-  - Base count offset (603)
+  - Base count offset (215)
   - Error fallback
 - **Environment Variables Required**:
   - `NOTION_TOKEN`

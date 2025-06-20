@@ -529,6 +529,19 @@ h1 {
   margin-bottom: 20px;
 }
 
+/* Horizontal form group for name fields */
+.form-group-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-group-row .form-group,
+.form-group-row .modal-form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
 label {
   display: block;
   font-weight: bold;
@@ -748,6 +761,22 @@ textarea::placeholder {
   .share-btn {
     width: 100%;
     justify-content: center;
+  }
+  
+  /* Stack name fields on mobile */
+  .form-group-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-group-row .form-group,
+  .form-group-row .modal-form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group-row .form-group:last-child,
+  .form-group-row .modal-form-group:last-child {
+    margin-bottom: 0;
   }
 }
 

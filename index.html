@@ -131,9 +131,15 @@
         <p class="form-subtitle">Add Your Voice to the Community Consensus NOW</p>
       </div>
       <form id="signupForm" class="signup-form">
-        <div class="form-group">
-          <label for="name">Your Name</label>
-          <input type="text" id="name" name="name" required placeholder="Join your neighbors">
+        <div class="form-group-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" name="firstName" required placeholder="First name">
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" name="lastName" required placeholder="Last name">
+          </div>
         </div>
         <div class="form-group">
           <label for="email">Email Address</label>
@@ -200,9 +206,15 @@
           <div id="modalMessage" class="message"></div>
 
           <form id="surveyModalForm">
-            <div class="modal-form-group">
-              <label for="modalName">Your Name</label>
-              <input type="text" id="modalName" name="name" required placeholder="Enter your name">
+            <div class="form-group-row">
+              <div class="modal-form-group">
+                <label for="modalFirstName">First Name</label>
+                <input type="text" id="modalFirstName" name="firstName" required placeholder="First name">
+              </div>
+              <div class="modal-form-group">
+                <label for="modalLastName">Last Name</label>
+                <input type="text" id="modalLastName" name="lastName" required placeholder="Last name">
+              </div>
             </div>
 
             <div class="modal-form-group">

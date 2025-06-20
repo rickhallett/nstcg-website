@@ -82,7 +82,7 @@ export default async function handler(req, res) {
     }
 
     // Update cache
-    cachedCount = 603 + totalCount; // Add base count to database count
+    cachedCount = 215 + totalCount; // Add base count to database count
     cacheTime = now;
 
     // Log count for monitoring
@@ -101,6 +101,6 @@ export default async function handler(req, res) {
     });
 
     // Return default count on error
-    res.status(200).json({ count: 603 });
+    res.status(200).json({ count: 215 });
   }
 }

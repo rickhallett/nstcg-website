@@ -43,7 +43,7 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Too many requests. Please try again later.' });
   }
 
-  const { name, email, timestamp, source, website, comment } = req.body;
+  const { name, firstName, lastName, email, timestamp, source, website, comment, user_id, referrer } = req.body;
 
   // Honeypot check
   if (website) {
@@ -109,6 +109,20 @@ export default async function handler(req, res) {
               }
             }]
           },
+          'First Name': {
+            rich_text: [{
+              text: {
+                content: firstName
+              }
+            }]
+          },
+          'Last Name': {
+            rich_text: [{
+              text: {
+                content: lastName
+              }
+            }]
+          },
           'Email': {
             email: email
           },
@@ -128,6 +142,20 @@ export default async function handler(req, res) {
             rich_text: [{
               text: {
                 content: comment
+              }
+            }]
+          } : undefined,
+          'User ID': user_id ? {
+            rich_text: [{
+              text: {
+                content: user_id
+              }
+            }]
+          } : undefined,
+          'Referrer': referrer ? {
+            rich_text: [{
+              text: {
+                content: referrer || 'None'
               }
             }]
           } : undefined
