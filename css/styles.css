@@ -100,23 +100,30 @@ body {
 /* Desktop Header Styles */
 @media (min-width: 769px) {
   .header-content {
-    justify-content: center;
+    justify-content: space-between;
     position: relative;
     max-width: 1200px;
     margin: 0 auto;
   }
   
   .alert-badge {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
+    /* Keep in normal flow for proper left alignment */
+    flex-shrink: 0;
   }
   
   .header-countdown {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.3);
     padding: 12px 25px;
     border-radius: 25px;
+  }
+  
+  /* Spacer to balance layout */
+  .header-content::after {
+    content: '';
+    flex: 0 0 200px;
   }
   
   .header-time-unit {
