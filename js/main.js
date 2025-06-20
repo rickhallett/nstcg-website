@@ -633,7 +633,7 @@ function initializeRegistrationState() {
   if (isRegistered && userId) {
     // Transform UI for registered users
     transformSurveyButtonToShare();
-    showBottomFormBanner();
+    transformBottomFormToShare();
     showModalButtonNotification();
   }
 }
@@ -669,48 +669,34 @@ function transformSurveyButtonToShare() {
   }
 }
 
-// Show banner on bottom form for registered users
-function showBottomFormBanner() {
+// Transform bottom form to share section for registered users
+function transformBottomFormToShare() {
   const formSection = document.querySelector('.form-section');
   if (formSection) {
-    // Add banner at top of form section
-    const banner = document.createElement('div');
-    banner.className = 'already-registered-form-banner';
-    banner.style.cssText = `
-      background: #FFA500;
-      color: #1a1a1a;
-      padding: 15px 20px;
-      margin-bottom: 20px;
-      border-radius: 5px;
-      font-weight: bold;
-      text-align: center;
+    const userComment = localStorage.getItem('nstcg_comment') || '';
+    
+    // Replace entire form section content
+    formSection.innerHTML = `
+      <div class="already-registered-banner" style="
+        background: #FFA500;
+        color: #1a1a1a;
+        padding: 15px 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-weight: bold;
+        text-align: center;
+        font-size: 18px;
+      ">
+        <i class="fas fa-check-circle" style="margin-right: 10px;"></i>
+        ✓ You've already registered - now help spread the word!
+      </div>
+      <div id="bottom-share-container"></div>
     `;
-    banner.innerHTML = `
-      <i class="fas fa-check-circle" style="margin-right: 10px;"></i>
-      ✓ You've already registered - but you can share with others!
-    `;
     
-    formSection.insertBefore(banner, formSection.firstChild);
-    
-    // Disable form inputs
-    const inputs = formSection.querySelectorAll('input, textarea');
-    inputs.forEach(input => {
-      input.disabled = true;
-      input.style.opacity = '0.6';
-    });
-    
-    // Update submit button
-    const submitBtn = formSection.querySelector('.submit-btn');
-    if (submitBtn) {
-      submitBtn.innerHTML = '<span>Share Instead</span>';
-      submitBtn.onclick = function(e) {
-        e.preventDefault();
-        const shareSection = document.getElementById('registered-share-container');
-        if (shareSection) {
-          shareSection.scrollIntoView({ behavior: 'smooth' });
-        }
-      };
-    }
+    // Add share buttons after count is available
+    setTimeout(() => {
+      addSocialShareButtons('bottom-share-container', realCount || 0, userComment, false);
+    }, 100);
   }
 }
 
