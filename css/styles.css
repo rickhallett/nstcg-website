@@ -15,7 +15,9 @@ body {
 .alert-header {
   background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
   padding: 15px 20px;
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
   overflow: hidden;
 }
 
@@ -93,6 +95,43 @@ body {
   background: #fff;
   border-radius: 50%;
   animation: pulse 1s infinite;
+}
+
+/* Desktop Header Styles */
+@media (min-width: 769px) {
+  .header-content {
+    justify-content: center;
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .alert-badge {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .header-countdown {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 12px 25px;
+    border-radius: 25px;
+  }
+  
+  .header-time-unit {
+    min-width: 50px;
+  }
+  
+  .header-time-value {
+    font-size: 24px;
+    font-weight: 900;
+  }
+  
+  .header-time-label {
+    font-size: 12px;
+    margin-top: 4px;
+  }
 }
 
 @keyframes pulse {
