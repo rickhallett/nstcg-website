@@ -783,7 +783,16 @@ document.addEventListener('DOMContentLoaded', function () {
               
               <div class="survey-step">
                 <span class="survey-step-number">Q26:</span>
-                <span>Preferred traffic solutions</span>
+                <div>
+                  <span>Preferred traffic solutions</span>
+                  <p style="color: #999; font-size: 14px; margin-top: 10px;">
+                    The council has identified four options with different traffic implications:
+                    • Two-way with parking removal - maintains current traffic flow patterns
+                    • Keep as is - no changes to current situation
+                    • One-way system - would redirect traffic to alternative routes
+                    • Full closure - would redistribute all Shore Road traffic to other streets
+                  </p>
+                </div>
               </div>
               
               <p style="color: #ccc; margin-top: 20px; text-align: center;">
@@ -1006,6 +1015,13 @@ function showModalSurveyInstructions() {
             <span class="survey-step-number">Q26:</span>
             <div>
               <span>Preferred traffic solutions</span>
+              <p style="color: #999; font-size: 14px; margin-top: 10px;">
+                The council has identified four options with different traffic implications:
+                • Two-way with parking removal - maintains current traffic flow patterns
+                • Keep as is - no changes to current situation
+                • One-way system - would redirect traffic to alternative routes
+                • Full closure - would redistribute all Shore Road traffic to other streets
+              </p>
             </div>
           </div>
           
