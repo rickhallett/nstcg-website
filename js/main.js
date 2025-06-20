@@ -56,10 +56,12 @@ document.getElementById('signupForm').addEventListener('submit', async function 
   e.preventDefault();
 
   // Get form data
+  const userId = generateUserId();
   const formData = {
     name: document.getElementById('name').value.trim(),
     email: document.getElementById('email').value.trim(),
     comment: document.getElementById('comment').value.trim(),
+    user_id: userId,
     timestamp: new Date().toISOString(),
     source: 'main_form',
     referrer: sessionStorage.getItem('referrer') || null
@@ -69,7 +71,14 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     // Submit to API
     await submitToNotion(formData);
 
-    // Success - Hide form section
+    // Success - Store user data in localStorage
+    localStorage.setItem('nstcg_user_id', userId);
+    localStorage.setItem('nstcg_registered', 'true');
+    if (formData.comment) {
+      localStorage.setItem('nstcg_comment', formData.comment);
+    }
+    
+    // Hide form section
     document.querySelector('.form-section').style.display = 'none';
 
     // Show confirmation
@@ -539,8 +548,19 @@ function checkReferral() {
   const referrer = urlParams.get('ref');
 
   if (referrer) {
-    // Store referrer in session storage
+    // Store full referrer in session storage
     sessionStorage.setItem('referrer', referrer);
+    
+    // Parse platform and user ID if format matches
+    if (referrer.includes('-')) {
+      const parts = referrer.split('-');
+      if (parts.length >= 2) {
+        const platform = parts[0];
+        const userId = parts.slice(1).join('-'); // Handle user IDs with hyphens
+        sessionStorage.setItem('referrer_platform', platform);
+        sessionStorage.setItem('referrer_id', userId);
+      }
+    }
 
     // Clean URL without reload
     const cleanUrl = window.location.pathname;
@@ -605,6 +625,132 @@ function setupSmartPolling() {
   pollWithDynamicRate();
 }
 
+// Function to check registration status and update UI
+function initializeRegistrationState() {
+  const isRegistered = localStorage.getItem('nstcg_registered') === 'true';
+  const userId = localStorage.getItem('nstcg_user_id');
+  
+  if (isRegistered && userId) {
+    // Transform UI for registered users
+    transformSurveyButtonToShare();
+    showBottomFormBanner();
+    showModalButtonNotification();
+  }
+}
+
+// Transform survey button to share section for registered users
+function transformSurveyButtonToShare() {
+  const surveySection = document.querySelector('.survey-button-section');
+  if (surveySection) {
+    const userComment = localStorage.getItem('nstcg_comment') || '';
+    
+    // Replace entire section with share UI
+    surveySection.innerHTML = `
+      <div class="already-registered-banner" style="
+        background: #FFA500;
+        color: #1a1a1a;
+        padding: 15px 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-weight: bold;
+        text-align: center;
+        font-size: 18px;
+      ">
+        <i class="fas fa-check-circle" style="margin-right: 10px;"></i>
+        You've already registered - now help spread the word!
+      </div>
+      <div id="registered-share-container"></div>
+    `;
+    
+    // Add share buttons after count is available
+    setTimeout(() => {
+      addSocialShareButtons('registered-share-container', realCount || 0, userComment, false);
+    }, 100);
+  }
+}
+
+// Show banner on bottom form for registered users
+function showBottomFormBanner() {
+  const formSection = document.querySelector('.form-section');
+  if (formSection) {
+    // Add banner at top of form section
+    const banner = document.createElement('div');
+    banner.className = 'already-registered-form-banner';
+    banner.style.cssText = `
+      background: #FFA500;
+      color: #1a1a1a;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      text-align: center;
+    `;
+    banner.innerHTML = `
+      <i class="fas fa-check-circle" style="margin-right: 10px;"></i>
+      ✓ You've already registered - but you can share with others!
+    `;
+    
+    formSection.insertBefore(banner, formSection.firstChild);
+    
+    // Disable form inputs
+    const inputs = formSection.querySelectorAll('input, textarea');
+    inputs.forEach(input => {
+      input.disabled = true;
+      input.style.opacity = '0.6';
+    });
+    
+    // Update submit button
+    const submitBtn = formSection.querySelector('.submit-btn');
+    if (submitBtn) {
+      submitBtn.innerHTML = '<span>Share Instead</span>';
+      submitBtn.onclick = function(e) {
+        e.preventDefault();
+        const shareSection = document.getElementById('registered-share-container');
+        if (shareSection) {
+          shareSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    }
+  }
+}
+
+// Show notification for modal survey button
+function showModalButtonNotification() {
+  const modalBtn = document.querySelector('.survey-btn');
+  if (modalBtn) {
+    const notification = document.createElement('div');
+    notification.className = 'survey-button-notification';
+    notification.style.cssText = `
+      background: #FFA500;
+      color: #1a1a1a;
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    `;
+    notification.textContent = "You've already registered";
+    
+    modalBtn.parentElement.appendChild(notification);
+    
+    // Fade in
+    setTimeout(() => {
+      notification.style.opacity = '1';
+    }, 100);
+    
+    // Fade out after 5 seconds
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      setTimeout(() => {
+        notification.remove();
+      }, 300);
+    }, 5000);
+  }
+}
+
 // Initialize counts on page load
 window.addEventListener('load', async function () {
   // Check for referral
@@ -615,6 +761,9 @@ window.addEventListener('load', async function () {
 
   // Load feed actions
   await loadFeedActions();
+  
+  // Load social referral codes
+  await loadSocialCodes();
 
   // Start counter animation immediately
   const counterEl = document.querySelector('.counter-number');
@@ -630,6 +779,9 @@ window.addEventListener('load', async function () {
 
   // Initialize all counts immediately
   await initializeCounts();
+  
+  // Check registration status and update UI
+  initializeRegistrationState();
 
   // Initial live feed update with loading state
   await updateLiveFeed(true);
@@ -699,10 +851,12 @@ async function handleModalFormSubmit(e) {
   const submitBtn = this.querySelector('.modal-submit-btn');
 
   // Get form data
+  const userId = generateUserId();
   const formData = {
     name: document.getElementById('modalName').value.trim(),
     email: document.getElementById('modalEmail').value.trim(),
     comment: document.getElementById('modalComment').value.trim(),
+    user_id: userId,
     timestamp: new Date().toISOString(),
     source: 'survey_modal',
     referrer: sessionStorage.getItem('referrer') || null
@@ -733,6 +887,13 @@ async function handleModalFormSubmit(e) {
   try {
     // Submit to API
     await submitToNotion(formData);
+    
+    // Success - Store user data in localStorage
+    localStorage.setItem('nstcg_user_id', userId);
+    localStorage.setItem('nstcg_registered', 'true');
+    if (formData.comment) {
+      localStorage.setItem('nstcg_comment', formData.comment);
+    }
 
     // Replace modal content with success message (with loading state)
     const modalContent = document.getElementById('modal-survey-content');
@@ -1035,7 +1196,7 @@ function generateUserId() {
 
 // Social Sharing Functions
 function generateShareText(count, userComment) {
-  const baseMessage = `I just joined ${count} neighbors fighting for safer streets in North Swanage! The Nassau traffic plan could flood our residential streets with dangerous traffic.`;
+  const baseMessage = `I just joined ${count} neighbors fighting for safer streets in North Swanage! The proposed traffic changes could flood our residential streets with dangerous traffic.`;
 
   if (userComment) {
     return `${baseMessage} My reason: "${userComment}" Take action now:`;
@@ -1044,41 +1205,70 @@ function generateShareText(count, userComment) {
   return `${baseMessage} Take action before it's too late:`;
 }
 
-function getShareUrl() {
-  const userId = sessionStorage.getItem('userId') || generateUserId();
-  sessionStorage.setItem('userId', userId);
-  return `https://nstcg.org?ref=${userId}`;
+// Load social referral codes
+let socialCodes = null;
+async function loadSocialCodes() {
+  if (!socialCodes) {
+    try {
+      const response = await fetch('/data/social-referral-codes.json');
+      socialCodes = await response.json();
+    } catch (error) {
+      console.error('Error loading social codes:', error);
+      socialCodes = {
+        platforms: {
+          twitter: 'tw',
+          facebook: 'fb',
+          whatsapp: 'wa',
+          linkedin: 'li',
+          instagram: 'ig',
+          email: 'em',
+          direct: 'dr'
+        }
+      };
+    }
+  }
+  return socialCodes;
 }
 
-function shareOnTwitter(count, userComment) {
+async function getShareUrl(platform = 'direct') {
+  const userId = localStorage.getItem('nstcg_user_id') || sessionStorage.getItem('userId') || generateUserId();
+  
+  // Ensure social codes are loaded
+  await loadSocialCodes();
+  
+  const platformCode = socialCodes.platforms[platform] || 'dr';
+  return `https://nstcg.org?ref=${platformCode}-${userId}`;
+}
+
+async function shareOnTwitter(count, userComment) {
   const text = generateShareText(count, userComment);
-  const url = getShareUrl();
+  const url = await getShareUrl('twitter');
   const hashtags = 'SaveNorthSwanage,TrafficSafety';
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${hashtags}`;
   window.open(twitterUrl, '_blank', 'width=550,height=420');
 }
 
-function shareOnFacebook() {
-  const url = getShareUrl();
+async function shareOnFacebook() {
+  const url = await getShareUrl('facebook');
   const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
   window.open(facebookUrl, '_blank', 'width=550,height=420');
 }
 
-function shareOnWhatsApp(count, userComment) {
+async function shareOnWhatsApp(count, userComment) {
   const text = generateShareText(count, userComment);
-  const url = getShareUrl();
+  const url = await getShareUrl('whatsapp');
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
   window.open(whatsappUrl, '_blank');
 }
 
-function shareOnLinkedIn(count, userComment) {
-  const url = getShareUrl();
+async function shareOnLinkedIn(count, userComment) {
+  const url = await getShareUrl('linkedin');
   const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
   window.open(linkedInUrl, '_blank', 'width=550,height=520');
 }
 
-function shareOnInstagram() {
-  const url = getShareUrl();
+async function shareOnInstagram() {
+  const url = await getShareUrl('instagram');
   
   // Copy to clipboard
   navigator.clipboard.writeText(url).then(() => {
@@ -1130,15 +1320,15 @@ function showToast(message) {
   }, 3000);
 }
 
-function shareByEmail(count, userComment) {
-  const subject = 'Urgent: North Swanage Traffic Crisis - We Need Your Help!';
+async function shareByEmail(count, userComment) {
+  const subject = 'Urgent: North Swanage Traffic Concern Group - We Need Your Help!';
   const text = generateShareText(count, userComment);
-  const url = getShareUrl();
+  const url = await getShareUrl('email');
   const body = `${text}
 
 Visit: ${url}
 
-The Nassau initiative threatens to turn Shore Road into a one-way system, pushing dangerous levels of traffic onto our quiet residential streets. This affects everyone - our children's safety, property values, and quality of life.
+The North Swanage Traffic Concern Group is raising awareness about proposed traffic changes that could turn Shore Road into a one-way system, pushing dangerous levels of traffic onto our quiet residential streets. This affects everyone - our children's safety, property values, and quality of life.
 
 Please take 2 minutes to join us and share with other neighbors. Time is running out!`;
 
@@ -1148,7 +1338,7 @@ Please take 2 minutes to join us and share with other neighbors. Time is running
 
 async function shareNative(count, userComment) {
   const text = generateShareText(count, userComment);
-  const url = getShareUrl();
+  const url = await getShareUrl('direct');
   const shareData = {
     title: 'North Swanage Traffic Crisis',
     text: text,
