@@ -75,10 +75,11 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     // Show confirmation
     document.getElementById('confirmation').style.display = 'block';
 
-    // Show loading state in confirmation message
+    // Show loading state in confirmation message with animation
     const confirmationCountEl = document.getElementById('confirmation-count');
+    let confirmationCountUpdater = null;
     if (confirmationCountEl) {
-      confirmationCountEl.textContent = '---';
+      confirmationCountUpdater = createAnimatedPlaceholder(confirmationCountEl);
     }
 
     // Scroll to confirmation
@@ -96,8 +97,8 @@ document.getElementById('signupForm').addEventListener('submit', async function 
       // Update all count displays with fresh data
       counterEl.textContent = newCount;
       
-      if (confirmationCountEl) {
-        confirmationCountEl.textContent = newCount;
+      if (confirmationCountUpdater) {
+        confirmationCountUpdater(newCount);
       }
       
       // Update submit button for consistency
@@ -183,27 +184,121 @@ async function initializeCounts() {
   animateCounterFromZero(realCount);
 }
 
-// Separate function for counter animation
-function animateCounterFromZero(end) {
-  let start = 0;
-  const duration = 2000;
-  const startTime = Date.now();
-  const counterEl = document.querySelector('.counter-number');
+// Enhanced counter animation system
+let counterAnimation = {
+  current: 0,
+  target: null,
+  animationId: null,
+  startTime: null,
+  phase: 'initial' // 'initial' or 'accelerated'
+};
 
+function startCounterAnimation(element) {
+  // Start with slow counting immediately
+  counterAnimation.current = 0;
+  counterAnimation.startTime = Date.now();
+  counterAnimation.phase = 'initial';
+  
   function animate() {
-    const currentTime = Date.now();
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-
-    const current = Math.floor(start + (end - start) * progress);
-    counterEl.textContent = current;
-
-    if (progress < 1) {
-      requestAnimationFrame(animate);
+    const elapsed = Date.now() - counterAnimation.startTime;
+    
+    if (counterAnimation.phase === 'initial') {
+      // Slow initial counting: roughly 1 per 50ms
+      counterAnimation.current = Math.floor(elapsed / 50);
+    } else if (counterAnimation.phase === 'accelerated' && counterAnimation.target !== null) {
+      // Exponential acceleration to target
+      const phaseElapsed = Date.now() - counterAnimation.acceleratedStartTime;
+      const duration = 1500; // 1.5 seconds to reach target
+      const progress = Math.min(phaseElapsed / duration, 1);
+      
+      // Exponential easing
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      counterAnimation.current = Math.floor(
+        counterAnimation.acceleratedStart + 
+        (counterAnimation.target - counterAnimation.acceleratedStart) * easedProgress
+      );
+      
+      if (progress >= 1) {
+        counterAnimation.current = counterAnimation.target;
+        cancelAnimationFrame(counterAnimation.animationId);
+        return;
+      }
     }
+    
+    if (element) {
+      element.textContent = counterAnimation.current;
+    }
+    
+    counterAnimation.animationId = requestAnimationFrame(animate);
   }
-
+  
   animate();
+}
+
+function accelerateToTarget(target) {
+  counterAnimation.target = target;
+  counterAnimation.phase = 'accelerated';
+  counterAnimation.acceleratedStart = counterAnimation.current;
+  counterAnimation.acceleratedStartTime = Date.now();
+}
+
+// Helper to create animated placeholder for any element
+function createAnimatedPlaceholder(element) {
+  if (!element) return;
+  
+  let localCounter = 0;
+  const startTime = Date.now();
+  let animationId = null;
+  
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    localCounter = Math.floor(elapsed / 50); // Same rate as main counter
+    element.textContent = localCounter;
+    animationId = requestAnimationFrame(animate);
+  }
+  
+  animate();
+  
+  // Return function to stop and set final value
+  return function(finalValue) {
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+    }
+    
+    // Animate to final value
+    const duration = 1000;
+    const startValue = localCounter;
+    const animStartTime = Date.now();
+    
+    function finalAnimate() {
+      const elapsed = Date.now() - animStartTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(startValue + (finalValue - startValue) * easedProgress);
+      
+      element.textContent = current;
+      
+      if (progress < 1) {
+        requestAnimationFrame(finalAnimate);
+      }
+    }
+    
+    finalAnimate();
+  };
+}
+
+// Separate function for counter animation (keep for compatibility)
+function animateCounterFromZero(end) {
+  const counterEl = document.querySelector('.counter-number');
+  if (counterAnimation.animationId) {
+    // If already animating, just update the target
+    accelerateToTarget(end);
+  } else {
+    // Start new animation
+    startCounterAnimation(counterEl);
+    // Immediately accelerate to target since we have the value
+    setTimeout(() => accelerateToTarget(end), 100);
+  }
 }
 
 // Fisher-Yates shuffle algorithm
@@ -469,6 +564,12 @@ window.addEventListener('load', async function () {
   // Load feed actions
   await loadFeedActions();
   
+  // Start counter animation immediately
+  const counterEl = document.querySelector('.counter-number');
+  if (counterEl) {
+    startCounterAnimation(counterEl);
+  }
+  
   // Initialize all counts immediately
   await initializeCounts();
   
@@ -583,7 +684,7 @@ async function handleModalFormSubmit(e) {
           ✓ WELCOME TO THE MOVEMENT!
         </h3>
         <p style="font-size: 18px; color: #ccc; margin-bottom: 20px; line-height: 1.5;">
-          You are now part of <span id="modal-count-display">---</span> neighbors fighting for safer streets.<br>
+          You are now part of <span id="modal-count-display">0</span> neighbors fighting for safer streets.<br>
           Together, we're making North Swanage better for everyone.
         </p>
         <p style="color: #00ff00; font-weight: bold; font-size: 16px;">
@@ -678,6 +779,13 @@ async function handleModalFormSubmit(e) {
     // Store user comment for sharing
     const userComment = formData.comment;
     
+    // Start animated counter in modal
+    const modalCountDisplay = document.getElementById('modal-count-display');
+    let modalCountUpdater = null;
+    if (modalCountDisplay) {
+      modalCountUpdater = createAnimatedPlaceholder(modalCountDisplay);
+    }
+    
     // Wait a moment for database to update, then fetch fresh count
     setTimeout(async () => {
       const counterEl = document.querySelector('.counter-number');
@@ -687,9 +795,8 @@ async function handleModalFormSubmit(e) {
       // Update all count displays with fresh data
       counterEl.textContent = newCount;
       
-      const modalCountDisplay = document.getElementById('modal-count-display');
-      if (modalCountDisplay) {
-        modalCountDisplay.textContent = newCount;
+      if (modalCountUpdater) {
+        modalCountUpdater(newCount);
       }
       
       // Update submit button for consistency
