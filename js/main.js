@@ -188,7 +188,7 @@ function createAnimatedSubmitButton(element) {
   let animationId = null;
 
   function updateText(count) {
-    element.textContent = `JOIN ${count} NEIGHBORS NOW`;
+    element.textContent = `JOIN ${count} NEIGHBOURS NOW`;
   }
 
   function animate() {
@@ -893,7 +893,7 @@ async function handleModalFormSubmit(e) {
           ✓ WELCOME TO THE MOVEMENT!
         </h3>
         <p style="font-size: 18px; color: #ccc; margin-bottom: 20px; line-height: 1.5;">
-          You are now part of <span id="modal-count-display">0</span> neighbors fighting for safer streets.<br>
+          You are now part of <span id="modal-count-display">0</span> Neighbours fighting for safer streets.<br>
           Together, we're making North Swanage better for everyone.
         </p>
         <p style="color: #00ff00; font-weight: bold; font-size: 16px;">
@@ -953,21 +953,21 @@ async function handleModalFormSubmit(e) {
           
           <div style="background: #1a1a1a; padding: 15px; border-radius: 5px; margin-bottom: 10px;">
             <label style="display: flex; align-items: center; cursor: pointer; color: #fff;">
-              <input type="checkbox" id="bottom-understand-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
-                onchange="toggleBottomSurveyButton()">
+              <input type="checkbox" id="modal-understand-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
+                onchange="toggleModalSurveyButton()">
               <span style="font-size: 16px;">I understand the survey structure and am ready to proceed</span>
             </label>
           </div>
           
           <div style="background: #1a1a1a; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
             <label style="display: flex; align-items: center; cursor: pointer; color: #fff;">
-              <input type="checkbox" id="bottom-valid-survey-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
-                onchange="toggleBottomSurveyButton()">
+              <input type="checkbox" id="modal-valid-survey-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
+                onchange="toggleModalSurveyButton()">
               <span style="font-size: 16px;">I understand that questions 1, 24, and 26 do constitute a valid and complete survey</span>
             </label>
           </div>
           
-          <button id="bottom-official-survey-btn" class="official-survey-btn" disabled style="
+          <button id="modal-official-survey-btn" class="official-survey-btn" disabled style="
             width: 100%;
             background: #666;
             color: #999;
@@ -1194,7 +1194,7 @@ function generateUserId() {
 
 // Social Sharing Functions
 function generateShareText(count, userComment) {
-  const baseMessage = `I just joined ${count} neighbors fighting for safer streets in North Swanage! The proposed traffic changes could flood our residential streets with dangerous traffic.`;
+  const baseMessage = `I just joined ${count} Neighbours fighting for safer streets in North Swanage! The proposed traffic changes could flood our residential streets with dangerous traffic.`;
 
   if (userComment) {
     return `${baseMessage} My reason: "${userComment}" Take action now:`;
@@ -1328,7 +1328,7 @@ Visit: ${url}
 
 The North Swanage Traffic Concern Group is raising awareness about proposed traffic changes that could turn Shore Road into a one-way system, pushing dangerous levels of traffic onto our quiet residential streets. This affects everyone - our children's safety, property values, and quality of life.
 
-Please take 2 minutes to join us and share with other neighbors. Time is running out!`;
+Please take 2 minutes to join us and share with other Neighbours. Time is running out!`;
 
   const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailtoUrl;
@@ -1479,7 +1479,7 @@ function showModalSurveyInstructions() {
         <button id="modal-official-survey-btn" class="official-survey-btn" disabled style="
           width: 100%;
           background: #666;
-          color: #999;
+        color: #999;
           padding: 20px;
           border: none;
           border-radius: 5px;
@@ -1500,30 +1500,6 @@ function toggleModalSurveyButton() {
   const checkbox1 = document.getElementById('modal-understand-checkbox');
   const checkbox2 = document.getElementById('modal-valid-survey-checkbox');
   const button = document.getElementById('modal-official-survey-btn');
-
-  if (checkbox1 && checkbox2 && button) {
-    if (checkbox1.checked && checkbox2.checked) {
-      button.disabled = false;
-      button.style.background = '#00ff00';
-      button.style.color = '#1a1a1a';
-      button.style.cursor = 'pointer';
-      button.onmouseover = function () { this.style.background = '#00cc00'; };
-      button.onmouseout = function () { this.style.background = '#00ff00'; };
-    } else {
-      button.disabled = true;
-      button.style.background = '#666';
-      button.style.color = '#999';
-      button.style.cursor = 'not-allowed';
-      button.onmouseover = null;
-      button.onmouseout = null;
-    }
-  }
-}
-
-function toggleBottomSurveyButton() {
-  const checkbox1 = document.getElementById('bottom-understand-checkbox');
-  const checkbox2 = document.getElementById('bottom-valid-survey-checkbox');
-  const button = document.getElementById('bottom-official-survey-btn');
 
   if (checkbox1 && checkbox2 && button) {
     if (checkbox1.checked && checkbox2.checked) {

@@ -8,7 +8,7 @@ Recommended specifications:
 - File format: JPG (smaller file size)
 - Content suggestions:
   * Impact map with red zones highlighted
-  * Text overlay: "600+ Neighbors Fighting for Safer Streets"
+  * Text overlay: "215+ Neighbours Fighting for Safer Streets"
   * Warning symbol or traffic icon
   * North Swanage landmark or street view
   * Call to action: "Join Us Before It's Too Late"
