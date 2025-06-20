@@ -84,31 +84,34 @@ document.getElementById('signupForm').addEventListener('submit', async function 
 
     // Scroll to confirmation
     document.getElementById('confirmation').scrollIntoView({ behavior: 'smooth' });
-    
+
     // Store user comment for sharing
     const userComment = formData.comment;
+    
+    // Add share buttons immediately in disabled state
+    addSocialShareButtons('confirmation', 0, userComment, true);
 
     // Wait a moment for database to update, then fetch fresh count
     setTimeout(async () => {
       const counterEl = document.querySelector('.counter-number');
       const newCount = await fetchRealCount();
       realCount = newCount; // Update global count
-      
+
       // Update all count displays with fresh data
       counterEl.textContent = newCount;
-      
+
       if (confirmationCountUpdater) {
         confirmationCountUpdater(newCount);
       }
-      
+
       // Update submit button for consistency
       if (submitButtonUpdater) {
         submitButtonUpdater(newCount);
       }
-      
-      // Add social share buttons after count is loaded
-      addSocialShareButtons('confirmation', newCount, userComment);
-      
+
+      // Update social share buttons with real count and enable them
+      addSocialShareButtons('confirmation', newCount, userComment, false);
+
       // Update live feed to show new signup
       await updateLiveFeed();
     }, 500);
@@ -168,48 +171,48 @@ let submitButtonUpdater = null;
 // Helper to create animated submit button
 function createAnimatedSubmitButton(element) {
   if (!element) return;
-  
+
   let localCounter = 0;
   const startTime = Date.now();
   let animationId = null;
-  
+
   function updateText(count) {
     element.textContent = `JOIN ${count} NEIGHBORS NOW`;
   }
-  
+
   function animate() {
     const elapsed = Date.now() - startTime;
     localCounter = Math.floor(elapsed / 50); // Same rate as main counter
     updateText(localCounter);
     animationId = requestAnimationFrame(animate);
   }
-  
+
   animate();
-  
+
   // Return function to stop and set final value
-  return function(finalValue) {
+  return function (finalValue) {
     if (animationId) {
       cancelAnimationFrame(animationId);
     }
-    
+
     // Animate to final value
     const duration = 1000;
     const startValue = localCounter;
     const animStartTime = Date.now();
-    
+
     function finalAnimate() {
       const elapsed = Date.now() - animStartTime;
       const progress = Math.min(elapsed / duration, 1);
       const easedProgress = 1 - Math.pow(1 - progress, 3);
       const current = Math.floor(startValue + (finalValue - startValue) * easedProgress);
-      
+
       updateText(current);
-      
+
       if (progress < 1) {
         requestAnimationFrame(finalAnimate);
       }
     }
-    
+
     finalAnimate();
   };
 }
@@ -248,10 +251,10 @@ function startCounterAnimation(element) {
   counterAnimation.current = 0;
   counterAnimation.startTime = Date.now();
   counterAnimation.phase = 'initial';
-  
+
   function animate() {
     const elapsed = Date.now() - counterAnimation.startTime;
-    
+
     if (counterAnimation.phase === 'initial') {
       // Slow initial counting: roughly 1 per 50ms
       counterAnimation.current = Math.floor(elapsed / 50);
@@ -260,28 +263,28 @@ function startCounterAnimation(element) {
       const phaseElapsed = Date.now() - counterAnimation.acceleratedStartTime;
       const duration = 1500; // 1.5 seconds to reach target
       const progress = Math.min(phaseElapsed / duration, 1);
-      
+
       // Exponential easing
       const easedProgress = 1 - Math.pow(1 - progress, 3);
       counterAnimation.current = Math.floor(
-        counterAnimation.acceleratedStart + 
+        counterAnimation.acceleratedStart +
         (counterAnimation.target - counterAnimation.acceleratedStart) * easedProgress
       );
-      
+
       if (progress >= 1) {
         counterAnimation.current = counterAnimation.target;
         cancelAnimationFrame(counterAnimation.animationId);
         return;
       }
     }
-    
+
     if (element) {
       element.textContent = counterAnimation.current;
     }
-    
+
     counterAnimation.animationId = requestAnimationFrame(animate);
   }
-  
+
   animate();
 }
 
@@ -295,44 +298,44 @@ function accelerateToTarget(target) {
 // Helper to create animated placeholder for any element
 function createAnimatedPlaceholder(element) {
   if (!element) return;
-  
+
   let localCounter = 0;
   const startTime = Date.now();
   let animationId = null;
-  
+
   function animate() {
     const elapsed = Date.now() - startTime;
     localCounter = Math.floor(elapsed / 50); // Same rate as main counter
     element.textContent = localCounter;
     animationId = requestAnimationFrame(animate);
   }
-  
+
   animate();
-  
+
   // Return function to stop and set final value
-  return function(finalValue) {
+  return function (finalValue) {
     if (animationId) {
       cancelAnimationFrame(animationId);
     }
-    
+
     // Animate to final value
     const duration = 1000;
     const startValue = localCounter;
     const animStartTime = Date.now();
-    
+
     function finalAnimate() {
       const elapsed = Date.now() - animStartTime;
       const progress = Math.min(elapsed / duration, 1);
       const easedProgress = 1 - Math.pow(1 - progress, 3);
       const current = Math.floor(startValue + (finalValue - startValue) * easedProgress);
-      
+
       element.textContent = current;
-      
+
       if (progress < 1) {
         requestAnimationFrame(finalAnimate);
       }
     }
-    
+
     finalAnimate();
   };
 }
@@ -367,11 +370,11 @@ async function loadThoughtBubbles() {
     const response = await fetch('/data/thought-bubbles.json');
     const data = await response.json();
     const bubbles = data.thoughtBubbles;
-    
+
     // Shuffle and select 3 bubbles (or fewer if less than 3 available)
     const shuffled = shuffleArray(bubbles);
     const selected = shuffled.slice(0, 3);
-    
+
     // Get container and populate
     const container = document.getElementById('thought-bubbles-container');
     if (container) {
@@ -409,7 +412,7 @@ function getRelativeTime(timestamp) {
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
-  
+
   if (diffMins < 1) return 'just now';
   if (diffMins === 1) return '1 minute ago';
   if (diffMins < 60) return `${diffMins} minutes ago`;
@@ -448,12 +451,12 @@ function getRandomAction() {
 async function updateLiveFeed(showLoading = false) {
   const feedContainer = document.querySelector('.live-feed');
   if (!feedContainer) return;
-  
+
   // Show loading only on initial load or if requested
   if (showLoading) {
     const existingItems = feedContainer.querySelectorAll('.feed-item, .feed-loading, .feed-empty, .feed-error');
     existingItems.forEach(item => item.remove());
-    
+
     const loadingDiv = document.createElement('div');
     loadingDiv.className = 'feed-loading';
     loadingDiv.innerHTML = `
@@ -462,40 +465,40 @@ async function updateLiveFeed(showLoading = false) {
     `;
     feedContainer.appendChild(loadingDiv);
   }
-  
+
   try {
     const response = await fetch('/api/get-recent-signups');
     if (!response.ok) throw new Error('Failed to fetch signups');
-    
+
     const data = await response.json();
     const signups = data.signups;
-    
+
     // Clear loading/existing items
     const existingItems = feedContainer.querySelectorAll('.feed-item, .feed-loading, .feed-empty, .feed-error');
     existingItems.forEach(item => item.remove());
-    
+
     if (signups && signups.length > 0) {
       // Add real signups
       signups.forEach((signup, index) => {
         const feedItem = document.createElement('div');
         feedItem.className = 'feed-item';
         feedItem.style.animationDelay = `${index * 0.1}s`;
-        
+
         const relativeTime = getRelativeTime(signup.timestamp);
         const action = getRandomAction();
-        
+
         let feedContent = `
           <div class="feed-time">${relativeTime}</div>
           <div class="feed-message">${signup.name} ${action}</div>
         `;
-        
+
         // Add comment if present
         if (signup.comment) {
           feedContent += `<div class="feed-comment">"${signup.comment}"</div>`;
         }
-        
+
         feedItem.innerHTML = feedContent;
-        
+
         feedContainer.appendChild(feedItem);
       });
     } else {
@@ -511,13 +514,13 @@ async function updateLiveFeed(showLoading = false) {
     }
   } catch (error) {
     console.error('Error updating live feed:', error);
-    
+
     // Only show error state if there are no existing items
     const existingItems = feedContainer.querySelectorAll('.feed-item');
     if (existingItems.length === 0) {
       const existingStates = feedContainer.querySelectorAll('.feed-loading, .feed-empty, .feed-error');
       existingStates.forEach(item => item.remove());
-      
+
       const errorDiv = document.createElement('div');
       errorDiv.className = 'feed-error';
       errorDiv.innerHTML = `
@@ -534,16 +537,16 @@ async function updateLiveFeed(showLoading = false) {
 function checkReferral() {
   const urlParams = new URLSearchParams(window.location.search);
   const referrer = urlParams.get('ref');
-  
+
   if (referrer) {
     // Store referrer in session storage
     sessionStorage.setItem('referrer', referrer);
-    
+
     // Clean URL without reload
     const cleanUrl = window.location.pathname;
     window.history.replaceState({}, document.title, cleanUrl);
   }
-  
+
   return referrer;
 }
 
@@ -566,11 +569,11 @@ function updateCountDisplays(count) {
 function setupSmartPolling() {
   // Clear any existing interval
   if (pollInterval) clearTimeout(pollInterval);
-  
+
   function updatePollRate() {
     const timeOnPage = Date.now() - pageLoadTime;
     const minutes = timeOnPage / 60000;
-    
+
     if (minutes < 5) {
       // First 5 minutes: 30 seconds
       return 30000;
@@ -582,7 +585,7 @@ function setupSmartPolling() {
       return 120000;
     }
   }
-  
+
   // Set up dynamic polling
   function pollWithDynamicRate() {
     const rate = updatePollRate();
@@ -598,7 +601,7 @@ function setupSmartPolling() {
       pollWithDynamicRate(); // Schedule next poll
     }, rate);
   }
-  
+
   pollWithDynamicRate();
 }
 
@@ -606,28 +609,28 @@ function setupSmartPolling() {
 window.addEventListener('load', async function () {
   // Check for referral
   const referrer = checkReferral();
-  
+
   // Load thought bubbles
   loadThoughtBubbles();
-  
+
   // Load feed actions
   await loadFeedActions();
-  
+
   // Start counter animation immediately
   const counterEl = document.querySelector('.counter-number');
   if (counterEl) {
     startCounterAnimation(counterEl);
   }
-  
+
   // Start submit button animation
   const submitBtnText = document.getElementById('submit-btn-text');
   if (submitBtnText) {
     submitButtonUpdater = createAnimatedSubmitButton(submitBtnText);
   }
-  
+
   // Initialize all counts immediately
   await initializeCounts();
-  
+
   // Initial live feed update with loading state
   await updateLiveFeed(true);
 
@@ -833,7 +836,7 @@ async function handleModalFormSubmit(e) {
 
     // Store user comment for sharing
     const userComment = formData.comment;
-    
+
     // Start animated counter in modal
     const modalCountDisplay = document.getElementById('modal-count-display');
     let modalCountUpdater = null;
@@ -841,27 +844,30 @@ async function handleModalFormSubmit(e) {
       modalCountUpdater = createAnimatedPlaceholder(modalCountDisplay);
     }
     
+    // Add share buttons immediately in disabled state
+    addSocialShareButtons('modal-share-container', 0, userComment, true);
+
     // Wait a moment for database to update, then fetch fresh count
     setTimeout(async () => {
       const counterEl = document.querySelector('.counter-number');
       const newCount = await fetchRealCount();
       realCount = newCount; // Update global count
-      
+
       // Update all count displays with fresh data
       counterEl.textContent = newCount;
-      
+
       if (modalCountUpdater) {
         modalCountUpdater(newCount);
       }
-      
+
       // Update submit button for consistency
       if (submitButtonUpdater) {
         submitButtonUpdater(newCount);
       }
-      
-      // Add social share buttons to modal
-      addSocialShareButtons('modal-share-container', newCount, userComment);
-      
+
+      // Update social share buttons with real count and enable them
+      addSocialShareButtons('modal-share-container', newCount, userComment, false);
+
       // Update live feed to show new signup
       await updateLiveFeed();
     }, 500);
@@ -947,10 +953,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div>
                   <span>Preferred traffic solutions</span>
                   <ul style="color: #999; font-size: 14px; margin-top: 10px; list-style-type: disc; margin-left: 20px;">
-                    <li>Two-way with parking removal - maintains current traffic flow patterns</li>
+                    <li>Two-way with parking removal - <span style="color: #00ff00;">maintains current traffic flow patterns</span></li>
                     <li>Keep as is - no changes to current situation</li>
                     <li>One-way system - would redirect traffic to alternative routes</li>
-                    <li>Full closure - would redistribute all Shore Road traffic to other streets</li>
+                    <li>Full closure - <span style="color: red;">would redistribute all Shore Road traffic to other streets</span></li>
                   </ul>
                 </div>
               </div>
@@ -985,20 +991,20 @@ document.addEventListener('DOMContentLoaded', function () {
             </button>
           </div>
         `;
-        
+
         // Re-attach event listeners to the new elements
         const newCheckbox = document.getElementById('understand-checkbox-new');
         const newButton = document.getElementById('official-survey-btn-new');
-        
+
         if (newCheckbox && newButton) {
-          newCheckbox.addEventListener('change', function() {
+          newCheckbox.addEventListener('change', function () {
             if (this.checked) {
               newButton.disabled = false;
               newButton.style.background = '#00ff00';
               newButton.style.color = '#1a1a1a';
               newButton.style.cursor = 'pointer';
-              newButton.onmouseover = function() { this.style.background = '#00cc00'; };
-              newButton.onmouseout = function() { this.style.background = '#00ff00'; };
+              newButton.onmouseover = function () { this.style.background = '#00cc00'; };
+              newButton.onmouseout = function () { this.style.background = '#00ff00'; };
             } else {
               newButton.disabled = true;
               newButton.style.background = '#666';
@@ -1008,14 +1014,14 @@ document.addEventListener('DOMContentLoaded', function () {
               newButton.onmouseout = null;
             }
           });
-          
-          newButton.addEventListener('click', function() {
+
+          newButton.addEventListener('click', function () {
             if (!this.disabled) {
               window.open('https://www.dorsetcoasthaveyoursay.co.uk/swanage-green-seafront-stabilisation/surveys/swanage-green-seafront-survey-2025', '_blank');
             }
           });
         }
-        
+
         confirmationDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     });
@@ -1030,11 +1036,11 @@ function generateUserId() {
 // Social Sharing Functions
 function generateShareText(count, userComment) {
   const baseMessage = `I just joined ${count} neighbors fighting for safer streets in North Swanage! The Nassau traffic plan could flood our residential streets with dangerous traffic.`;
-  
+
   if (userComment) {
     return `${baseMessage} My reason: "${userComment}" Take action now:`;
   }
-  
+
   return `${baseMessage} Take action before it's too late:`;
 }
 
@@ -1076,7 +1082,7 @@ Visit: ${url}
 The Nassau initiative threatens to turn Shore Road into a one-way system, pushing dangerous levels of traffic onto our quiet residential streets. This affects everyone - our children's safety, property values, and quality of life.
 
 Please take 2 minutes to join us and share with other neighbors. Time is running out!`;
-  
+
   const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailtoUrl;
 }
@@ -1089,7 +1095,7 @@ async function shareNative(count, userComment) {
     text: text,
     url: url
   };
-  
+
   try {
     await navigator.share(shareData);
     // Track successful share if analytics are implemented
@@ -1098,47 +1104,64 @@ async function shareNative(count, userComment) {
   }
 }
 
-function addSocialShareButtons(containerId, count, userComment) {
+function addSocialShareButtons(containerId, count, userComment, isDisabled = false) {
   const container = document.getElementById(containerId);
   if (!container) return;
-  
-  const shareSection = document.createElement('div');
-  shareSection.className = 'social-share-section';
-  
+
+  // Check if share section already exists
+  let shareSection = container.querySelector('.social-share-section');
+  if (!shareSection) {
+    shareSection = document.createElement('div');
+    shareSection.className = 'social-share-section';
+    container.appendChild(shareSection);
+  }
+
+  const disabledAttr = isDisabled ? 'disabled' : '';
+  const disabledStyle = isDisabled ? 'opacity: 0.5; cursor: not-allowed;' : '';
+  const buttonText = isDisabled ? 'Preparing...' : '';
+
   // Check if Web Share API is available (mobile)
   if (navigator.share) {
     shareSection.innerHTML = `
       <h4 class="social-share-title">🔊 Spread the Word - Every Share Matters!</h4>
       <div class="social-share-buttons">
-        <button class="share-btn whatsapp" style="background: #3498db;" onclick="shareNative(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})">
-          <span>Share This Campaign</span>
+        <button class="share-btn whatsapp" style="background: #3498db; ${disabledStyle}" 
+                ${disabledAttr}
+                ${!isDisabled ? `onclick="shareNative(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})"` : ''}>
+          <span>${buttonText || 'Share This Campaign'}</span>
         </button>
       </div>
-      <p class="share-impact-text">Your voice amplifies our message. Together we're stronger! 💪</p>
+      <p class="share-impact-text">${isDisabled ? 'Preparing share options...' : 'Your voice amplifies our message. Together we\'re stronger! 💪'}</p>
     `;
   } else {
     // Desktop version with individual buttons
     shareSection.innerHTML = `
       <h4 class="social-share-title">🔊 Spread the Word - Every Share Matters!</h4>
       <div class="social-share-buttons">
-        <button class="share-btn twitter" onclick="shareOnTwitter(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})">
-          <span>Twitter</span>
+        <button class="share-btn twitter" style="${disabledStyle}"
+                ${disabledAttr}
+                ${!isDisabled ? `onclick="shareOnTwitter(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})"` : ''}>
+          <span>${buttonText || 'Twitter'}</span>
         </button>
-        <button class="share-btn facebook" onclick="shareOnFacebook()">
-          <span>Facebook</span>
+        <button class="share-btn facebook" style="${disabledStyle}"
+                ${disabledAttr}
+                ${!isDisabled ? `onclick="shareOnFacebook()"` : ''}>
+          <span>${buttonText || 'Facebook'}</span>
         </button>
-        <button class="share-btn whatsapp" onclick="shareOnWhatsApp(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})">
-          <span>WhatsApp</span>
+        <button class="share-btn whatsapp" style="${disabledStyle}"
+                ${disabledAttr}
+                ${!isDisabled ? `onclick="shareOnWhatsApp(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})"` : ''}>
+          <span>${buttonText || 'WhatsApp'}</span>
         </button>
-        <button class="share-btn email" onclick="shareByEmail(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})">
-          <span>Email</span>
+        <button class="share-btn email" style="${disabledStyle}"
+                ${disabledAttr}
+                ${!isDisabled ? `onclick="shareByEmail(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})"` : ''}>
+          <span>${buttonText || 'Email'}</span>
         </button>
       </div>
-      <p class="share-impact-text">Your voice amplifies our message. Together we're stronger! 💪</p>
+      <p class="share-impact-text">${isDisabled ? 'Preparing share options...' : 'Your voice amplifies our message. Together we\'re stronger! 💪'}</p>
     `;
   }
-  
-  container.appendChild(shareSection);
 }
 
 // Modal survey instructions functions
@@ -1176,10 +1199,10 @@ function showModalSurveyInstructions() {
             <div>
               <span>Preferred traffic solutions</span>
               <ul style="color: #999; font-size: 14px; margin-top: 10px; list-style-type: disc; margin-left: 20px;">
-                <li>Two-way with parking removal - maintains current traffic flow patterns</li>
+                <li>Two-way with parking removal - <span style="color: #00ff00;">maintains current traffic flow patterns</span></li>
                 <li>Keep as is - no changes to current situation</li>
                 <li>One-way system - would redirect traffic to alternative routes</li>
-                <li>Full closure - would redistribute all Shore Road traffic to other streets</li>
+                <li>Full closure - <span style="color: red;">would redistribute all Shore Road traffic to other streets</span></li>
               </ul>
             </div>
           </div>
