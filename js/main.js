@@ -609,7 +609,7 @@ async function handleModalFormSubmit(e) {
         
         <div id="modal-survey-instructions" style="display: none; margin-top: 30px; background: #2a2a2a; padding: 25px; border-radius: 10px; border: 2px solid #00ff00;">
           <h4 style="color: #00ff00; margin-bottom: 20px; font-size: 20px;">
-            ✓ Complete the Official Survey in Just 30 Seconds!
+            Dorset Council Consultation Survey
           </h4>
           
           <div style="background: #1a1a1a; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
@@ -645,7 +645,7 @@ async function handleModalFormSubmit(e) {
             <label style="display: flex; align-items: center; cursor: pointer; color: #fff;">
               <input type="checkbox" id="modal-understand-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
                 onchange="toggleModalSurveyButton()">
-              <span style="font-size: 16px;">I understand I only need to answer Questions 1, 24, and 26 to complete a valid survey response</span>
+              <span style="font-size: 16px;">I understand the survey structure and am ready to proceed</span>
             </label>
           </div>
           
@@ -759,47 +759,43 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmationDiv.innerHTML = `
           <div class="survey-instructions" style="margin: 0;">
             <h4 style="color: #00ff00; margin-bottom: 20px; font-size: 20px; text-align: center;">
-              ✓ Complete the Official Survey in Just 30 Seconds!
+              Dorset Council Consultation Survey
             </h4>
             
             <div class="survey-instructions-content">
-              <p style="color: #ff6b6b; font-weight: bold; margin-bottom: 15px;">
-                ⚡ IMPORTANT: The survey contains a large number of questions about "Green Seafront" improvements (which won't cause traffic issues), but we ONLY need to address the TRAFFIC IMPACT questions:
+              <p style="color: #ccc; margin-bottom: 15px;">
+                The Dorset Council consultation survey contains approximately 30 questions covering various aspects of the Shore Road project, including green spaces, pedestrian improvements, and traffic management.
+              </p>
+              
+              <p style="color: #ccc; margin-bottom: 15px;">
+                If your primary concern is traffic safety, the most relevant questions are:
               </p>
               
               <div class="survey-step">
-                <span class="survey-step-number">STEP 1:</span>
-                <span>Answer Question 1 (Your connection to the area)</span>
+                <span class="survey-step-number">Q1:</span>
+                <span>Your connection to the area</span>
               </div>
               
               <div class="survey-step">
-                <span class="survey-step-number">STEP 2:</span>
-                <span>Skip directly to Question 24 - Select <strong>"Don't Know"</strong></span>
+                <span class="survey-step-number">Q24:</span>
+                <span>Assessment of traffic impacts</span>
               </div>
               
               <div class="survey-step">
-                <span class="survey-step-number">STEP 3:</span>
-                <div>
-                  <span>Go to Question 26 - Rank preferences in this order:</span>
-                  <div class="survey-ranking-box">
-                    <p class="survey-ranking-item" style="color: #00ff00; margin: 0;"><strong>1st Choice:</strong> Two-way traffic on Shore Road with removal of parking</p>
-                    <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0;"><strong>2nd Choice:</strong> Do nothing / keep Shore Road as it is</p>
-                    <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0;"><strong>3rd Choice:</strong> A one-way system on Shore Road</p>
-                    <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0 0 0;"><strong>4th Choice:</strong> Full closure of Shore Road</p>
-                  </div>
-                </div>
+                <span class="survey-step-number">Q26:</span>
+                <span>Preferred traffic solutions</span>
               </div>
               
-              <p style="color: #00ff00; margin-top: 20px; font-weight: bold; text-align: center;">
-                ⏱️ This takes only 30 seconds vs 30 minutes for the full survey<br>
-                ✅ These 3 questions constitute a COMPLETE and VALID survey response
+              <p style="color: #ccc; margin-top: 20px; text-align: center;">
+                Completion time varies from 30 seconds (traffic questions only) to 10-30 minutes (full survey).<br>
+                You're free to answer any or all questions according to your interests and available time.
               </p>
             </div>
             
             <div class="survey-checkbox-container">
               <label style="display: flex; align-items: center; cursor: pointer; color: #fff;">
                 <input type="checkbox" id="understand-checkbox-new" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
-                <span style="font-size: 16px;">I understand I only need to answer Questions 1, 24, and 26 to complete a valid survey response</span>
+                <span style="font-size: 16px;">I understand the survey structure and am ready to proceed</span>
               </label>
             </div>
             
@@ -984,40 +980,38 @@ function showModalSurveyInstructions() {
     modalContent.innerHTML = `
       <div style="padding: 10px;">
         <h4 style="color: #00ff00; margin-bottom: 20px; font-size: 20px; text-align: center;">
-          ✓ Complete the Official Survey in Just 30 Seconds!
+          Dorset Council Consultation Survey
         </h4>
         
         <div class="survey-instructions-content">
-          <p style="color: #ff6b6b; font-weight: bold; margin-bottom: 15px;">
-            ⚡ IMPORTANT: The survey contains a large number of questions about "Green Seafront" improvements (which won't cause traffic issues), but we ONLY need to address the TRAFFIC IMPACT questions:
+          <p style="color: #ccc; margin-bottom: 15px;">
+            The Dorset Council consultation survey contains approximately 30 questions covering various aspects of the Shore Road project, including green spaces, pedestrian improvements, and traffic management.
+          </p>
+          
+          <p style="color: #ccc; margin-bottom: 15px;">
+            If your primary concern is traffic safety, the most relevant questions are:
           </p>
           
           <div class="survey-step">
-            <span class="survey-step-number">STEP 1:</span>
-            <span>Answer Question 1 (Your connection to the area)</span>
+            <span class="survey-step-number">Q1:</span>
+            <span>Your connection to the area</span>
           </div>
           
           <div class="survey-step">
-            <span class="survey-step-number">STEP 2:</span>
-            <span>Skip directly to Question 24 - Select <strong>"Don't Know"</strong></span>
+            <span class="survey-step-number">Q24:</span>
+            <span>Assessment of traffic impacts</span>
           </div>
           
           <div class="survey-step">
-            <span class="survey-step-number">STEP 3:</span>
+            <span class="survey-step-number">Q26:</span>
             <div>
-              <span>Go to Question 26 - Rank preferences in this order:</span>
-              <div class="survey-ranking-box">
-                <p class="survey-ranking-item" style="color: #00ff00; margin: 0;"><strong>1st Choice:</strong> Two-way traffic on Shore Road with removal of parking</p>
-                <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0;"><strong>2nd Choice:</strong> Do nothing / keep Shore Road as it is</p>
-                <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0;"><strong>3rd Choice:</strong> A one-way system on Shore Road</p>
-                <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0 0 0;"><strong>4th Choice:</strong> Full closure of Shore Road</p>
-              </div>
+              <span>Preferred traffic solutions</span>
             </div>
           </div>
           
-          <p style="color: #00ff00; margin-top: 20px; font-weight: bold; text-align: center;">
-            ⏱️ This takes only 30 seconds vs 30 minutes for the full survey<br>
-            ✅ These 3 questions constitute a COMPLETE and VALID survey response
+          <p style="color: #ccc; margin-top: 20px; text-align: center;">
+            Completion time varies from 30 seconds (traffic questions only) to 10-30 minutes (full survey).<br>
+            You're free to answer any or all questions according to your interests and available time.
           </p>
         </div>
         
@@ -1025,7 +1019,7 @@ function showModalSurveyInstructions() {
           <label style="display: flex; align-items: center; cursor: pointer; color: #fff;">
             <input type="checkbox" id="modal-understand-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
               onchange="toggleModalSurveyButton()">
-            <span style="font-size: 16px;">I understand I only need to answer Questions 1, 24, and 26 to complete a valid survey response</span>
+            <span style="font-size: 16px;">I understand the survey structure and am ready to proceed</span>
           </label>
         </div>
         
