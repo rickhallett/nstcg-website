@@ -778,6 +778,11 @@ document.addEventListener('DOMContentLoaded', function () {
               
               <div class="survey-step">
                 <span class="survey-step-number">Q24:</span>
+                <span>Preferred scheme option (non-traffic related)</span>
+              </div>
+              
+              <div class="survey-step">
+                <span class="survey-step-number">Q26:</span>
                 <div>
                   <span>Preferred traffic solutions</span>
                   <ul style="color: #999; font-size: 14px; margin-top: 10px; list-style-type: disc; margin-left: 20px;">
@@ -787,11 +792,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     <li>Full closure - would redistribute all Shore Road traffic to other streets</li>
                   </ul>
                 </div>
-              </div>
-              
-              <div class="survey-step">
-                <span class="survey-step-number">Q26:</span>
-                <span>Preferred scheme option (non-traffic related)</span>
               </div>
               
               <p style="color: #ccc; margin-top: 20px; text-align: center;">
@@ -1007,6 +1007,11 @@ function showModalSurveyInstructions() {
           
           <div class="survey-step">
             <span class="survey-step-number">Q24:</span>
+            <span>Preferred scheme option (non-traffic related)</span>
+          </div>
+          
+          <div class="survey-step">
+            <span class="survey-step-number">Q26:</span>
             <div>
               <span>Preferred traffic solutions</span>
               <ul style="color: #999; font-size: 14px; margin-top: 10px; list-style-type: disc; margin-left: 20px;">
@@ -1016,11 +1021,6 @@ function showModalSurveyInstructions() {
                 <li>Full closure - would redistribute all Shore Road traffic to other streets</li>
               </ul>
             </div>
-          </div>
-          
-          <div class="survey-step">
-            <span class="survey-step-number">Q26:</span>
-            <span>Preferred scheme option (non-traffic related)</span>
           </div>
           
           <p style="color: #ccc; margin-top: 20px; text-align: center;">
