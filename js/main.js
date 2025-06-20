@@ -108,6 +108,9 @@ document.getElementById('signupForm').addEventListener('submit', async function 
       
       // Add social share buttons after count is loaded
       addSocialShareButtons('confirmation', newCount, userComment);
+      
+      // Update live feed to show new signup
+      await updateLiveFeed();
     }, 500);
   } catch (error) {
     // Error - Replace form with error state
@@ -297,7 +300,24 @@ function getRandomAction() {
 }
 
 // Function to update live feed with real data
-async function updateLiveFeed() {
+async function updateLiveFeed(showLoading = false) {
+  const feedContainer = document.querySelector('.live-feed');
+  if (!feedContainer) return;
+  
+  // Show loading only on initial load or if requested
+  if (showLoading) {
+    const existingItems = feedContainer.querySelectorAll('.feed-item, .feed-loading, .feed-empty, .feed-error');
+    existingItems.forEach(item => item.remove());
+    
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'feed-loading';
+    loadingDiv.innerHTML = `
+      <div class="loading-spinner"></div>
+      <p>Loading recent activity...</p>
+    `;
+    feedContainer.appendChild(loadingDiv);
+  }
+  
   try {
     const response = await fetch('/api/get-recent-signups');
     if (!response.ok) throw new Error('Failed to fetch signups');
@@ -305,18 +325,12 @@ async function updateLiveFeed() {
     const data = await response.json();
     const signups = data.signups;
     
+    // Clear loading/existing items
+    const existingItems = feedContainer.querySelectorAll('.feed-item, .feed-loading, .feed-empty, .feed-error');
+    existingItems.forEach(item => item.remove());
+    
     if (signups && signups.length > 0) {
-      const feedContainer = document.querySelector('.live-feed');
-      if (!feedContainer) return;
-      
-      // Keep the header
-      const feedHeader = feedContainer.querySelector('.feed-header');
-      
-      // Clear existing items
-      const existingItems = feedContainer.querySelectorAll('.feed-item');
-      existingItems.forEach(item => item.remove());
-      
-      // Add new items
+      // Add real signups
       signups.forEach((signup, index) => {
         const feedItem = document.createElement('div');
         feedItem.className = 'feed-item';
@@ -339,10 +353,35 @@ async function updateLiveFeed() {
         
         feedContainer.appendChild(feedItem);
       });
+    } else {
+      // Show empty state
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'feed-empty';
+      emptyDiv.innerHTML = `
+        <p style="color: #666;">
+          Be the first to join the movement!
+        </p>
+      `;
+      feedContainer.appendChild(emptyDiv);
     }
   } catch (error) {
     console.error('Error updating live feed:', error);
-    // Keep existing mock data on error
+    
+    // Only show error state if there are no existing items
+    const existingItems = feedContainer.querySelectorAll('.feed-item');
+    if (existingItems.length === 0) {
+      const existingStates = feedContainer.querySelectorAll('.feed-loading, .feed-empty, .feed-error');
+      existingStates.forEach(item => item.remove());
+      
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'feed-error';
+      errorDiv.innerHTML = `
+        <p style="color: #ff6666;">
+          Unable to load recent activity
+        </p>
+      `;
+      feedContainer.appendChild(errorDiv);
+    }
   }
 }
 
@@ -363,6 +402,62 @@ function checkReferral() {
   return referrer;
 }
 
+// Page load time tracking for smart polling
+const pageLoadTime = Date.now();
+let pollInterval;
+
+// Function to update count displays
+function updateCountDisplays(count) {
+  const counterEl = document.querySelector('.counter-number');
+  if (counterEl) {
+    counterEl.textContent = count;
+  }
+  const submitBtnText = document.getElementById('submit-btn-text');
+  if (submitBtnText) {
+    submitBtnText.textContent = `JOIN ${count} NEIGHBORS NOW`;
+  }
+}
+
+// Smart polling implementation
+function setupSmartPolling() {
+  // Clear any existing interval
+  if (pollInterval) clearTimeout(pollInterval);
+  
+  function updatePollRate() {
+    const timeOnPage = Date.now() - pageLoadTime;
+    const minutes = timeOnPage / 60000;
+    
+    if (minutes < 5) {
+      // First 5 minutes: 30 seconds
+      return 30000;
+    } else if (minutes < 15) {
+      // Next 10 minutes: 60 seconds
+      return 60000;
+    } else {
+      // After 15 minutes: 2 minutes
+      return 120000;
+    }
+  }
+  
+  // Set up dynamic polling
+  function pollWithDynamicRate() {
+    const rate = updatePollRate();
+    pollInterval = setTimeout(async () => {
+      // Update both count and feed in parallel
+      await Promise.all([
+        fetchRealCount().then(count => {
+          realCount = count;
+          updateCountDisplays(count);
+        }),
+        updateLiveFeed()
+      ]);
+      pollWithDynamicRate(); // Schedule next poll
+    }, rate);
+  }
+  
+  pollWithDynamicRate();
+}
+
 // Initialize counts on page load
 window.addEventListener('load', async function () {
   // Check for referral
@@ -377,25 +472,11 @@ window.addEventListener('load', async function () {
   // Initialize all counts immediately
   await initializeCounts();
   
-  // Initial live feed update
-  await updateLiveFeed();
+  // Initial live feed update with loading state
+  await updateLiveFeed(true);
 
-  // Update count and live feed every 5 minutes
-  setInterval(async () => {
-    realCount = await fetchRealCount();
-    const counterEl = document.querySelector('.counter-number');
-    if (counterEl) {
-      counterEl.textContent = realCount;
-    }
-    // Also update submit button
-    const submitBtnText = document.getElementById('submit-btn-text');
-    if (submitBtnText) {
-      submitBtnText.textContent = `JOIN ${realCount} NEIGHBORS NOW`;
-    }
-    
-    // Update live feed
-    await updateLiveFeed();
-  }, 1000 * 60 * 5);
+  // Set up smart polling
+  setupSmartPolling();
 
   // Show map after a delay
   setTimeout(() => {
@@ -548,9 +629,9 @@ async function handleModalFormSubmit(e) {
               </p>
               <div style="background: #333; padding: 15px; margin-left: 20px; border-left: 4px solid #00ff00;">
                 <p style="color: #00ff00; margin: 5px 0;"><strong>1st Choice:</strong> Two-way traffic on Shore Road with removal of parking</p>
-                <p style="color: #ccc; margin: 5px 0;"><strong>2nd Choice:</strong> Option 4</p>
-                <p style="color: #ccc; margin: 5px 0;"><strong>3rd Choice:</strong> Option 3</p>
-                <p style="color: #ccc; margin: 5px 0;"><strong>4th Choice:</strong> Option 2</p>
+                <p style="color: #ccc; margin: 5px 0;"><strong>2nd Choice:</strong> Do nothing / keep Shore Road as it is</p>
+                <p style="color: #ccc; margin: 5px 0;"><strong>3rd Choice:</strong> A one-way system on Shore Road</p>
+                <p style="color: #ccc; margin: 5px 0;"><strong>4th Choice:</strong> Full closure of Shore Road</p>
               </div>
             </div>
             
@@ -619,6 +700,9 @@ async function handleModalFormSubmit(e) {
       
       // Add social share buttons to modal
       addSocialShareButtons('modal-share-container', newCount, userComment);
+      
+      // Update live feed to show new signup
+      await updateLiveFeed();
     }, 500);
 
   } catch (error) {
@@ -699,9 +783,9 @@ document.addEventListener('DOMContentLoaded', function () {
                   <span>Go to Question 26 - Rank preferences in this order:</span>
                   <div class="survey-ranking-box">
                     <p class="survey-ranking-item" style="color: #00ff00; margin: 0;"><strong>1st Choice:</strong> Two-way traffic on Shore Road with removal of parking</p>
-                    <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0;"><strong>2nd Choice:</strong> Option 4</p>
-                    <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0;"><strong>3rd Choice:</strong> Option 3</p>
-                    <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0 0 0;"><strong>4th Choice:</strong> Option 2</p>
+                    <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0;"><strong>2nd Choice:</strong> Do nothing / keep Shore Road as it is</p>
+                    <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0;"><strong>3rd Choice:</strong> A one-way system on Shore Road</p>
+                    <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0 0 0;"><strong>4th Choice:</strong> Full closure of Shore Road</p>
                   </div>
                 </div>
               </div>
@@ -924,9 +1008,9 @@ function showModalSurveyInstructions() {
               <span>Go to Question 26 - Rank preferences in this order:</span>
               <div class="survey-ranking-box">
                 <p class="survey-ranking-item" style="color: #00ff00; margin: 0;"><strong>1st Choice:</strong> Two-way traffic on Shore Road with removal of parking</p>
-                <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0;"><strong>2nd Choice:</strong> Option 4</p>
-                <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0;"><strong>3rd Choice:</strong> Option 3</p>
-                <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0 0 0;"><strong>4th Choice:</strong> Option 2</p>
+                <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0;"><strong>2nd Choice:</strong> Do nothing / keep Shore Road as it is</p>
+                <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0;"><strong>3rd Choice:</strong> A one-way system on Shore Road</p>
+                <p class="survey-ranking-item" style="color: #ccc; margin: 8px 0 0 0;"><strong>4th Choice:</strong> Full closure of Shore Road</p>
               </div>
             </div>
           </div>
