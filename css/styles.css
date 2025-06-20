@@ -784,6 +784,98 @@ textarea::placeholder {
   font-style: italic;
 }
 
+/* Icon-based share buttons */
+.social-share-buttons-icons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.share-btn-icon {
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 50%;
+  font-size: 20px;
+  color: #fff;
+  background: #444;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.share-btn-icon:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.share-btn-icon:active {
+  transform: translateY(-1px);
+}
+
+.share-btn-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Platform-specific colors on hover */
+.share-btn-icon.facebook:hover {
+  background: #1877f2;
+}
+
+.share-btn-icon.twitter:hover {
+  background: #000000;
+}
+
+.share-btn-icon.whatsapp:hover {
+  background: #25D366;
+}
+
+.share-btn-icon.linkedin:hover {
+  background: #0077b5;
+}
+
+.share-btn-icon.instagram:hover {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.share-btn-icon.email:hover {
+  background: #EA4335;
+}
+
+/* Toast notification */
+.toast-notification {
+  position: fixed;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #00ff00;
+  color: #1a1a1a;
+  padding: 16px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 20px rgba(0, 255, 0, 0.3);
+  z-index: 10000;
+  transition: bottom 0.3s ease;
+}
+
+.toast-notification.show {
+  bottom: 30px;
+}
+
+.toast-notification i {
+  font-size: 20px;
+}
+
 /* Footer */
 .footer {
   text-align: center;
@@ -1053,6 +1145,17 @@ textarea::placeholder {
   h1 {
     font-size: 24px;
     margin-bottom: 15px;
+  }
+  
+  /* Icon share buttons on mobile */
+  .share-btn-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+  }
+  
+  .social-share-buttons-icons {
+    gap: 10px;
   }
 
   .hero p {

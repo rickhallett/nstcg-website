@@ -1071,6 +1071,65 @@ function shareOnWhatsApp(count, userComment) {
   window.open(whatsappUrl, '_blank');
 }
 
+function shareOnLinkedIn(count, userComment) {
+  const url = getShareUrl();
+  const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+  window.open(linkedInUrl, '_blank', 'width=550,height=520');
+}
+
+function shareOnInstagram() {
+  const url = getShareUrl();
+  
+  // Copy to clipboard
+  navigator.clipboard.writeText(url).then(() => {
+    // Show toast notification
+    showToast('Link copied! Share on Instagram Stories or Bio');
+  }).catch(() => {
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = url;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    showToast('Link copied! Share on Instagram Stories or Bio');
+  });
+}
+
+// Toast notification function
+function showToast(message) {
+  // Remove any existing toast
+  const existingToast = document.querySelector('.toast-notification');
+  if (existingToast) {
+    existingToast.remove();
+  }
+  
+  // Create new toast
+  const toast = document.createElement('div');
+  toast.className = 'toast-notification';
+  toast.innerHTML = `
+    <i class="fas fa-check-circle"></i>
+    <span>${message}</span>
+  `;
+  
+  document.body.appendChild(toast);
+  
+  // Trigger animation
+  setTimeout(() => {
+    toast.classList.add('show');
+  }, 10);
+  
+  // Remove after 3 seconds
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 3000);
+}
+
 function shareByEmail(count, userComment) {
   const subject = 'Urgent: North Swanage Traffic Crisis - We Need Your Help!';
   const text = generateShareText(count, userComment);
@@ -1118,50 +1177,50 @@ function addSocialShareButtons(containerId, count, userComment, isDisabled = fal
 
   const disabledAttr = isDisabled ? 'disabled' : '';
   const disabledStyle = isDisabled ? 'opacity: 0.5; cursor: not-allowed;' : '';
-  const buttonText = isDisabled ? 'Preparing...' : '';
 
-  // Check if Web Share API is available (mobile)
-  if (navigator.share) {
-    shareSection.innerHTML = `
-      <h4 class="social-share-title">🔊 Spread the Word - Every Share Matters!</h4>
-      <div class="social-share-buttons">
-        <button class="share-btn whatsapp" style="background: #3498db; ${disabledStyle}" 
-                ${disabledAttr}
-                ${!isDisabled ? `onclick="shareNative(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})"` : ''}>
-          <span>${buttonText || 'Share This Campaign'}</span>
-        </button>
-      </div>
-      <p class="share-impact-text">${isDisabled ? 'Preparing share options...' : 'Your voice amplifies our message. Together we\'re stronger! 💪'}</p>
-    `;
-  } else {
-    // Desktop version with individual buttons
-    shareSection.innerHTML = `
-      <h4 class="social-share-title">🔊 Spread the Word - Every Share Matters!</h4>
-      <div class="social-share-buttons">
-        <button class="share-btn twitter" style="${disabledStyle}"
-                ${disabledAttr}
-                ${!isDisabled ? `onclick="shareOnTwitter(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})"` : ''}>
-          <span>${buttonText || 'Twitter'}</span>
-        </button>
-        <button class="share-btn facebook" style="${disabledStyle}"
-                ${disabledAttr}
-                ${!isDisabled ? `onclick="shareOnFacebook()"` : ''}>
-          <span>${buttonText || 'Facebook'}</span>
-        </button>
-        <button class="share-btn whatsapp" style="${disabledStyle}"
-                ${disabledAttr}
-                ${!isDisabled ? `onclick="shareOnWhatsApp(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})"` : ''}>
-          <span>${buttonText || 'WhatsApp'}</span>
-        </button>
-        <button class="share-btn email" style="${disabledStyle}"
-                ${disabledAttr}
-                ${!isDisabled ? `onclick="shareByEmail(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})"` : ''}>
-          <span>${buttonText || 'Email'}</span>
-        </button>
-      </div>
-      <p class="share-impact-text">${isDisabled ? 'Preparing share options...' : 'Your voice amplifies our message. Together we\'re stronger! 💪'}</p>
-    `;
-  }
+  // Unified icon-based buttons for both mobile and desktop
+  shareSection.innerHTML = `
+    <h4 class="social-share-title">🔊 Spread the Word - Every Share Matters!</h4>
+    <div class="social-share-buttons-icons">
+      <button class="share-btn-icon facebook" 
+              title="Share on Facebook"
+              ${disabledAttr}
+              ${!isDisabled ? `onclick="shareOnFacebook()"` : ''}>
+        <i class="fab fa-facebook-f"></i>
+      </button>
+      <button class="share-btn-icon twitter" 
+              title="Share on X (Twitter)"
+              ${disabledAttr}
+              ${!isDisabled ? `onclick="shareOnTwitter(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})"` : ''}>
+        <i class="fab fa-x-twitter"></i>
+      </button>
+      <button class="share-btn-icon whatsapp" 
+              title="Share on WhatsApp"
+              ${disabledAttr}
+              ${!isDisabled ? `onclick="shareOnWhatsApp(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})"` : ''}>
+        <i class="fab fa-whatsapp"></i>
+      </button>
+      <button class="share-btn-icon linkedin" 
+              title="Share on LinkedIn"
+              ${disabledAttr}
+              ${!isDisabled ? `onclick="shareOnLinkedIn(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})"` : ''}>
+        <i class="fab fa-linkedin-in"></i>
+      </button>
+      <button class="share-btn-icon instagram" 
+              title="Copy link for Instagram"
+              ${disabledAttr}
+              ${!isDisabled ? `onclick="shareOnInstagram()"` : ''}>
+        <i class="fab fa-instagram"></i>
+      </button>
+      <button class="share-btn-icon email" 
+              title="Share via Email"
+              ${disabledAttr}
+              ${!isDisabled ? `onclick="shareByEmail(${count}, ${userComment ? `'${userComment.replace(/'/g, "\\'")}'` : 'null'})"` : ''}>
+        <i class="fas fa-envelope"></i>
+      </button>
+    </div>
+    <p class="share-impact-text">${isDisabled ? 'Preparing share options...' : 'Your voice amplifies our message. Together we\'re stronger! 💪'}</p>
+  `;
 }
 
 // Modal survey instructions functions
