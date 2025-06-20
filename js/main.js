@@ -1,6 +1,6 @@
 // Countdown Timer
 function updateCountdown() {
-  const deadline = new Date('2025-07-07T23:59:59');
+  const deadline = new Date('2025-06-29T23:59:59');
   const now = new Date().getTime();
   const timeLeft = deadline - now;
 
