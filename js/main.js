@@ -102,9 +102,8 @@ document.getElementById('signupForm').addEventListener('submit', async function 
       }
       
       // Update submit button for consistency
-      const submitBtnText = document.getElementById('submit-btn-text');
-      if (submitBtnText) {
-        submitBtnText.textContent = `JOIN ${newCount} NEIGHBORS NOW`;
+      if (submitButtonUpdater) {
+        submitButtonUpdater(newCount);
       }
       
       // Add social share buttons after count is loaded
@@ -163,15 +162,66 @@ async function fetchRealCount() {
 // Global variable to store the real count
 let realCount = null;
 
+// Global variable for submit button animation
+let submitButtonUpdater = null;
+
+// Helper to create animated submit button
+function createAnimatedSubmitButton(element) {
+  if (!element) return;
+  
+  let localCounter = 0;
+  const startTime = Date.now();
+  let animationId = null;
+  
+  function updateText(count) {
+    element.textContent = `JOIN ${count} NEIGHBORS NOW`;
+  }
+  
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    localCounter = Math.floor(elapsed / 50); // Same rate as main counter
+    updateText(localCounter);
+    animationId = requestAnimationFrame(animate);
+  }
+  
+  animate();
+  
+  // Return function to stop and set final value
+  return function(finalValue) {
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+    }
+    
+    // Animate to final value
+    const duration = 1000;
+    const startValue = localCounter;
+    const animStartTime = Date.now();
+    
+    function finalAnimate() {
+      const elapsed = Date.now() - animStartTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(startValue + (finalValue - startValue) * easedProgress);
+      
+      updateText(current);
+      
+      if (progress < 1) {
+        requestAnimationFrame(finalAnimate);
+      }
+    }
+    
+    finalAnimate();
+  };
+}
+
 // Fetch and update all count displays
 async function initializeCounts() {
   // Fetch the real count
   realCount = await fetchRealCount();
 
-  // Update the submit button text
-  const submitBtnText = document.getElementById('submit-btn-text');
-  if (submitBtnText) {
-    submitBtnText.textContent = `JOIN ${realCount} NEIGHBORS NOW`;
+  // Update the submit button with animation
+  if (submitButtonUpdater) {
+    submitButtonUpdater(realCount);
   }
 
   // Update confirmation count (in case it's visible)
@@ -507,9 +557,8 @@ function updateCountDisplays(count) {
   if (counterEl) {
     counterEl.textContent = count;
   }
-  const submitBtnText = document.getElementById('submit-btn-text');
-  if (submitBtnText) {
-    submitBtnText.textContent = `JOIN ${count} NEIGHBORS NOW`;
+  if (submitButtonUpdater) {
+    submitButtonUpdater(count);
   }
 }
 
@@ -568,6 +617,12 @@ window.addEventListener('load', async function () {
   const counterEl = document.querySelector('.counter-number');
   if (counterEl) {
     startCounterAnimation(counterEl);
+  }
+  
+  // Start submit button animation
+  const submitBtnText = document.getElementById('submit-btn-text');
+  if (submitBtnText) {
+    submitButtonUpdater = createAnimatedSubmitButton(submitBtnText);
   }
   
   // Initialize all counts immediately
@@ -800,9 +855,8 @@ async function handleModalFormSubmit(e) {
       }
       
       // Update submit button for consistency
-      const submitBtnText = document.getElementById('submit-btn-text');
-      if (submitBtnText) {
-        submitBtnText.textContent = `JOIN ${newCount} NEIGHBORS NOW`;
+      if (submitButtonUpdater) {
+        submitButtonUpdater(newCount);
       }
       
       // Add social share buttons to modal
