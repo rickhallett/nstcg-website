@@ -6,11 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a community action website for the North Swanage Traffic Consultation Group (NSTCG). It's a static site with Vercel serverless functions that integrates with Notion API for data collection.
 
+- Code according to .cursor/rules/dev_workflow.mdc
+
 ## MCP Servers
 
-- `task-master-ai`: Task Master AI
-  - Refer to .cursor/rules/taskmaster.mdc
-  - Refer to .cursor/rules/dev_workflow.mdc
+  - Code according to .cursor/rules/taskmaster.mdc
 - `filesystem`: Filesystem (for local development)
 
 
