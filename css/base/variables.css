@@ -1,0 +1,69 @@
+/**
+ * CSS Variables
+ * Define custom properties for consistent theming
+ */
+
+:root {
+  /* Colors */
+  --color-primary: #3498db;
+  --color-primary-dark: #2980b9;
+  --color-success: #00ff00;
+  --color-error: #ff0000;
+  --color-warning: #ff9900;
+  --color-black: #000;
+  --color-white: #fff;
+  --color-gray-dark: #1a1a1a;
+  --color-gray: #666;
+  --color-gray-light: #999;
+  --color-gray-lighter: #ccc;
+  --color-gray-lightest: #ddd;
+  
+  /* Background colors */
+  --bg-primary: #000;
+  --bg-secondary: #111;
+  --bg-tertiary: #1a1a1a;
+  --bg-card: rgba(255, 255, 255, 0.05);
+  --bg-input: rgba(255, 255, 255, 0.1);
+  --bg-input-focus: rgba(255, 255, 255, 0.15);
+  
+  /* Fonts */
+  --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-serif: Georgia, serif;
+  
+  /* Font weights */
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+  
+  /* Spacing */
+  --spacing-xs: 5px;
+  --spacing-sm: 10px;
+  --spacing-md: 15px;
+  --spacing-lg: 20px;
+  --spacing-xl: 30px;
+  --spacing-2xl: 40px;
+  
+  /* Border radius */
+  --radius-sm: 5px;
+  --radius-md: 10px;
+  --radius-lg: 20px;
+  --radius-full: 50%;
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Z-index layers */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 1000;
+  --z-modal: 1001;
+  --z-modal-content: 1002;
+  --z-toast: 10000;
+  
+  /* Breakpoints (for reference) */
+  --breakpoint-mobile: 768px;
+  --breakpoint-tablet: 1024px;
+  --breakpoint-desktop: 1200px;
+}
