@@ -46,6 +46,9 @@
 </head>
 
 <body>
+  <!-- Navigation -->
+  <div id="navigation-placeholder"></div>
+  
   <header class="alert-header">
     <div class="header-content">
       <div class="alert-badge">
@@ -73,6 +76,7 @@
     </div>
   </header>
 
+  <main id="main-content">
   <div class="container">
     <div class="hero">
       <h1>
@@ -114,6 +118,7 @@
     <div class="community-counter">
       <div class="counter-number">0</div>
       <div class="counter-label">Neighbours Have Already Signed Up</div>
+      <a href="/feeds.html" class="see-all-link">See all participants →</a>
     </div>
 
     <div class="live-feed">
@@ -157,6 +162,23 @@
           <input type="email" id="email" name="email" required placeholder="Stay connected with updates">
         </div>
         <div class="form-group">
+          <fieldset class="radio-group">
+            <legend>Are you a:</legend>
+            <div class="radio-options">
+              <label class="radio-label">
+                <input type="radio" name="visitorType" value="local" required checked>
+                <span class="radio-custom"></span>
+                <span>Local Resident</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="visitorType" value="tourist" required>
+                <span class="radio-custom"></span>
+                <span>Visitor/Tourist</span>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+        <div class="form-group">
           <textarea id="comment" name="comment" rows="2" maxlength="150"
             placeholder="Share why this matters to you (optional)" style="resize: none;"></textarea>
           <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">Your comment will be publicly
@@ -166,6 +188,57 @@
           <span id="submit-btn-text">JOIN YOUR Neighbours NOW</span>
         </button>
       </form>
+    </div>
+
+    <!-- Campaign Financial Status -->
+    <div class="financial-status-card">
+      <h2 class="card-title">Campaign Financial Status</h2>
+      <div class="financial-grid">
+        <div class="financial-item costs">
+          <div class="financial-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="financial-content loading">
+            <h3>Running Costs</h3>
+            <div class="skeleton-loader"></div>
+            <div class="amount" id="campaign-costs">£0</div>
+            <p class="sublabel">Since June 14, 2025</p>
+          </div>
+        </div>
+        
+        <div class="financial-item donations">
+          <div class="financial-icon">
+            <i class="fas fa-hand-holding-heart"></i>
+          </div>
+          <div class="financial-content loading">
+            <h3>Total Donations</h3>
+            <div class="skeleton-loader"></div>
+            <div class="amount" id="total-donations">£0</div>
+            <p class="sublabel"><span id="donation-count">0</span> supporters</p>
+          </div>
+        </div>
+        
+        <div class="financial-item balance">
+          <div class="financial-icon">
+            <i class="fas fa-balance-scale"></i>
+          </div>
+          <div class="financial-content loading">
+            <h3>Campaign Balance</h3>
+            <div class="skeleton-loader"></div>
+            <div class="amount" id="campaign-balance">£0</div>
+            <p class="sublabel">
+              <span id="balance-status">Breaking even</span>
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="donate-cta">
+        <p>Help us cover campaign costs and fight for safer streets</p>
+        <a href="/donate.html" class="donate-button">
+          <i class="fas fa-donate"></i> Donate Now
+        </a>
+      </div>
     </div>
 
     <div id="confirmation" class="confirmation">
@@ -239,6 +312,24 @@
             </div>
 
             <div class="modal-form-group">
+              <fieldset class="radio-group">
+                <legend>Are you a:</legend>
+                <div class="radio-options">
+                  <label class="radio-label">
+                    <input type="radio" name="modalVisitorType" value="local" required checked>
+                    <span class="radio-custom"></span>
+                    <span>Local Resident</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="modalVisitorType" value="tourist" required>
+                    <span class="radio-custom"></span>
+                    <span>Visitor/Tourist</span>
+                  </label>
+                </div>
+              </fieldset>
+            </div>
+
+            <div class="modal-form-group">
               <textarea id="modalComment" name="comment" rows="2" maxlength="150"
                 placeholder="Share why this matters to you (optional)"
                 style="resize: none; width: 100%; padding: 15px; background: rgba(255, 255, 255, 0.1); border: 2px solid #666; border-radius: 5px; color: #fff; font-size: 16px; transition: all 0.3s ease;"></textarea>
@@ -254,6 +345,7 @@
       </div>
     </div>
   </div>
+  </main>
 
   <!-- Micromodal CDN -->
   <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
@@ -262,6 +354,9 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
   <!-- Local JavaScript -->
+  <!-- Navigation Include -->
+  <script type="module" src="js/utils/include-nav.js"></script>
+  
   <script src="js/main.js"></script>
 
   <script>
