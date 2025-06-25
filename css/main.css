@@ -18,6 +18,7 @@
 @import url('layout/footer.css');
 
 /* Component modules - UI elements */
+@import url('components/navigation.css');
 @import url('components/hero.css');
 @import url('components/impact-map.css');
 @import url('components/counter.css');
@@ -31,6 +32,7 @@
 @import url('components/toast.css');
 @import url('components/modal.css');
 @import url('components/messages.css');
+@import url('components/financial-card.css');
 
 /* Utility modules - Helpers */
 @import url('utilities/helpers.css');
