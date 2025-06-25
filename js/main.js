@@ -51,6 +51,42 @@ async function submitToNotion(formData) {
   return response.json();
 }
 
+// Show email error function
+function showEmailError() {
+  const emailInput = document.getElementById('email');
+  const modalEmailInput = document.getElementById('modalEmail');
+  
+  // Add error state to main form email input
+  if (emailInput) {
+    emailInput.classList.add('error');
+    emailInput.placeholder = 'Email already registered';
+    emailInput.value = '';
+    
+    // Remove error state when user starts typing
+    const resetError = () => {
+      emailInput.classList.remove('error');
+      emailInput.placeholder = 'Stay connected with updates';
+      emailInput.removeEventListener('input', resetError);
+    };
+    emailInput.addEventListener('input', resetError);
+  }
+  
+  // Add error state to modal email input  
+  if (modalEmailInput) {
+    modalEmailInput.classList.add('error');
+    modalEmailInput.placeholder = 'Email already registered';
+    modalEmailInput.value = '';
+    
+    // Remove error state when user starts typing
+    const resetModalError = () => {
+      modalEmailInput.classList.remove('error');
+      modalEmailInput.placeholder = 'Enter your email';
+      modalEmailInput.removeEventListener('input', resetModalError);
+    };
+    modalEmailInput.addEventListener('input', resetModalError);
+  }
+}
+
 // Form Submission with Error Handling
 document.getElementById('signupForm').addEventListener('submit', async function (e) {
   e.preventDefault();
@@ -65,17 +101,23 @@ document.getElementById('signupForm').addEventListener('submit', async function 
   // Get form data
   const userId = generateUserId();
   const submissionId = `${userId}-${Date.now()}`; // Unique submission ID
+  const visitorType = document.querySelector('input[name="visitorType"]:checked')?.value || 'local';
   const formData = {
     name: `${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`,
     firstName: document.getElementById('firstName').value.trim(),
     lastName: document.getElementById('lastName').value.trim(),
     email: document.getElementById('email').value.trim(),
     comment: document.getElementById('comment').value.trim(),
+    visitorType: visitorType,
     user_id: userId,
     submission_id: submissionId,
     timestamp: new Date().toISOString(),
     source: 'main_form',
-    referrer: sessionStorage.getItem('referrer') || null
+    referrer: sessionStorage.getItem('referrer') || null,
+    referral_code: sessionStorage.getItem('referral_code') || null,
+    referral_source: sessionStorage.getItem('referral_source') || null,
+    referral_platform: sessionStorage.getItem('referrer_platform') || null,
+    referral_timestamp: sessionStorage.getItem('referral_timestamp') || null
   };
 
   try {
@@ -139,6 +181,13 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     // Re-enable submit button on error
     submitBtn.disabled = false;
     submitBtn.textContent = originalText;
+    
+    // Check if it's an email duplication error
+    if (error.message === 'email_exists' || (error.message && error.message.includes('email_exists'))) {
+      // Handle email already registered error
+      showEmailError();
+      return;
+    }
     
     // Error - Replace form with error state
     const formSection = document.querySelector('.form-section');
@@ -582,29 +631,49 @@ async function updateLiveFeed(showLoading = false) {
 // Check for referral parameter
 function checkReferral() {
   const urlParams = new URLSearchParams(window.location.search);
-  const referrer = urlParams.get('ref');
+  const referralCode = urlParams.get('ref');
+  const sourceCode = urlParams.get('src');
 
-  if (referrer) {
-    // Store full referrer in session storage
-    sessionStorage.setItem('referrer', referrer);
-
-    // Parse platform and user ID if format matches
-    if (referrer.includes('-')) {
-      const parts = referrer.split('-');
-      if (parts.length >= 2) {
-        const platform = parts[0];
-        const userId = parts.slice(1).join('-'); // Handle user IDs with hyphens
-        sessionStorage.setItem('referrer_platform', platform);
-        sessionStorage.setItem('referrer_id', userId);
-      }
+  if (referralCode) {
+    // Store referral information in session storage
+    sessionStorage.setItem('referrer', referralCode);
+    sessionStorage.setItem('referral_code', referralCode);
+    
+    // Store source platform if provided
+    if (sourceCode) {
+      sessionStorage.setItem('referral_source', sourceCode);
+      
+      // Map source codes to platform names
+      const platformMap = {
+        'fb': 'facebook',
+        'tw': 'twitter',
+        'wa': 'whatsapp',
+        'li': 'linkedin',
+        'ig': 'instagram',
+        'em': 'email',
+        'dr': 'direct'
+      };
+      
+      const platform = platformMap[sourceCode] || sourceCode;
+      sessionStorage.setItem('referrer_platform', platform);
     }
+
+    // Store referral attribution timestamp
+    sessionStorage.setItem('referral_timestamp', new Date().toISOString());
 
     // Clean URL without reload
     const cleanUrl = window.location.pathname;
     window.history.replaceState({}, document.title, cleanUrl);
+    
+    // Return both codes for tracking
+    return {
+      referralCode,
+      sourceCode,
+      timestamp: new Date().toISOString()
+    };
   }
 
-  return referrer;
+  return null;
 }
 
 // Page load time tracking for smart polling
@@ -697,6 +766,35 @@ function transformSurveyButtonToShare() {
         You've already registered - now help spread the word!
       </div>
       <div id="registered-share-container"></div>
+      <div class="referral-info-card" style="
+        background: rgba(52, 152, 219, 0.1);
+        border: 2px solid var(--color-primary);
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        text-align: left;
+      ">
+        <h3 style="color: var(--color-primary); margin-bottom: 15px; font-size: 20px;">
+          <i class="fas fa-trophy"></i> Earn Rewards & Win Prizes!
+        </h3>
+        <div class="reward-items" style="display: grid; gap: 12px;">
+          <div class="reward-item" style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-users" style="color: #00ff00; font-size: 18px;"></i>
+            <span><strong>10 points</strong> for each friend who joins through your link</span>
+          </div>
+          <div class="reward-item" style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-chart-line" style="color: #ff9900; font-size: 18px;"></i>
+            <span>Climb the <a href="/leaderboard.html" style="color: var(--color-primary); text-decoration: underline;">community leaderboard</a></span>
+          </div>
+          <div class="reward-item" style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-gift" style="color: #ff6b6b; font-size: 18px;"></i>
+            <span><strong>£500 prize pool</strong> for top contributors</span>
+          </div>
+        </div>
+        <p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">
+          Your unique referral code: <strong>${generateReferralCode()}</strong>
+        </p>
+      </div>
     `;
 
     // Add share buttons immediately with cached count
@@ -772,10 +870,72 @@ function showModalButtonNotification() {
   }
 }
 
+// Show referral attribution banner
+function showReferralBanner(referralInfo) {
+  if (!referralInfo || !referralInfo.referralCode) return;
+  
+  const banner = document.createElement('div');
+  banner.className = 'referral-banner';
+  banner.style.cssText = `
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+    color: #1a1a1a;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-weight: bold;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0, 255, 0, 0.3);
+    opacity: 0;
+    transition: all 0.5s ease;
+    text-align: center;
+    max-width: 90%;
+  `;
+  
+  // Determine source text
+  const sourceText = referralInfo.sourceCode ? 
+    ` via ${referralInfo.sourceCode === 'fb' ? 'Facebook' :
+           referralInfo.sourceCode === 'tw' ? 'Twitter' :
+           referralInfo.sourceCode === 'wa' ? 'WhatsApp' :
+           referralInfo.sourceCode === 'li' ? 'LinkedIn' :
+           referralInfo.sourceCode === 'ig' ? 'Instagram' :
+           referralInfo.sourceCode === 'em' ? 'Email' : 'a friend'}` : '';
+  
+  banner.innerHTML = `
+    <i class="fas fa-link" style="margin-right: 10px;"></i>
+    Welcome! You were referred by a community member${sourceText}
+    <i class="fas fa-heart" style="margin-left: 10px; color: #ff6b6b;"></i>
+  `;
+  
+  document.body.appendChild(banner);
+  
+  // Animate in
+  setTimeout(() => {
+    banner.style.opacity = '1';
+    banner.style.transform = 'translateX(-50%) translateY(0)';
+  }, 100);
+  
+  // Animate out after 5 seconds
+  setTimeout(() => {
+    banner.style.opacity = '0';
+    banner.style.transform = 'translateX(-50%) translateY(-20px)';
+    setTimeout(() => {
+      banner.remove();
+    }, 500);
+  }, 5000);
+}
+
 // Initialize counts on page load
 window.addEventListener('load', async function () {
   // Check for referral
-  const referrer = checkReferral();
+  const referralInfo = checkReferral();
+  
+  // Show referral banner if applicable
+  if (referralInfo) {
+    showReferralBanner(referralInfo);
+  }
 
   // Load thought bubbles
   loadThoughtBubbles();
@@ -800,6 +960,9 @@ window.addEventListener('load', async function () {
 
   // Initialize all counts immediately
   await initializeCounts();
+  
+  // Load financial status
+  await loadFinancialStatus();
 
   // Initial live feed update with loading state
   await updateLiveFeed(true);
@@ -915,17 +1078,23 @@ async function handleModalFormSubmit(e) {
   // Get form data
   const userId = generateUserId();
   const submissionId = `${userId}-${Date.now()}`; // Unique submission ID
+  const modalVisitorType = document.querySelector('input[name="modalVisitorType"]:checked')?.value || 'local';
   const formData = {
     name: `${document.getElementById('modalFirstName').value.trim()} ${document.getElementById('modalLastName').value.trim()}`,
     firstName: document.getElementById('modalFirstName').value.trim(),
     lastName: document.getElementById('modalLastName').value.trim(),
     email: document.getElementById('modalEmail').value.trim(),
     comment: document.getElementById('modalComment').value.trim(),
+    visitorType: modalVisitorType,
     user_id: userId,
     submission_id: submissionId,
     timestamp: new Date().toISOString(),
     source: 'survey_modal',
-    referrer: sessionStorage.getItem('referrer') || null
+    referrer: sessionStorage.getItem('referrer') || null,
+    referral_code: sessionStorage.getItem('referral_code') || null,
+    referral_source: sessionStorage.getItem('referral_source') || null,
+    referral_platform: sessionStorage.getItem('referrer_platform') || null,
+    referral_timestamp: sessionStorage.getItem('referral_timestamp') || null
   };
 
   // Basic validation
@@ -1112,6 +1281,20 @@ async function handleModalFormSubmit(e) {
     }, 500);
 
   } catch (error) {
+    // Re-enable submit button on error
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+    
+    // Check if it's an email duplication error
+    if (error.message === 'email_exists' || (error.message && error.message.includes('email_exists'))) {
+      // Handle email already registered error - show error in the modal
+      messageEl.className = 'message error';
+      messageEl.textContent = 'This email is already registered. Please use a different email address.';
+      messageEl.style.display = 'block';
+      showEmailError(); // This will also handle the modal email input
+      return;
+    }
+    
     // Replace modal content with error state
     const modalContent = document.getElementById('modal-survey-content');
     modalContent.innerHTML = `
@@ -1396,6 +1579,103 @@ function showToast(message) {
       toast.remove();
     }, 300);
   }, 3000);
+}
+
+// Generate referral code from user data
+function generateReferralCode() {
+  const stored = localStorage.getItem('nstcg_referral_code');
+  if (stored) return stored;
+  
+  const firstName = localStorage.getItem('nstcg_firstName') || 'USER';
+  const timestamp = Date.now().toString(36).slice(-4);
+  const code = `${firstName.toUpperCase().slice(0, 3)}${timestamp}`.toUpperCase();
+  
+  localStorage.setItem('nstcg_referral_code', code);
+  return code;
+}
+
+// Calculate running costs since campaign start
+function calculateRunningCosts() {
+  const startDate = new Date('2025-06-14');
+  const now = new Date();
+  
+  // If campaign hasn't started yet, return 0
+  if (now < startDate) {
+    return 0;
+  }
+  
+  // Calculate time elapsed since campaign start
+  const timeElapsed = now - startDate;
+  const daysElapsed = timeElapsed / (1000 * 60 * 60 * 24);
+  const monthsElapsed = daysElapsed / 30.4375; // Average days per month
+  
+  // Constants matching donate.js
+  const upfrontCosts = 525; // Software (£425) + Materials (£100)
+  const monthlyEngCost = 5000; // Engineering, Research & Development per month
+  
+  // Calculate total cost: upfront + pro-rata engineering
+  const engineeringCost = monthsElapsed * monthlyEngCost;
+  const totalCosts = Math.floor(upfrontCosts + engineeringCost);
+  
+  return totalCosts;
+}
+
+// Fetch and display donation totals
+async function loadFinancialStatus() {
+  try {
+    // Get donations
+    const donationRes = await fetch('/api/get-total-donations');
+    const donationData = await donationRes.json();
+    
+    // Calculate costs
+    const runningCosts = calculateRunningCosts();
+    
+    // Remove loading state from all financial content
+    document.querySelectorAll('.financial-content.loading').forEach(el => {
+      el.classList.remove('loading');
+    });
+    
+    // Update UI
+    const costsEl = document.getElementById('campaign-costs');
+    const donationsEl = document.getElementById('total-donations');
+    const donationCountEl = document.getElementById('donation-count');
+    const balanceEl = document.getElementById('campaign-balance');
+    const statusEl = document.getElementById('balance-status');
+    
+    if (costsEl) costsEl.textContent = `£${runningCosts.toLocaleString()}`;
+    if (donationsEl) donationsEl.textContent = `£${donationData.total.toLocaleString()}`;
+    if (donationCountEl) donationCountEl.textContent = donationData.count;
+    
+    // Calculate balance
+    const balance = donationData.total - runningCosts;
+    if (balanceEl) balanceEl.textContent = `£${Math.abs(balance).toLocaleString()}`;
+    
+    // Update status
+    if (statusEl) {
+      if (balance > 0) {
+        statusEl.textContent = 'In surplus';
+        statusEl.style.color = '#00ff00';
+      } else if (balance < 0) {
+        statusEl.textContent = 'Needs support';
+        statusEl.style.color = '#ff6b6b';
+      } else {
+        statusEl.textContent = 'Breaking even';
+        statusEl.style.color = 'var(--color-gray-light)';
+      }
+    }
+  } catch (error) {
+    console.error('Error loading financial status:', error);
+    // Remove loading state even on error
+    document.querySelectorAll('.financial-content.loading').forEach(el => {
+      el.classList.remove('loading');
+    });
+    // Show error state
+    const statusEl = document.getElementById('balance-status');
+    if (statusEl) {
+      statusEl.textContent = 'Unable to load';
+      statusEl.style.color = '#ff6b6b';
+    }
+  }
 }
 
 async function shareByEmail(count, userComment) {

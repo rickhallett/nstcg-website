@@ -46,6 +46,38 @@ function checkDuplicate(email) {
   return false;
 }
 
+async function checkEmailInDatabase(email) {
+  try {
+    const response = await fetch('https://api.notion.com/v1/databases/' + process.env.NOTION_DATABASE_ID + '/query', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28'
+      },
+      body: JSON.stringify({
+        filter: {
+          property: 'Email',
+          email: {
+            equals: email
+          }
+        }
+      })
+    });
+
+    if (!response.ok) {
+      console.error('Failed to query Notion database:', response.status);
+      return false; // Assume no duplicate if query fails
+    }
+
+    const data = await response.json();
+    return data.results && data.results.length > 0;
+  } catch (error) {
+    console.error('Error checking email in database:', error);
+    return false; // Assume no duplicate if error occurs
+  }
+}
+
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -68,7 +100,7 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Too many requests. Please try again later.' });
   }
 
-  const { name, firstName, lastName, email, timestamp, source, website, comment, user_id, submission_id, referrer } = req.body;
+  const { name, firstName, lastName, email, timestamp, source, website, comment, user_id, submission_id, referrer, visitorType } = req.body;
 
   // Honeypot check
   if (website) {
@@ -96,10 +128,16 @@ export default async function handler(req, res) {
   if (comment && comment.length > 150) {
     return res.status(400).json({ error: 'Comment must be 150 characters or less' });
   }
+
+  // Visitor type validation
+  const validVisitorTypes = ['local', 'tourist'];
+  if (visitorType && !validVisitorTypes.includes(visitorType)) {
+    return res.status(400).json({ error: 'Invalid visitor type' });
+  }
   
-  // Check for duplicate submission
+  // Check for duplicate submission in memory (recent submissions)
   if (checkDuplicate(email.toLowerCase())) {
-    console.log('Duplicate submission prevented:', {
+    console.log('Duplicate submission prevented (memory):', {
       email: email.substring(0, 3) + '***',
       timestamp: new Date().toISOString()
     });
@@ -108,6 +146,19 @@ export default async function handler(req, res) {
       success: true,
       id: 'duplicate-prevented',
       message: 'Already registered'
+    });
+  }
+
+  // Check for existing email in database
+  const emailExists = await checkEmailInDatabase(email.toLowerCase());
+  if (emailExists) {
+    console.log('Email already exists in database:', {
+      email: email.substring(0, 3) + '***',
+      timestamp: new Date().toISOString()
+    });
+    return res.status(409).json({
+      error: 'email_exists',
+      message: 'Email already registered'
     });
   }
 
@@ -204,6 +255,11 @@ export default async function handler(req, res) {
                 content: submission_id
               }
             }]
+          } : undefined,
+          'Visitor Type': visitorType ? {
+            select: {
+              name: visitorType === 'local' ? 'Local' : 'Tourist'
+            }
           } : undefined
         }
       })
