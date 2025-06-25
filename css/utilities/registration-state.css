@@ -1,0 +1,28 @@
+/* Instant UI updates based on registration state */
+/* These rules apply immediately when html.user-registered is added */
+
+/* Hide form sections for registered users */
+html.user-registered .form-section form,
+html.user-registered .survey-button-section > *:not(.already-registered-banner):not(#registered-share-container) {
+  display: none !important;
+}
+
+/* Show registration banners immediately */
+html.user-registered .already-registered-banner {
+  display: block !important;
+}
+
+/* Prevent layout shift by maintaining container dimensions */
+html.user-registered .form-section,
+html.user-registered .survey-button-section {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Also support body class for JS updates */
+body.user-registered .form-section form,
+body.user-registered .survey-button-section > *:not(.already-registered-banner):not(#registered-share-container) {
+  display: none !important;
+}

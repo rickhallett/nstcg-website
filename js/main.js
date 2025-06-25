@@ -54,9 +54,17 @@ async function submitToNotion(formData) {
 // Form Submission with Error Handling
 document.getElementById('signupForm').addEventListener('submit', async function (e) {
   e.preventDefault();
+  
+  // Immediately disable submit button to prevent double-clicks
+  const submitBtn = this.querySelector('button[type="submit"]');
+  if (submitBtn.disabled) return; // Already processing
+  submitBtn.disabled = true;
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = 'PROCESSING...';
 
   // Get form data
   const userId = generateUserId();
+  const submissionId = `${userId}-${Date.now()}`; // Unique submission ID
   const formData = {
     name: `${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`,
     firstName: document.getElementById('firstName').value.trim(),
@@ -64,6 +72,7 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     email: document.getElementById('email').value.trim(),
     comment: document.getElementById('comment').value.trim(),
     user_id: userId,
+    submission_id: submissionId,
     timestamp: new Date().toISOString(),
     source: 'main_form',
     referrer: sessionStorage.getItem('referrer') || null
@@ -127,6 +136,10 @@ document.getElementById('signupForm').addEventListener('submit', async function 
       await updateLiveFeed();
     }, 500);
   } catch (error) {
+    // Re-enable submit button on error
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+    
     // Error - Replace form with error state
     const formSection = document.querySelector('.form-section');
     formSection.innerHTML = `
@@ -165,6 +178,8 @@ async function fetchRealCount() {
     const response = await fetch('/api/get-count');
     if (response.ok) {
       const data = await response.json();
+      // Cache the count for next visit
+      localStorage.setItem('nstcg_cached_count', data.count.toString());
       return data.count;
     }
   } catch (error) {
@@ -246,6 +261,26 @@ async function initializeCounts() {
 
   // Animate the main counter
   animateCounterFromZero(realCount);
+
+  // Update share buttons for registered users with real count
+  const isRegistered = localStorage.getItem('nstcg_registered') === 'true';
+  if (isRegistered && realCount) {
+    const userComment = localStorage.getItem('nstcg_comment') || '';
+    
+    // Update registered share container if it exists
+    const registeredShareContainer = document.getElementById('registered-share-container');
+    if (registeredShareContainer) {
+      registeredShareContainer.innerHTML = '';
+      addSocialShareButtons('registered-share-container', realCount, userComment, false);
+    }
+    
+    // Update bottom share container if it exists
+    const bottomShareContainer = document.getElementById('bottom-share-container');
+    if (bottomShareContainer) {
+      bottomShareContainer.innerHTML = '';
+      addSocialShareButtons('bottom-share-container', realCount, userComment, false);
+    }
+  }
 }
 
 // Enhanced counter animation system
@@ -664,10 +699,9 @@ function transformSurveyButtonToShare() {
       <div id="registered-share-container"></div>
     `;
 
-    // Add share buttons after count is available
-    setTimeout(() => {
-      addSocialShareButtons('registered-share-container', realCount || 0, userComment, false);
-    }, 100);
+    // Add share buttons immediately with cached count
+    const cachedCount = localStorage.getItem('nstcg_cached_count') || '1000+';
+    addSocialShareButtons('registered-share-container', cachedCount, userComment, false);
   }
 }
 
@@ -695,10 +729,9 @@ function transformBottomFormToShare() {
       <div id="bottom-share-container"></div>
     `;
 
-    // Add share buttons after count is available
-    setTimeout(() => {
-      addSocialShareButtons('bottom-share-container', realCount || 0, userComment, false);
-    }, 100);
+    // Add share buttons immediately with cached count
+    const cachedCount = localStorage.getItem('nstcg_cached_count') || '1000+';
+    addSocialShareButtons('bottom-share-container', cachedCount, userComment, false);
   }
 }
 
@@ -768,9 +801,6 @@ window.addEventListener('load', async function () {
   // Initialize all counts immediately
   await initializeCounts();
 
-  // Check registration status and update UI
-  initializeRegistrationState();
-
   // Initial live feed update with loading state
   await updateLiveFeed(true);
 
@@ -802,8 +832,26 @@ window.addEventListener('load', async function () {
 // Store original modal content for reset
 let originalModalContent;
 
+// Check registration status as soon as script loads (for critical UI updates)
+// This runs before DOMContentLoaded for the fastest possible UI update
+(function() {
+  const isRegistered = localStorage.getItem('nstcg_registered') === 'true';
+  if (isRegistered) {
+    // Add a class to body immediately to allow CSS-based UI changes
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.classList.add('user-registered');
+      initializeRegistrationState();
+    }, { once: true });
+  }
+})();
+
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function () {
+  // Only initialize if not already done above
+  if (!document.body.classList.contains('user-registered')) {
+    initializeRegistrationState();
+  }
+  
   originalModalContent = document.getElementById('modal-survey-content').innerHTML;
 
   // Initialize Micromodal with all configurations
@@ -829,6 +877,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Attach event listener to form
   document.getElementById('surveyModalForm').addEventListener('submit', handleModalFormSubmit);
+  
+  // Workaround for email share button click issues in modals
+  document.addEventListener('click', function(e) {
+    // Check if clicked element is email share button or its child
+    const emailBtn = e.target.closest('.share-btn-icon.email');
+    if (emailBtn && !emailBtn.disabled) {
+      // Get the onclick attribute
+      const onclickAttr = emailBtn.getAttribute('onclick');
+      if (onclickAttr && onclickAttr.includes('shareByEmail')) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Execute the shareByEmail function
+        try {
+          eval(onclickAttr);
+        } catch (error) {
+          console.error('Error executing shareByEmail:', error);
+        }
+      }
+    }
+  }, true); // Use capture phase to intercept before MicroModal
 });
 
 // Extract form submission handler to a named function
@@ -837,9 +905,16 @@ async function handleModalFormSubmit(e) {
 
   const messageEl = document.getElementById('modalMessage');
   const submitBtn = this.querySelector('.modal-submit-btn');
+  
+  // Immediately disable submit button to prevent double-clicks
+  if (submitBtn.disabled) return; // Already processing
+  submitBtn.disabled = true;
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = 'PROCESSING...';
 
   // Get form data
   const userId = generateUserId();
+  const submissionId = `${userId}-${Date.now()}`; // Unique submission ID
   const formData = {
     name: `${document.getElementById('modalFirstName').value.trim()} ${document.getElementById('modalLastName').value.trim()}`,
     firstName: document.getElementById('modalFirstName').value.trim(),
@@ -847,6 +922,7 @@ async function handleModalFormSubmit(e) {
     email: document.getElementById('modalEmail').value.trim(),
     comment: document.getElementById('modalComment').value.trim(),
     user_id: userId,
+    submission_id: submissionId,
     timestamp: new Date().toISOString(),
     source: 'survey_modal',
     referrer: sessionStorage.getItem('referrer') || null
@@ -857,6 +933,9 @@ async function handleModalFormSubmit(e) {
     messageEl.className = 'message error';
     messageEl.textContent = 'Please fill in all required fields.';
     messageEl.style.display = 'block';
+    // Re-enable button on validation error
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
     return;
   }
 
@@ -866,12 +945,13 @@ async function handleModalFormSubmit(e) {
     messageEl.className = 'message error';
     messageEl.textContent = 'Please enter a valid email address.';
     messageEl.style.display = 'block';
+    // Re-enable button on validation error
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
     return;
   }
 
-  // Disable submit button and show loading state
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'JOINING...';
+  // Hide any previous messages
   messageEl.style.display = 'none';
 
   try {
@@ -1331,7 +1411,23 @@ The North Swanage Traffic Concern Group is raising awareness about proposed traf
 Please take 2 minutes to join us and share with other Neighbours. Time is running out!`;
 
   const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.location.href = mailtoUrl;
+  
+  // Try multiple methods to ensure it works
+  try {
+    // Method 1: Direct navigation
+    window.location.href = mailtoUrl;
+  } catch (e) {
+    // Method 2: Create temporary link and click it
+    const link = document.createElement('a');
+    link.href = mailtoUrl;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => document.body.removeChild(link), 100);
+  }
+  
+  // Prevent any default behavior or modal closing
+  return false;
 }
 
 async function shareNative(count, userComment) {
@@ -1521,5 +1617,5 @@ function toggleModalSurveyButton() {
 }
 
 function openOfficialSurvey() {
-  window.open('https://www.dorsetcoasthaveyoursay.co.uk/swanage-green-seafront-stabilisation/surveys/swanage-green-seafront-survey-2025', '_blank');
+  window.open('https://www.dorsetcoasthaveyoursay.co.uk/swanage-green-seafront-stabilisation/surveys/swanage-green-seafront-survey-2025?ref=nstcg', '_blank');
 }

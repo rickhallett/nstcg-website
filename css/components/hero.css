@@ -1,0 +1,61 @@
+/**
+ * Hero Component
+ * Main hero section with call-to-action
+ */
+
+.hero {
+  background: var(--bg-secondary);
+  border: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  margin: 20px 0;
+  padding: 30px;
+  position: relative;
+  text-align: center;
+}
+
+.hero::before {
+  content: '✓';
+  position: absolute;
+  top: -20px;
+  left: 20px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: 30px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 3px solid var(--bg-secondary);
+}
+
+.hero p {
+  font-size: 20px;
+}
+
+.highlight {
+  color: var(--color-primary);
+  text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .hero {
+    padding: 20px;
+  }
+
+  .hero::before {
+    top: -15px;
+    left: 15px;
+    font-size: 20px;
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--bg-secondary);
+  }
+
+  .hero p {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+}

@@ -5,6 +5,10 @@ const rateLimits = new Map();
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const MAX_REQUESTS = 10;
 
+// In-memory duplicate detection
+const recentSubmissions = new Map();
+const DUPLICATE_WINDOW = 30000; // 30 seconds
+
 function checkRateLimit(ip) {
   const now = Date.now();
   const userRequests = rateLimits.get(ip) || [];
@@ -19,6 +23,27 @@ function checkRateLimit(ip) {
   recentRequests.push(now);
   rateLimits.set(ip, recentRequests);
   return true;
+}
+
+function checkDuplicate(email) {
+  const now = Date.now();
+  const lastSubmission = recentSubmissions.get(email);
+  
+  // Clean up old entries periodically
+  if (recentSubmissions.size > 1000) {
+    for (const [key, timestamp] of recentSubmissions.entries()) {
+      if (now - timestamp > DUPLICATE_WINDOW) {
+        recentSubmissions.delete(key);
+      }
+    }
+  }
+  
+  if (lastSubmission && (now - lastSubmission) < DUPLICATE_WINDOW) {
+    return true; // Duplicate found
+  }
+  
+  recentSubmissions.set(email, now);
+  return false;
 }
 
 export default async function handler(req, res) {
@@ -43,7 +68,7 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Too many requests. Please try again later.' });
   }
 
-  const { name, firstName, lastName, email, timestamp, source, website, comment, user_id, referrer } = req.body;
+  const { name, firstName, lastName, email, timestamp, source, website, comment, user_id, submission_id, referrer } = req.body;
 
   // Honeypot check
   if (website) {
@@ -70,6 +95,20 @@ export default async function handler(req, res) {
   // Comment validation (optional)
   if (comment && comment.length > 150) {
     return res.status(400).json({ error: 'Comment must be 150 characters or less' });
+  }
+  
+  // Check for duplicate submission
+  if (checkDuplicate(email.toLowerCase())) {
+    console.log('Duplicate submission prevented:', {
+      email: email.substring(0, 3) + '***',
+      timestamp: new Date().toISOString()
+    });
+    // Return success to avoid confusing the user
+    return res.status(200).json({
+      success: true,
+      id: 'duplicate-prevented',
+      message: 'Already registered'
+    });
   }
 
   try {
@@ -156,6 +195,13 @@ export default async function handler(req, res) {
             rich_text: [{
               text: {
                 content: referrer || 'None'
+              }
+            }]
+          } : undefined,
+          'Submission ID': submission_id ? {
+            rich_text: [{
+              text: {
+                content: submission_id
               }
             }]
           } : undefined

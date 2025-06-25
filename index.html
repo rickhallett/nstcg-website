@@ -33,8 +33,16 @@
   <!-- Font Awesome CDN for social media icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <!-- Local Styles -->
-  <link rel="stylesheet" href="css/styles.css">
+  <!-- Local Styles - Modular CSS -->
+  <link rel="stylesheet" href="css/main.css">
+  
+  <!-- Critical inline script for instant UI updates -->
+  <script>
+    // Check registration status immediately for fastest possible UI update
+    if (localStorage.getItem('nstcg_registered') === 'true') {
+      document.documentElement.classList.add('user-registered');
+    }
+  </script>
 </head>
 
 <body>
@@ -190,12 +198,17 @@
       <p>
         North Swanage Community Group | Protecting Our Neighborhoods Since 2020
       </p>
+      <div class="footer-links">
+        <a href="/privacy-policy.html">Privacy Policy</a>
+        <span class="footer-separator">·</span>
+        <a href="/terms-and-conditions.html">Terms & Conditions</a>
+      </div>
     </footer>
   </div>
 
   <!-- Survey Modal -->
   <div id="modal-survey" class="modal" aria-hidden="true">
-    <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+    <div class="modal__overlay" tabindex="-1">
       <div class="modal__container animate__animated animate__fadeInUp" role="dialog" aria-modal="true"
         aria-labelledby="modal-survey-title">
         <header class="modal__header">
@@ -245,8 +258,16 @@
   <!-- Micromodal CDN -->
   <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
 
+  <!-- Alpine.js CDN for reactive templating -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
   <!-- Local JavaScript -->
   <script src="js/main.js"></script>
+
+  <script>
+    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
 </body>
 
 </html>

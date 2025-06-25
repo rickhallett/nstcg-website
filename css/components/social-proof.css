@@ -1,0 +1,55 @@
+/**
+ * Social Proof Component
+ * Avatar stack showing community members
+ */
+
+.social-proof {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 30px;
+  margin: 30px 0;
+  text-align: center;
+}
+
+.neighbor-avatars {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  position: relative;
+}
+
+.avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: 20px;
+  margin: 0 -10px;
+  border: 3px solid var(--bg-primary);
+  position: relative;
+  z-index: var(--z-base);
+}
+
+.avatar:nth-child(1) {
+  z-index: 5;
+}
+
+.avatar:nth-child(2) {
+  z-index: 4;
+}
+
+.avatar:nth-child(3) {
+  z-index: 3;
+}
+
+.avatar:nth-child(4) {
+  z-index: 2;
+}
+
+.avatar:nth-child(5) {
+  z-index: 1;
+}

@@ -1,0 +1,111 @@
+/**
+ * Impact Map Component
+ * Interactive map showing traffic impact zones
+ */
+
+.impact-map {
+  background: #001133;
+  border: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin: 30px 0;
+  text-align: center;
+}
+
+.impact-map h2 {
+  font-size: 24px;
+  font-weight: var(--font-weight-black);
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: 15px;
+  text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+.map-placeholder {
+  background: rgba(52, 152, 219, 0.1);
+  border: 2px dashed var(--color-primary);
+  border-radius: var(--radius-md);
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.map-placeholder::before {
+  content: '🗺️';
+  font-size: 80px;
+  opacity: 0.3;
+  position: absolute;
+}
+
+.map-overlay {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  z-index: var(--z-base);
+}
+
+.map-image {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  max-width: 100%;
+  height: 500px;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 1.5s ease-out, transform 1.5s ease-out;
+}
+
+.map-image.fade-in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.map-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.impact-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse 60% 95% at center,
+      rgba(255, 0, 0, 0.8) 0%,
+      rgba(255, 0, 0, 0.75) 65%,
+      rgba(255, 50, 0, 0.7) 70%,
+      rgba(255, 102, 0, 0.7) 75%,
+      rgba(255, 153, 0, 0.65) 85%,
+      rgba(255, 204, 0, 0.6) 95%,
+      rgba(255, 255, 0, 0.5) 100%);
+  opacity: 0.5;
+  pointer-events: none;
+  animation: pulseOverlay 3s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .impact-map {
+    padding: 15px;
+    margin: 20px 0;
+  }
+
+  .impact-map h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .map-placeholder,
+  .map-image {
+    height: 300px;
+  }
+}

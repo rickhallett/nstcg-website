@@ -1,0 +1,93 @@
+/**
+ * Live Feed Component
+ * Real-time activity feed
+ */
+
+.live-feed {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin: 30px 0;
+}
+
+.feed-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-primary);
+}
+
+.feed-item {
+  background: var(--bg-card);
+  border-left: 3px solid var(--color-primary);
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-sm);
+  animation: slideIn 0.5s ease-out;
+}
+
+.feed-time {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  font-size: 14px;
+}
+
+.feed-message {
+  margin-top: 5px;
+  color: var(--color-gray-lighter);
+}
+
+.feed-comment {
+  margin-top: 8px;
+  color: var(--color-gray-light);
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.4;
+  padding-left: 10px;
+}
+
+.feed-loading {
+  text-align: center;
+  padding: 30px;
+  color: var(--color-gray-light);
+}
+
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  margin: 0 auto 15px;
+  border: 3px solid #333;
+  border-top: 3px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.feed-empty {
+  text-align: center;
+  padding: 30px;
+}
+
+.feed-error {
+  text-align: center;
+  padding: 30px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .activity-item {
+    font-size: 14px;
+  }
+
+  .time-ago {
+    font-size: 12px;
+  }
+}
