@@ -1,0 +1,17 @@
+{
+  "name": "nstcg-scripts",
+  "version": "1.0.0",
+  "description": "Scripts for NSTCG database management",
+  "type": "module",
+  "scripts": {
+    "create-gamification-db": "node create-gamification-database.js",
+    "test-connection": "node test-notion-connection.js"
+  },
+  "dependencies": {
+    "@notionhq/client": "^2.2.14",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {},
+  "author": "NSTCG",
+  "license": "MIT"
+}
