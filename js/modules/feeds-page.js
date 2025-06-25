@@ -1,0 +1,468 @@
+/**
+ * Feeds Page Module
+ * @module FeedsPage
+ */
+
+import eventBus, { Events } from '../core/eventBus.js';
+import stateManager from '../core/StateManager.js';
+
+/**
+ * Feeds Page configuration
+ */
+const FeedsConfig = {
+  baseCount: 215, // Historical count before database tracking
+  
+  selectors: {
+    totalCount: '#total-count',
+    todayCount: '#today-count',
+    weekCount: '#week-count',
+    feedsGrid: '#feeds-grid',
+    feedsCount: '#feeds-count span',
+    loadingState: '#loading-state',
+    errorState: '#error-state',
+    emptyState: '#empty-state',
+    graphLoading: '#graph-loading',
+    signupChart: '#signup-chart'
+  },
+  
+  colors: {
+    primary: '#ff6600',
+    primaryLight: 'rgba(255, 102, 0, 0.2)',
+    gridColor: 'rgba(255, 255, 255, 0.1)',
+    textColor: '#ffffff'
+  }
+};
+
+/**
+ * Feeds Page Manager class
+ */
+class FeedsPageManager {
+  constructor() {
+    this.participants = [];
+    this.chart = null;
+    this.isLoading = false;
+  }
+
+  /**
+   * Initialize the feeds page
+   */
+  async init() {
+    // Load all participants
+    await this.loadAllParticipants();
+    
+    // Set up event listeners
+    this.setupEventListeners();
+  }
+
+  /**
+   * Set up event listeners
+   */
+  setupEventListeners() {
+    // Window resize for chart responsiveness
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (this.chart) {
+          this.chart.resize();
+        }
+      }, 250);
+    });
+  }
+
+  /**
+   * Load all participants from API
+   */
+  async loadAllParticipants() {
+    if (this.isLoading) return;
+    
+    this.isLoading = true;
+    this.showLoadingState();
+
+    try {
+      const response = await fetch('/api/get-all-participants');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch participants');
+      }
+
+      const data = await response.json();
+      
+      // Store participants
+      this.participants = data.participants || [];
+      
+      // Update statistics
+      this.updateStatistics(data);
+      
+      // Render participant grid
+      this.renderParticipants();
+      
+      // Create line graph
+      this.createLineGraph();
+      
+      // Hide loading state
+      this.hideLoadingState();
+      
+      // Emit success event
+      eventBus.emit(Events.FEEDS_LOADED, {
+        count: this.participants.length,
+        total: data.totalCount
+      });
+
+    } catch (error) {
+      console.error('Error loading participants:', error);
+      this.showErrorState();
+      
+      eventBus.emit(Events.FEEDS_ERROR, error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  /**
+   * Update statistics displays
+   */
+  updateStatistics(data) {
+    // Update total count
+    const totalElement = document.querySelector(FeedsConfig.selectors.totalCount);
+    if (totalElement) {
+      totalElement.innerHTML = this.formatNumber(data.totalCount || FeedsConfig.baseCount);
+    }
+
+    // Update today count
+    const todayElement = document.querySelector(FeedsConfig.selectors.todayCount);
+    if (todayElement) {
+      todayElement.innerHTML = this.formatNumber(data.todayCount || 0);
+    }
+
+    // Update week count
+    const weekElement = document.querySelector(FeedsConfig.selectors.weekCount);
+    if (weekElement) {
+      weekElement.innerHTML = this.formatNumber(data.weekCount || 0);
+    }
+
+    // Update feeds count
+    const feedsCountElement = document.querySelector(FeedsConfig.selectors.feedsCount);
+    if (feedsCountElement) {
+      feedsCountElement.textContent = this.participants.length;
+    }
+  }
+
+  /**
+   * Format number with animation
+   */
+  formatNumber(num) {
+    return `<span class="count-animate">${num.toLocaleString()}</span>`;
+  }
+
+  /**
+   * Render participant cards
+   */
+  renderParticipants() {
+    const grid = document.querySelector(FeedsConfig.selectors.feedsGrid);
+    if (!grid) return;
+
+    // Clear existing content
+    grid.innerHTML = '';
+
+    if (this.participants.length === 0) {
+      this.showEmptyState();
+      return;
+    }
+
+    // Sort by most recent first for display
+    const sortedParticipants = [...this.participants].sort((a, b) => 
+      new Date(b.timestamp) - new Date(a.timestamp)
+    );
+
+    // Create participant cards
+    sortedParticipants.forEach((participant, index) => {
+      const card = this.createParticipantCard(participant, index);
+      grid.appendChild(card);
+    });
+
+    // Add staggered animation
+    requestAnimationFrame(() => {
+      const cards = grid.querySelectorAll('.participant-card');
+      cards.forEach((card, index) => {
+        setTimeout(() => {
+          card.classList.add('visible');
+        }, index * 20); // 20ms delay between cards
+      });
+    });
+  }
+
+  /**
+   * Create participant card element
+   */
+  createParticipantCard(participant, index) {
+    const card = document.createElement('div');
+    card.className = 'participant-card';
+    
+    const timeAgo = this.getRelativeTime(participant.timestamp);
+    
+    let cardContent = `
+      <div class="participant-header">
+        <div class="participant-info">
+          <h3 class="participant-name">${participant.name}</h3>
+          <time class="participant-time">${timeAgo}</time>
+        </div>
+        <div class="participant-number">#${this.participants.length - index}</div>
+      </div>
+    `;
+
+    if (participant.comment) {
+      cardContent += `
+        <div class="participant-comment">
+          <i class="fas fa-quote-left"></i>
+          <p>${participant.comment}</p>
+        </div>
+      `;
+    }
+
+    card.innerHTML = cardContent;
+    return card;
+  }
+
+  /**
+   * Get relative time string
+   */
+  getRelativeTime(timestamp) {
+    const now = new Date();
+    const then = new Date(timestamp);
+    const diffMs = now - then;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'just now';
+    if (diffMins === 1) return '1 minute ago';
+    if (diffMins < 60) return `${diffMins} minutes ago`;
+    if (diffHours === 1) return '1 hour ago';
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 30) return `${diffDays} days ago`;
+    
+    // Format as date for older entries
+    return then.toLocaleDateString('en-GB', { 
+      day: 'numeric', 
+      month: 'short', 
+      year: 'numeric' 
+    });
+  }
+
+  /**
+   * Create cumulative signup line graph
+   */
+  createLineGraph() {
+    const canvas = document.querySelector(FeedsConfig.selectors.signupChart);
+    if (!canvas || !window.Chart) return;
+
+    // Hide loading state
+    const graphLoading = document.querySelector(FeedsConfig.selectors.graphLoading);
+    if (graphLoading) {
+      graphLoading.style.display = 'none';
+    }
+
+    // Prepare data
+    const graphData = this.prepareGraphData();
+
+    // Create chart
+    const ctx = canvas.getContext('2d');
+    this.chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: graphData.labels,
+        datasets: [{
+          label: 'Total Participants',
+          data: graphData.data,
+          borderColor: FeedsConfig.colors.primary,
+          backgroundColor: FeedsConfig.colors.primaryLight,
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: FeedsConfig.colors.primary,
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            borderColor: FeedsConfig.colors.primary,
+            borderWidth: 1,
+            cornerRadius: 4,
+            padding: 12,
+            displayColors: false,
+            callbacks: {
+              title: function(context) {
+                return context[0].label;
+              },
+              label: function(context) {
+                return 'Total: ' + context.parsed.y.toLocaleString() + ' participants';
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              color: FeedsConfig.colors.gridColor,
+              borderColor: FeedsConfig.colors.gridColor
+            },
+            ticks: {
+              color: FeedsConfig.colors.textColor,
+              font: {
+                size: 12
+              },
+              maxRotation: 45,
+              minRotation: 45
+            }
+          },
+          y: {
+            beginAtZero: false,
+            grid: {
+              color: FeedsConfig.colors.gridColor,
+              borderColor: FeedsConfig.colors.gridColor
+            },
+            ticks: {
+              color: FeedsConfig.colors.textColor,
+              font: {
+                size: 12
+              },
+              callback: function(value) {
+                return value.toLocaleString();
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Prepare data for line graph
+   */
+  prepareGraphData() {
+    // Group participants by date
+    const dailyCounts = {};
+    
+    this.participants.forEach(participant => {
+      const date = new Date(participant.timestamp);
+      const dateKey = date.toLocaleDateString('en-GB', { 
+        day: 'numeric', 
+        month: 'short' 
+      });
+      
+      dailyCounts[dateKey] = (dailyCounts[dateKey] || 0) + 1;
+    });
+
+    // Convert to cumulative data
+    const labels = [];
+    const data = [];
+    let cumulative = FeedsConfig.baseCount;
+    
+    // Sort dates chronologically
+    const sortedDates = Object.keys(dailyCounts).sort((a, b) => {
+      const dateA = new Date(a + ' 2025');
+      const dateB = new Date(b + ' 2025');
+      return dateA - dateB;
+    });
+
+    sortedDates.forEach(date => {
+      cumulative += dailyCounts[date];
+      labels.push(date);
+      data.push(cumulative);
+    });
+
+    // Ensure we show at least the base count if no data
+    if (labels.length === 0) {
+      labels.push('Start');
+      data.push(FeedsConfig.baseCount);
+    }
+
+    return { labels, data };
+  }
+
+  /**
+   * Show loading state
+   */
+  showLoadingState() {
+    const loadingState = document.querySelector(FeedsConfig.selectors.loadingState);
+    const errorState = document.querySelector(FeedsConfig.selectors.errorState);
+    const emptyState = document.querySelector(FeedsConfig.selectors.emptyState);
+    const grid = document.querySelector(FeedsConfig.selectors.feedsGrid);
+
+    if (loadingState) loadingState.style.display = 'flex';
+    if (errorState) errorState.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'none';
+    if (grid) grid.style.display = 'none';
+  }
+
+  /**
+   * Hide loading state
+   */
+  hideLoadingState() {
+    const loadingState = document.querySelector(FeedsConfig.selectors.loadingState);
+    const grid = document.querySelector(FeedsConfig.selectors.feedsGrid);
+
+    if (loadingState) loadingState.style.display = 'none';
+    if (grid) grid.style.display = 'grid';
+  }
+
+  /**
+   * Show error state
+   */
+  showErrorState() {
+    const loadingState = document.querySelector(FeedsConfig.selectors.loadingState);
+    const errorState = document.querySelector(FeedsConfig.selectors.errorState);
+    const emptyState = document.querySelector(FeedsConfig.selectors.emptyState);
+    const grid = document.querySelector(FeedsConfig.selectors.feedsGrid);
+
+    if (loadingState) loadingState.style.display = 'none';
+    if (errorState) errorState.style.display = 'flex';
+    if (emptyState) emptyState.style.display = 'none';
+    if (grid) grid.style.display = 'none';
+  }
+
+  /**
+   * Show empty state
+   */
+  showEmptyState() {
+    const loadingState = document.querySelector(FeedsConfig.selectors.loadingState);
+    const errorState = document.querySelector(FeedsConfig.selectors.errorState);
+    const emptyState = document.querySelector(FeedsConfig.selectors.emptyState);
+
+    if (loadingState) loadingState.style.display = 'none';
+    if (errorState) errorState.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'flex';
+  }
+}
+
+// Create instance and expose globally for retry button
+const feedsPage = new FeedsPageManager();
+window.feedsPage = feedsPage;
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => feedsPage.init());
+} else {
+  feedsPage.init();
+}
+
+// Export
+export default feedsPage;
