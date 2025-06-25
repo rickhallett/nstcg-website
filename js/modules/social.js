@@ -145,6 +145,19 @@ class SocialShareManager {
   }
 
   /**
+   * Generate referral code
+   * @returns {string} Referral code
+   */
+  generateReferralCode() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  }
+
+  /**
    * Get share URL with referral tracking
    * @param {string} platform - Social platform
    * @returns {Promise<string>} Share URL
@@ -156,8 +169,11 @@ class SocialShareManager {
 
     await this.loadSocialCodes();
     const platformCode = this.socialCodes.platforms[platform] || 'dr';
+    
+    // Generate referral code in same format as main.js
+    const referralCode = this.generateReferralCode();
 
-    return `${this.baseUrl}?ref=${platformCode}-${userId}`;
+    return `${this.baseUrl}?ref=${referralCode}&src=${platformCode}`;
   }
 
   /**
