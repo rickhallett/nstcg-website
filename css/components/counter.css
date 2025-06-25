@@ -1,0 +1,36 @@
+/**
+ * Counter Component
+ * Community participant counter
+ */
+
+.community-counter {
+  background: rgba(52, 152, 219, 0.1);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 25px;
+  margin: 30px 0;
+  text-align: center;
+}
+
+.counter-number {
+  font-size: 72px;
+  font-weight: var(--font-weight-black);
+  color: var(--color-primary);
+  line-height: 1;
+  margin-bottom: 10px;
+  animation: countUp 2s ease-out;
+}
+
+.counter-label {
+  font-size: 24px;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .counter-number {
+    font-size: 48px;
+  }
+}

@@ -1,0 +1,31 @@
+/**
+ * Confirmation Component
+ * Success confirmation messages
+ */
+
+.confirmation {
+  display: none;
+  background: rgba(0, 255, 0, 0.1);
+  border: 2px solid var(--color-success);
+  border-radius: var(--radius-md);
+  padding: 30px;
+  margin: 30px 0;
+  text-align: center;
+}
+
+.confirmation h3 {
+  color: var(--color-success);
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .confirmation {
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+}

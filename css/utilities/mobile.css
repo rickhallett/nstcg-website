@@ -1,0 +1,44 @@
+/**
+ * Mobile Utilities
+ * Mobile-specific overrides and adjustments
+ */
+
+/* Mobile-only utilities */
+@media (max-width: 768px) {
+  .mobile-hide { display: none !important; }
+  .mobile-show { display: block !important; }
+  
+  /* Text size adjustments */
+  .mobile-text-sm { font-size: 14px !important; }
+  .mobile-text-xs { font-size: 12px !important; }
+  
+  /* Spacing adjustments */
+  .mobile-p-0 { padding: 0 !important; }
+  .mobile-p-sm { padding: 10px !important; }
+  .mobile-p-md { padding: 15px !important; }
+  
+  .mobile-m-0 { margin: 0 !important; }
+  .mobile-m-sm { margin: 10px !important; }
+  .mobile-m-md { margin: 15px !important; }
+  
+  /* Full width on mobile */
+  .mobile-w-100 { width: 100% !important; }
+  
+  /* Stack elements on mobile */
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+  
+  /* Center on mobile */
+  .mobile-text-center { text-align: center !important; }
+  
+  /* Remove borders on mobile */
+  .mobile-no-border { border: none !important; }
+  .mobile-no-radius { border-radius: 0 !important; }
+}
+
+/* Desktop-only utilities */
+@media (min-width: 769px) {
+  .desktop-hide { display: none !important; }
+  .desktop-show { display: block !important; }
+}

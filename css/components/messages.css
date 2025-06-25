@@ -1,0 +1,24 @@
+/**
+ * Messages Component
+ * Success and error message styles
+ */
+
+.message {
+  padding: 15px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+  font-weight: var(--font-weight-bold);
+  display: none;
+}
+
+.message.success {
+  background: rgba(0, 255, 0, 0.1);
+  border: 2px solid var(--color-success);
+  color: var(--color-success);
+}
+
+.message.error {
+  background: rgba(255, 0, 0, 0.1);
+  border: 2px solid var(--color-error);
+  color: var(--color-error);
+}
