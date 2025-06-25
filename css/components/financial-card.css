@@ -1,0 +1,193 @@
+/**
+ * Financial Status Card Component
+ * Campaign costs and donations display
+ */
+
+.financial-status-card {
+  background: var(--bg-card);
+  border: 2px solid rgba(52, 152, 219, 0.3);
+  border-radius: 15px;
+  padding: 40px;
+  margin: 60px auto;
+  max-width: 1200px;
+}
+
+.financial-status-card .card-title {
+  font-size: 32px;
+  font-weight: var(--font-weight-black);
+  text-align: center;
+  margin-bottom: 40px;
+  color: var(--color-white);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.financial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin: 30px 0;
+}
+
+.financial-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.financial-item:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.financial-icon {
+  font-size: 40px;
+  color: var(--color-primary);
+}
+
+.financial-item.costs .financial-icon {
+  color: #ff9900;
+}
+
+.financial-item.donations .financial-icon {
+  color: #00ff00;
+}
+
+.financial-item.balance .financial-icon {
+  color: var(--color-primary);
+}
+
+.financial-content h3 {
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  opacity: 0.8;
+  color: var(--color-gray-light);
+}
+
+.financial-content .amount {
+  font-size: 32px;
+  font-weight: var(--font-weight-black);
+  color: var(--color-white);
+  line-height: 1;
+}
+
+.financial-content .sublabel {
+  font-size: 14px;
+  color: var(--color-gray-light);
+  margin-top: 5px;
+  opacity: 0.8;
+}
+
+.donate-cta {
+  text-align: center;
+  margin-top: 30px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.donate-cta p {
+  font-size: 18px;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+.donate-button {
+  display: inline-block;
+  background: var(--color-primary);
+  color: var(--color-white);
+  padding: 15px 40px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.donate-button:hover {
+  background: var(--color-primary-dark);
+  transform: scale(1.05);
+  box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+}
+
+.donate-button i {
+  margin-right: 10px;
+}
+
+/* Skeleton Loading States */
+.skeleton-loader {
+  display: block;
+  width: 140px;
+  height: 32px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-color: rgba(255, 255, 255, 0.1);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+/* Hide actual content when loading, show skeleton */
+.financial-content.loading .amount,
+.financial-content.loading .sublabel {
+  display: none;
+}
+
+.financial-content.loading .skeleton-loader {
+  display: block;
+}
+
+/* Show actual content when not loading, hide skeleton */
+.financial-content:not(.loading) .amount,
+.financial-content:not(.loading) .sublabel {
+  display: block;
+}
+
+.financial-content:not(.loading) .skeleton-loader {
+  display: none;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .financial-status-card {
+    padding: 20px;
+    margin: 40px 10px;
+  }
+  
+  .financial-status-card .card-title {
+    font-size: 24px;
+  }
+  
+  .financial-grid {
+    gap: 20px;
+  }
+  
+  .financial-item {
+    padding: 15px;
+  }
+  
+  .financial-icon {
+    font-size: 30px;
+  }
+  
+  .financial-content .amount {
+    font-size: 24px;
+  }
+  
+  .donate-button {
+    padding: 12px 30px;
+    font-size: 16px;
+  }
+}
