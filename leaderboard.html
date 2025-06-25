@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - North Swanage Traffic Consultation Group</title>
+    <meta name="description" content="See who's leading the campaign to make North Swanage safer. View top supporters and their contributions.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components/gamification.css">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+</head>
+<body>
+    <!-- Navigation will be included here -->
+    <div id="nav-placeholder"></div>
+    
+    <main class="leaderboard-page">
+        <section class="leaderboard-hero">
+            <div class="container">
+                <h1>Community Champions</h1>
+                <p class="hero-subtitle">Celebrating our most active supporters in making North Swanage safer</p>
+                
+                <!-- User's current stats -->
+                <div class="current-user-stats" id="current-user-stats" style="display: none;">
+                    <h3>Your Stats</h3>
+                    <div class="user-stat-row">
+                        <div class="stat-item">
+                            <span class="stat-label">Rank</span>
+                            <span class="stat-value" id="my-rank">#-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Points</span>
+                            <span class="stat-value" id="my-points">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Referrals</span>
+                            <span class="stat-value" id="my-referrals">0</span>
+                        </div>
+                    </div>
+                    <a href="/share.html" class="share-cta-btn">Earn More Points →</a>
+                </div>
+            </div>
+        </section>
+        
+        <section class="leaderboard-content">
+            <div class="container">
+                <!-- Time period filter -->
+                <div class="leaderboard-controls">
+                    <div class="time-filter">
+                        <button class="filter-btn active" data-period="all">All Time</button>
+                        <button class="filter-btn" data-period="month">This Month</button>
+                        <button class="filter-btn" data-period="week">This Week</button>
+                    </div>
+                    <div class="leaderboard-info">
+                        <span id="leaderboard-update">Last updated: <span id="update-time">Just now</span></span>
+                    </div>
+                </div>
+                
+                <!-- Top 3 podium -->
+                <div class="podium-section">
+                    <div class="podium">
+                        <div class="podium-place second">
+                            <div class="podium-content">
+                                <div class="medal silver">2</div>
+                                <h4 class="podium-name" id="second-name">-</h4>
+                                <p class="podium-points"><span id="second-points">0</span> pts</p>
+                                <p class="podium-referrals"><span id="second-referrals">0</span> referrals</p>
+                            </div>
+                            <div class="podium-bar"></div>
+                        </div>
+                        <div class="podium-place first">
+                            <div class="podium-content">
+                                <div class="medal gold">1</div>
+                                <h4 class="podium-name" id="first-name">-</h4>
+                                <p class="podium-points"><span id="first-points">0</span> pts</p>
+                                <p class="podium-referrals"><span id="first-referrals">0</span> referrals</p>
+                            </div>
+                            <div class="podium-bar"></div>
+                        </div>
+                        <div class="podium-place third">
+                            <div class="podium-content">
+                                <div class="medal bronze">3</div>
+                                <h4 class="podium-name" id="third-name">-</h4>
+                                <p class="podium-points"><span id="third-points">0</span> pts</p>
+                                <p class="podium-referrals"><span id="third-referrals">0</span> referrals</p>
+                            </div>
+                            <div class="podium-bar"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Leaderboard table -->
+                <div class="leaderboard-table-container">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Name</th>
+                                <th>Points</th>
+                                <th>Referrals</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-tbody">
+                            <!-- Dynamically populated -->
+                        </tbody>
+                    </table>
+                    
+                    <!-- Loading state -->
+                    <div class="loading-state" id="loading-state">
+                        <div class="loading-spinner"></div>
+                        <p>Loading leaderboard...</p>
+                    </div>
+                    
+                    <!-- Empty state -->
+                    <div class="empty-state" id="empty-state" style="display: none;">
+                        <p>No data available for this time period.</p>
+                        <a href="/share.html" class="share-cta-btn">Be the first to earn points!</a>
+                    </div>
+                </div>
+                
+                <!-- Join CTA for non-participants -->
+                <div class="join-cta" id="join-cta" style="display: none;">
+                    <h3>Want to Join the Leaderboard?</h3>
+                    <p>Complete the survey to get your unique referral link and start earning points!</p>
+                    <a href="/#survey-form" class="join-btn">Take the Survey</a>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer placeholder -->
+    <footer id="footer-placeholder"></footer>
+    
+    <!-- Scripts -->
+    <script src="js/utils/include-nav.js"></script>
+    <script src="js/modules/referral-tracking.js"></script>
+    <script src="js/modules/leaderboard.js"></script>
+</body>
+</html>
