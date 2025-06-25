@@ -1,14 +1,14 @@
 // Simple caching mechanism
 let cachedCount = null;
 let cacheTime = 0;
-const CACHE_DURATION = 60000; // 1 minute cache
+const CACHE_DURATION = 900000; // 15 minute cache
 
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
+  res.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=2592000');
 
   // Handle OPTIONS request
   if (req.method === 'OPTIONS') {
