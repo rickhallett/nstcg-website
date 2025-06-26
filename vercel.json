@@ -23,6 +23,21 @@
     },
     "api/get-total-donations.js": {
       "maxDuration": 10
+    },
+    "api/feature-flags.js": {
+      "maxDuration": 10
+    },
+    "api/get-user-stats.js": {
+      "maxDuration": 10
+    },
+    "api/track-share.js": {
+      "maxDuration": 10
+    },
+    "api/get-leaderboard.js": {
+      "maxDuration": 10
+    },
+    "api/debug-env.js": {
+      "maxDuration": 10
     }
   },
   "headers": [
