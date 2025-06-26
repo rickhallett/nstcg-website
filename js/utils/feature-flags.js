@@ -2,24 +2,25 @@
  * Frontend Feature Flag Utility
  * 
  * This module provides access to feature flags in the browser.
- * Since we can't access process.env directly in the browser,
- * we'll need to inject these values during build time or fetch them from an API.
+ * Uses the same precedence logic as the backend:
+ * 1. Notion database (takes precedence)
+ * 2. Environment variables (injected at build time)
+ * 3. Default values
  */
 
-// Default feature configuration
-// These can be overridden by fetching from an API endpoint
+// Default feature configuration (synchronized with backend)
 const defaultFeatures = {
   donations: {
-    enabled: true,
-    showFinancialStatus: true,
-    showRecentDonations: true,
-    showTotalDonations: true
+    enabled: false,
+    showFinancialStatus: false,
+    showRecentDonations: false,
+    showTotalDonations: false
   },
   
   campaignCosts: {
-    enabled: true,
-    showLiveCounter: true,
-    showBreakdown: true
+    enabled: false,
+    showLiveCounter: false,
+    showBreakdown: false
   },
   
   leaderboard: {
@@ -46,6 +47,7 @@ const defaultFeatures = {
 
 // Store for runtime features
 let features = { ...defaultFeatures };
+let featuresLoaded = false;
 
 /**
  * Check if a feature is enabled
@@ -99,8 +101,12 @@ export function getFeatures() {
  * @returns {Promise<Object>} Features configuration
  */
 export async function loadFeatureFlags() {
+  if (featuresLoaded) {
+    return features;
+  }
+
   const CACHE_KEY = 'nstcg_feature_flags';
-  const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+  const CACHE_TTL = 5 * 60 * 1000; // 5 minutes (sync with backend)
   
   // Check localStorage cache
   try {
@@ -109,6 +115,7 @@ export async function loadFeatureFlags() {
       const { data, timestamp } = JSON.parse(cached);
       if (Date.now() - timestamp < CACHE_TTL) {
         features = { ...defaultFeatures, ...data };
+        featuresLoaded = true;
         console.log('Using cached feature flags');
         return features;
       }
@@ -123,6 +130,7 @@ export async function loadFeatureFlags() {
     if (response.ok) {
       const serverFeatures = await response.json();
       features = { ...defaultFeatures, ...serverFeatures };
+      featuresLoaded = true;
       
       // Cache the result
       try {
@@ -134,11 +142,16 @@ export async function loadFeatureFlags() {
         console.warn('Failed to cache feature flags:', cacheError);
       }
       
+      console.log('Loaded feature flags from server');
       return features;
+    } else {
+      console.warn(`Feature flags API returned ${response.status}, using defaults`);
     }
   } catch (error) {
     console.warn('Failed to load feature flags from server, using defaults:', error);
   }
+  
+  featuresLoaded = true;
   return features;
 }
 
@@ -177,6 +190,52 @@ export function removeIfDisabled(featurePath, element) {
   }
 }
 
+/**
+ * Initialize feature flags and set up global window object
+ * This ensures feature flags are available globally on window.featureFlags
+ */
+export async function initializeFeatureFlags() {
+  try {
+    await loadFeatureFlags();
+    
+    // Make features available globally for compatibility
+    window.featureFlags = features;
+    
+    // Dispatch event to signal that feature flags are ready
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('featureFlagsLoaded', { 
+        detail: features 
+      }));
+    }
+    
+    return features;
+  } catch (error) {
+    console.error('Failed to initialize feature flags:', error);
+    
+    // Set defaults globally even if initialization fails
+    window.featureFlags = features;
+    
+    return features;
+  }
+}
+
+/**
+ * Clear feature flags cache and reload from server
+ * Useful for testing or when flags change
+ */
+export async function refreshFeatureFlags() {
+  featuresLoaded = false;
+  
+  // Clear localStorage cache
+  try {
+    localStorage.removeItem('nstcg_feature_flags');
+  } catch (error) {
+    console.warn('Failed to clear feature flags cache:', error);
+  }
+  
+  return await loadFeatureFlags();
+}
+
 // Export default object with all functions
 export default {
   isFeatureEnabled,
@@ -184,6 +243,8 @@ export default {
   areAllFeaturesEnabled,
   getFeatures,
   loadFeatureFlags,
+  initializeFeatureFlags,
+  refreshFeatureFlags,
   showIfEnabled,
   hideIfDisabled,
   removeIfDisabled
