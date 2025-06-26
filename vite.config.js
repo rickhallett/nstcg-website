@@ -71,6 +71,9 @@ export default defineConfig({
   // Base URL configuration
   base: './',
   
+  // Public directory (will be copied to dist root)
+  publicDir: 'public',
+  
   // Asset handling
   assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg', '**/*.webp'],
   
@@ -83,13 +86,5 @@ export default defineConfig({
   // Define global constants
   define: {
     __DEV__: JSON.stringify(process.env.NODE_ENV === 'development')
-  },
-  
-  // Optimization settings
-  optimizeDeps: {
-    include: [
-      'micromodal',
-      'alpinejs'
-    ]
   }
 })
