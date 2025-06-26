@@ -58,6 +58,12 @@ async function createGamificationDatabase() {
         },
       ],
       properties: {
+        // Required title property - Notion requires exactly one title property
+        'Name': {
+          type: 'title',
+          title: {},
+        },
+        
         // Primary identifier
         'Email': {
           type: 'email',
@@ -298,6 +304,15 @@ async function migrateExistingUsers(gamificationDatabaseId) {
               database_id: gamificationDatabaseId,
             },
             properties: {
+              'Name': {
+                title: [
+                  {
+                    text: {
+                      content: name || `${firstName} ${lastName}`.trim() || email,
+                    },
+                  },
+                ],
+              },
               'Email': {
                 email: email,
               },
