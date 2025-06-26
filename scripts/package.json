@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "create-gamification-db": "node create-gamification-database.js",
-    "test-connection": "node test-notion-connection.js"
+    "test-connection": "node test-notion-connection.js",
+    "example": "node example-gamification-usage.js"
   },
   "dependencies": {
     "@notionhq/client": "^2.2.14",
