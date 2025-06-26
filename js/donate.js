@@ -22,17 +22,23 @@ document.addEventListener('DOMContentLoaded', function() {
   // Check URL parameters for success/cancel
   checkUrlParams();
   
-  // Initialize cost counter
-  updateCostCounter();
-  setInterval(updateCostCounter, 1000); // Update every second for real-time feel
+  // Initialize cost counter (if enabled)
+  if (!window.DISABLE_COST_COUNTER) {
+    updateCostCounter();
+    setInterval(updateCostCounter, 1000); // Update every second for real-time feel
+  }
   
-  // Load recent donations
-  loadRecentDonations();
-  setInterval(loadRecentDonations, 30000); // Refresh every 30 seconds
+  // Load recent donations (if enabled)
+  if (!window.donateFeatureFlags || window.donateFeatureFlags.shouldLoadRecentDonations()) {
+    loadRecentDonations();
+    setInterval(loadRecentDonations, 30000); // Refresh every 30 seconds
+  }
   
-  // Load total donations
-  loadTotalDonations();
-  setInterval(loadTotalDonations, 5 * 60 * 1000); // Refresh every 5 minutes
+  // Load total donations (if enabled)
+  if (!window.donateFeatureFlags || window.donateFeatureFlags.shouldLoadTotalDonations()) {
+    loadTotalDonations();
+    setInterval(loadTotalDonations, 5 * 60 * 1000); // Refresh every 5 minutes
+  }
   
   // Setup event listeners
   setupEventListeners();

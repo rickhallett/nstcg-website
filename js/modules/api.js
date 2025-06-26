@@ -6,6 +6,7 @@
 import { ApiConfig, ApiStatus, buildApiUrl, getErrorMessage } from '../config/api.config.js';
 import eventBus, { Events } from '../core/eventBus.js';
 import stateManager from '../core/StateManager.js';
+import cache, { CACHE_TTL } from '../utils/cache.js';
 
 /**
  * API Client class for handling all API communications
@@ -158,16 +159,53 @@ class ApiClient {
   }
 
   /**
-   * GET request
+   * GET request with caching support
    * @param {string} endpoint - API endpoint
    * @param {Object} options - Request options
    * @returns {Promise} Response data
    */
   async get(endpoint, options = {}) {
-    return this.request(endpoint, {
+    // Check if caching is enabled for this endpoint
+    const cacheKey = `api_${endpoint}`;
+    const cacheTTL = this.getCacheTTL(endpoint);
+    
+    if (cacheTTL && !options.skipCache) {
+      const cachedData = cache.get(cacheKey);
+      if (cachedData) {
+        console.log(`Cache hit for ${endpoint}`);
+        return cachedData;
+      }
+    }
+    
+    const data = await this.request(endpoint, {
       ...options,
       method: 'GET'
     });
+    
+    // Cache the response if applicable
+    if (cacheTTL && !options.skipCache) {
+      cache.set(cacheKey, data, cacheTTL);
+    }
+    
+    return data;
+  }
+  
+  /**
+   * Get cache TTL for endpoint
+   * @private
+   */
+  getCacheTTL(endpoint) {
+    const ttlMap = {
+      'getCount': CACHE_TTL.PARTICIPANT_COUNT,
+      'feature-flags': CACHE_TTL.FEATURE_FLAGS,
+      'getUserStats': CACHE_TTL.USER_STATS,
+      'getRecentSignups': CACHE_TTL.RECENT_SIGNUPS,
+      'getLeaderboard': CACHE_TTL.LEADERBOARD,
+      'getDonations': CACHE_TTL.DONATIONS,
+      'analyzeConcerns': CACHE_TTL.HOT_TOPICS
+    };
+    
+    return ttlMap[endpoint] || null;
   }
 
   /**
