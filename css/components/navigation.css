@@ -29,6 +29,19 @@
   height: 70px;
 }
 
+/* Navigation with timer layout */
+.nav-container.has-timer {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+}
+
+.nav-container.has-timer .nav-timer-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* Logo Styles */
 .nav-logo {
   font-size: 24px;
@@ -306,10 +319,10 @@
 }
 
 .mobile-menu a[href="/"]::before { content: '\f015'; } /* Home icon */
-.mobile-menu a[href="/feeds.html"]::before { content: '\f1ea'; } /* Feed icon */
+.mobile-menu a[href="/feeds.html"]::before { content: '\f09e'; } /* RSS/Feed icon */
 .mobile-menu a[href="/donate.html"]::before { content: '\f4b9'; } /* Donate icon */
-.mobile-menu a[href="/#signupForm"]::before { content: '\f234'; } /* User plus icon */
-.mobile-menu a[href="/#share-section"]::before { content: '\f1e0'; } /* Share icon */
+.mobile-menu a[href="/leaderboard.html"]::before { content: '\f091'; } /* Trophy icon */
+.mobile-menu a[href="/share.html"]::before { content: '\f1e0'; } /* Share icon */
 
 .mobile-menu a:hover,
 .mobile-menu a.active {
@@ -406,7 +419,7 @@
   }
   
   .nav-logo {
-    font-size: 20px;
+    font-size: 16px; /* Reduced from 20px to accommodate timer */
   }
   
   .desktop-menu {
@@ -474,4 +487,109 @@
 .mobile-menu,
 .mobile-menu-overlay {
   will-change: transform;
+}
+
+/* Navigation Timer Styles */
+.nav-timer-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+  font-size: 18px;
+}
+
+.nav-timer-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 45px;
+}
+
+.nav-timer-value {
+  font-size: 24px;
+  line-height: 1;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 1px;
+}
+
+.nav-timer-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+.nav-timer-separator {
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  opacity: 0.6;
+  align-self: center;
+  margin-bottom: 12px;
+}
+
+/* Timer color classes */
+.nav-timer-container.timer-yellow {
+  color: #ffeb3b;
+}
+
+.nav-timer-container.timer-amber {
+  color: #ffc107;
+}
+
+.nav-timer-container.timer-orange {
+  color: #ff9800;
+}
+
+.nav-timer-container.timer-red {
+  color: #ff0000;
+}
+
+/* Timer expired state */
+.timer-expired {
+  color: #ff6b6b;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Timer blink animation */
+@keyframes timer-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.nav-timer-container.timer-blink {
+  animation: timer-blink 1s ease-in-out infinite;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .nav-timer-container {
+    font-size: 14px;
+    gap: 2px;
+  }
+  
+  .nav-timer-value {
+    font-size: 16px;
+  }
+  
+  .nav-timer-label {
+    font-size: 8px;
+  }
+  
+  .nav-timer-separator {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  .nav-timer-unit {
+    min-width: 30px;
+  }
+  
+  /* Keep grid layout for timer positioning */
+  .nav-container.has-timer {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+  }
 }

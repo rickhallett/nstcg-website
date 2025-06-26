@@ -1,4 +1,23 @@
-// Countdown Timer
+// Load map as soon as DOM is ready for consistent fast loading
+document.addEventListener('DOMContentLoaded', function() {
+  // Deliberately show loading screen for 3 seconds to build anticipation
+  setTimeout(() => {
+    const mapContainer = document.getElementById('map-container');
+    if (mapContainer) {
+      mapContainer.innerHTML = `
+        <div class="map-image fade-in" id="traffic-impact-map">
+          <picture>
+            <source srcset="images/impact_non_sat_height.webp" type="image/webp">
+            <img src="images/impact_non_sat_height_compressed.png" alt="Map of North Swanage">
+          </picture>
+          <div class="impact-overlay"></div>
+        </div>
+      `;
+    }
+  }, 3000); // 3 second deliberate delay for loading screen effect
+});
+
+// Countdown Timer for alert header
 function updateCountdown() {
   const deadline = new Date('2025-06-29T23:59:59+01:00'); // BST (British Summer Time)
   const now = new Date().getTime();
@@ -17,6 +36,7 @@ function updateCountdown() {
   const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+  const totalHours = Math.floor(timeLeft / (1000 * 60 * 60));
 
   // Update header countdown
   const daysEl = document.querySelector('.header-days');
@@ -28,6 +48,35 @@ function updateCountdown() {
   if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
   if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
   if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
+  
+  // Apply color and blink features if enabled
+  applyTimerFeatures(totalHours);
+}
+
+// Apply timer color and blink features
+function applyTimerFeatures(totalHours) {
+  const container = document.querySelector('.header-countdown');
+  if (!container) return;
+  
+  // Check feature flags from window object (set by feature-flags.js)
+  const coloredTimer = window.featureFlags?.ui?.coloredTimer || false;
+  const timerBlink = window.featureFlags?.ui?.timerBlink || false;
+  
+  // Remove all color classes
+  container.classList.remove('timer-yellow', 'timer-amber', 'timer-orange', 'timer-red', 'timer-blink');
+  
+  if (coloredTimer) {
+    let colorClass = 'timer-yellow';
+    if (totalHours <= 1) colorClass = 'timer-red';
+    else if (totalHours <= 12) colorClass = 'timer-orange';
+    else if (totalHours <= 24) colorClass = 'timer-amber';
+    
+    container.classList.add(colorClass);
+    
+    if (timerBlink && totalHours <= 1) {
+      container.classList.add('timer-blink');
+    }
+  }
 }
 
 setInterval(updateCountdown, 1000);
@@ -126,6 +175,7 @@ document.getElementById('signupForm').addEventListener('submit', async function 
 
     // Success - Store user data in localStorage
     localStorage.setItem('nstcg_user_id', userId);
+    localStorage.setItem('nstcg_email', formData.email);
     localStorage.setItem('nstcg_registered', 'true');
     if (formData.comment) {
       localStorage.setItem('nstcg_comment', formData.comment);
@@ -221,14 +271,41 @@ document.getElementById('signupForm').addEventListener('submit', async function 
   }
 });
 
-// Function to fetch real count from API
+// Function to fetch real count from API with caching
 async function fetchRealCount() {
+  const CACHE_KEY = 'nstcg_participant_count_cache';
+  const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  
+  // Check cache first
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const { count, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < CACHE_TTL) {
+        console.log('Using cached participant count');
+        return count;
+      }
+    }
+  } catch (error) {
+    console.warn('Error reading count cache:', error);
+  }
+  
+  // Fetch from API
   try {
     const response = await fetch('/api/get-count');
     if (response.ok) {
       const data = await response.json();
-      // Cache the count for next visit
-      localStorage.setItem('nstcg_cached_count', data.count.toString());
+      
+      // Cache the count with timestamp
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          count: data.count,
+          timestamp: Date.now()
+        }));
+      } catch (cacheError) {
+        console.warn('Failed to cache count:', cacheError);
+      }
+      
       return data.count;
     }
   } catch (error) {
@@ -874,6 +951,9 @@ function showModalButtonNotification() {
 function showReferralBanner(referralInfo) {
   if (!referralInfo || !referralInfo.referralCode) return;
   
+  // Check if referral banner is disabled via feature flags
+  if (window.DISABLE_REFERRAL_BANNER) return;
+  
   const banner = document.createElement('div');
   banner.className = 'referral-banner';
   banner.style.cssText = `
@@ -929,8 +1009,8 @@ function showReferralBanner(referralInfo) {
 
 // Initialize counts on page load
 window.addEventListener('load', async function () {
-  // Check for referral
-  const referralInfo = checkReferral();
+  // Check for referral (only if not disabled)
+  const referralInfo = window.DISABLE_REFERRAL_TRACKING ? null : checkReferral();
   
   // Show referral banner if applicable
   if (referralInfo) {
@@ -942,9 +1022,6 @@ window.addEventListener('load', async function () {
 
   // Load feed actions
   await loadFeedActions();
-
-  // Load social referral codes
-  await loadSocialCodes();
 
   // Start counter animation immediately
   const counterEl = document.querySelector('.counter-number');
@@ -961,35 +1038,16 @@ window.addEventListener('load', async function () {
   // Initialize all counts immediately
   await initializeCounts();
   
-  // Load financial status
-  await loadFinancialStatus();
+  // Load financial status (only if enabled)
+  if (!window.featureFlags || window.featureFlags.shouldLoadFinancialStatus()) {
+    await loadFinancialStatus();
+  }
 
   // Initial live feed update with loading state
   await updateLiveFeed(true);
 
   // Set up smart polling
   setupSmartPolling();
-
-  // Show map after a delay
-  setTimeout(() => {
-    const mapContainer = document.getElementById('map-container');
-    if (mapContainer) {
-      mapContainer.innerHTML = `
-        <div class="map-image" id="traffic-impact-map">
-          <img src="images/impact_non_sat_height.png" alt="Map of North Swanage">
-          <div class="impact-overlay"></div>
-        </div>
-      `;
-
-      // Trigger fade-in animation after a brief delay
-      setTimeout(() => {
-        const mapImage = document.getElementById('traffic-impact-map');
-        if (mapImage) {
-          mapImage.classList.add('fade-in');
-        }
-      }, 100);
-    }
-  }, 1500);
 });
 
 // Store original modal content for reset
@@ -1129,6 +1187,7 @@ async function handleModalFormSubmit(e) {
 
     // Success - Store user data in localStorage
     localStorage.setItem('nstcg_user_id', userId);
+    localStorage.setItem('nstcg_email', formData.email);
     localStorage.setItem('nstcg_registered', 'true');
     if (formData.comment) {
       localStorage.setItem('nstcg_comment', formData.comment);
@@ -1466,39 +1525,14 @@ function generateShareText(count, userComment) {
   return `${baseMessage} Take action before it's too late:`;
 }
 
-// Load social referral codes
-let socialCodes = null;
-async function loadSocialCodes() {
-  if (!socialCodes) {
-    try {
-      const response = await fetch('/data/social-referral-codes.json');
-      socialCodes = await response.json();
-    } catch (error) {
-      console.error('Error loading social codes:', error);
-      socialCodes = {
-        platforms: {
-          twitter: 'tw',
-          facebook: 'fb',
-          whatsapp: 'wa',
-          linkedin: 'li',
-          instagram: 'ig',
-          email: 'em',
-          direct: 'dr'
-        }
-      };
-    }
-  }
-  return socialCodes;
-}
+// Social codes now handled by ReferralUtils
 
 async function getShareUrl(platform = 'direct') {
-  const userId = localStorage.getItem('nstcg_user_id') || sessionStorage.getItem('userId') || generateUserId();
-
-  // Ensure social codes are loaded
-  await loadSocialCodes();
-
-  const platformCode = socialCodes.platforms[platform] || 'dr';
-  return `https://nstcg.org?ref=${platformCode}-${userId}`;
+  // Get or generate referral code
+  const referralCode = generateReferralCode();
+  
+  // Use shared utility to generate URL
+  return window.ReferralUtils.generateShareUrl(referralCode, platform);
 }
 
 async function shareOnTwitter(count, userComment) {
@@ -1587,8 +1621,7 @@ function generateReferralCode() {
   if (stored) return stored;
   
   const firstName = localStorage.getItem('nstcg_firstName') || 'USER';
-  const timestamp = Date.now().toString(36).slice(-4);
-  const code = `${firstName.toUpperCase().slice(0, 3)}${timestamp}`.toUpperCase();
+  const code = window.ReferralUtils.generateReferralCode(firstName);
   
   localStorage.setItem('nstcg_referral_code', code);
   return code;
@@ -1623,12 +1656,18 @@ function calculateRunningCosts() {
 // Fetch and display donation totals
 async function loadFinancialStatus() {
   try {
-    // Get donations
-    const donationRes = await fetch('/api/get-total-donations');
-    const donationData = await donationRes.json();
+    let donationData = { total: 0, count: 0 };
     
-    // Calculate costs
-    const runningCosts = calculateRunningCosts();
+    // Get donations (only if feature is enabled)
+    if (!window.featureFlags || window.featureFlags.shouldFetchDonationTotals()) {
+      const donationRes = await fetch('/api/get-total-donations');
+      donationData = await donationRes.json();
+    }
+    
+    // Calculate costs (only if feature is enabled)
+    const runningCosts = (!window.featureFlags || window.featureFlags.shouldShowCampaignCosts()) 
+      ? calculateRunningCosts() 
+      : 0;
     
     // Remove loading state from all financial content
     document.querySelectorAll('.financial-content.loading').forEach(el => {
