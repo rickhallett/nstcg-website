@@ -336,15 +336,23 @@ class StateManager {
    * Deep clone an object
    * @private
    */
-  _deepClone(obj) {
+  _deepClone(obj, seen = new WeakSet()) {
     if (obj === null || typeof obj !== 'object') return obj;
+    
+    // Check for circular references
+    if (seen.has(obj)) {
+      return '[Circular Reference]';
+    }
+    
+    seen.add(obj);
+    
     if (obj instanceof Date) return new Date(obj);
-    if (obj instanceof Array) return obj.map(item => this._deepClone(item));
+    if (obj instanceof Array) return obj.map(item => this._deepClone(item, seen));
     if (obj instanceof Object) {
       const cloned = {};
       for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
-          cloned[key] = this._deepClone(obj[key]);
+          cloned[key] = this._deepClone(obj[key], seen);
         }
       }
       return cloned;
