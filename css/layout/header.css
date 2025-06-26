@@ -167,3 +167,30 @@
     padding: 6px 12px;
   }
 }
+
+/* Timer color classes for alert header */
+.header-countdown.timer-yellow .header-time-value {
+  color: #ffeb3b;
+}
+
+.header-countdown.timer-amber .header-time-value {
+  color: #ffc107;
+}
+
+.header-countdown.timer-orange .header-time-value {
+  color: #ff9800;
+}
+
+.header-countdown.timer-red .header-time-value {
+  color: #ff0000;
+}
+
+/* Timer blink animation */
+@keyframes header-timer-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.header-countdown.timer-blink {
+  animation: header-timer-blink 1s ease-in-out infinite;
+}
