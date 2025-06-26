@@ -213,14 +213,23 @@
   <script src="https://js.stripe.com/v3/"></script>
   <!-- Navigation Include -->
   <script type="module" src="js/utils/include-nav.js"></script>
+  <!-- Donate Page Features (conditional rendering) -->
+  <script type="module" src="js/modules/donate-features.js"></script>
   <!-- Page JavaScript -->
   <script src="js/donate.js"></script>
 
   <!-- Vercel Speed Insights -->
   <script>
-    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    // Only load Vercel Speed Insights in production
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+      
+      const script = document.createElement('script');
+      script.defer = true;
+      script.src = '/_vercel/speed-insights/script.js';
+      document.head.appendChild(script);
+    }
   </script>
-  <script defer src="/_vercel/speed-insights/script.js"></script>
 </body>
 
 </html>
