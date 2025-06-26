@@ -16,6 +16,10 @@ const ENDPOINT_MAP = {
   '/api/get-total-donations': 'donations'
 };
 
+// Recursion detection
+let fetchDepth = 0;
+const MAX_FETCH_DEPTH = 3;
+
 /**
  * Enhanced fetch function that uses preloaded data when available
  * @param {string} url - API endpoint URL
@@ -23,54 +27,71 @@ const ENDPOINT_MAP = {
  * @returns {Promise<Response>} Enhanced response with preloaded data
  */
 export async function fetchWithPreload(url, options = {}) {
-  const apiKey = ENDPOINT_MAP[url];
-  
-  // If we have a preload key, try to get preloaded data
-  if (apiKey) {
-    const preloadStatus = StateManager.getPreloadStatus(apiKey);
-    
-    // If we have fresh preloaded data, return it immediately
-    if (preloadStatus.isLoaded && !preloadStatus.isStale) {
-      console.log(`[APIIntegration] Using preloaded data for ${url}`);
-      return createMockResponse(preloadStatus.data);
-    }
-    
-    // If we have stale data, return it but trigger background refresh
-    if (preloadStatus.isLoaded && preloadStatus.isStale) {
-      console.log(`[APIIntegration] Using stale preloaded data for ${url}, refreshing in background`);
-      
-      // Trigger background refresh
-      fetch(url, options)
-        .then(response => response.json())
-        .then(data => {
-          StateManager.setPreloadedData(apiKey, data, {
-            ttl: 5 * 60 * 1000, // 5 minutes
-            priority: 'refresh'
-          });
-          CacheManager.set(`preload_${apiKey}`, data, 5 * 60 * 1000);
-        })
-        .catch(error => console.warn(`Background refresh failed for ${url}:`, error));
-      
-      return createMockResponse(preloadStatus.data);
-    }
+  // Recursion detection
+  if (fetchDepth > MAX_FETCH_DEPTH) {
+    console.error(`[APIIntegration] Maximum fetch depth exceeded for ${url}`);
+    throw new Error('Maximum fetch recursion depth exceeded');
   }
   
-  // No preloaded data available, perform normal fetch
-  const response = await fetch(url, options);
+  fetchDepth++;
   
-  // Cache the response for future use
-  if (response.ok && apiKey) {
-    const clonedResponse = response.clone();
-    clonedResponse.json().then(data => {
-      StateManager.setPreloadedData(apiKey, data, {
-        ttl: 5 * 60 * 1000,
-        priority: 'normal'
-      });
-      CacheManager.set(`preload_${apiKey}`, data, 5 * 60 * 1000);
-    }).catch(() => {}); // Ignore errors in background caching
+  try {
+    // Ensure we have the original fetch available
+    if (!window._originalFetch) {
+      window._originalFetch = window.fetch;
+    }
+    
+    const apiKey = ENDPOINT_MAP[url];
+    
+    // If we have a preload key, try to get preloaded data
+    if (apiKey) {
+      const preloadStatus = StateManager.getPreloadStatus(apiKey);
+      
+      // If we have fresh preloaded data, return it immediately
+      if (preloadStatus.isLoaded && !preloadStatus.isStale) {
+        console.log(`[APIIntegration] Using preloaded data for ${url}`);
+        return createMockResponse(preloadStatus.data);
+      }
+      
+      // If we have stale data, return it but trigger background refresh
+      if (preloadStatus.isLoaded && preloadStatus.isStale) {
+        console.log(`[APIIntegration] Using stale preloaded data for ${url}, refreshing in background`);
+        
+        // Trigger background refresh using original fetch
+        window._originalFetch(url, options)
+          .then(response => response.json())
+          .then(data => {
+            StateManager.setPreloadedData(apiKey, data, {
+              ttl: 5 * 60 * 1000, // 5 minutes
+              priority: 'refresh'
+            });
+            CacheManager.set(`preload_${apiKey}`, data, 5 * 60 * 1000);
+          })
+          .catch(error => console.warn(`Background refresh failed for ${url}:`, error));
+        
+        return createMockResponse(preloadStatus.data);
+      }
+    }
+    
+    // No preloaded data available, perform normal fetch using original fetch
+    const response = await window._originalFetch(url, options);
+    
+    // Cache the response for future use
+    if (response.ok && apiKey) {
+      const clonedResponse = response.clone();
+      clonedResponse.json().then(data => {
+        StateManager.setPreloadedData(apiKey, data, {
+          ttl: 5 * 60 * 1000,
+          priority: 'normal'
+        });
+        CacheManager.set(`preload_${apiKey}`, data, 5 * 60 * 1000);
+      }).catch(() => {}); // Ignore errors in background caching
+    }
+    
+    return response;
+  } finally {
+    fetchDepth--;
   }
-  
-  return response;
 }
 
 /**
@@ -121,7 +142,8 @@ export async function refreshPreloadedData(endpoint) {
     throw new Error(`No preload key found for endpoint: ${endpoint}`);
   }
   
-  const response = await fetch(endpoint);
+  // Use original fetch for refresh
+  const response = await (window._originalFetch || fetch)(endpoint);
   if (!response.ok) {
     throw new Error(`Failed to refresh ${endpoint}: ${response.statusText}`);
   }
@@ -161,7 +183,14 @@ function createMockResponse(data) {
  * This allows existing code to transparently benefit from preloading
  */
 export function enableFetchIntegration() {
-  const originalFetch = window.fetch;
+  // Prevent double-patching
+  if (window._originalFetch) {
+    console.warn('[APIIntegration] Fetch integration already enabled');
+    return;
+  }
+  
+  // Store the original fetch reference
+  window._originalFetch = window.fetch;
   
   window.fetch = async function(url, options) {
     // Only intercept our API calls
@@ -169,8 +198,8 @@ export function enableFetchIntegration() {
       return fetchWithPreload(url, options);
     }
     
-    // Pass through all other requests
-    return originalFetch.call(this, url, options);
+    // Pass through all other requests using the original fetch
+    return window._originalFetch.call(this, url, options);
   };
   
   console.log('[APIIntegration] Fetch integration enabled - API calls will use preloaded data when available');
