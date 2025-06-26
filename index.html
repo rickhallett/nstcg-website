@@ -36,6 +36,10 @@
   <!-- Local Styles - Modular CSS -->
   <link rel="stylesheet" href="css/main.css">
   
+  <!-- Preload map images for faster loading -->
+  <link rel="preload" as="image" href="images/impact_non_sat_height.webp" type="image/webp">
+  <link rel="preload" as="image" href="images/impact_non_sat_height_compressed.png" type="image/png">
+  
   <!-- Critical inline script for instant UI updates -->
   <script>
     // Check registration status immediately for fastest possible UI update
@@ -357,12 +361,25 @@
   <!-- Navigation Include -->
   <script type="module" src="js/utils/include-nav.js"></script>
   
+  <!-- Homepage Features (conditional rendering) -->
+  <script type="module" src="js/modules/homepage-features.js"></script>
+  
+  <!-- Referral Utilities -->
+  <script src="js/modules/referral-utils.js"></script>
+  
   <script src="js/main.js"></script>
 
   <script>
-    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    // Only load Vercel Speed Insights in production
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+      
+      const script = document.createElement('script');
+      script.defer = true;
+      script.src = '/_vercel/speed-insights/script.js';
+      document.head.appendChild(script);
+    }
   </script>
-  <script defer src="/_vercel/speed-insights/script.js"></script>
 </body>
 
 </html>
