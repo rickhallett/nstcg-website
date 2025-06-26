@@ -111,6 +111,228 @@
   border-radius: var(--radius-md);
 }
 
+/* Hot Topics Section */
+.hot-topics {
+  padding: 40px 0;
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(255, 102, 0, 0.05) 100%);
+  margin-bottom: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 102, 0, 0.2);
+}
+
+.hot-topics .section-title {
+  color: var(--color-primary);
+  margin-bottom: 10px;
+}
+
+.hot-topics .section-title .fa-fire {
+  margin-right: 10px;
+  color: #ff4500;
+  animation: fireFlicker 2s ease-in-out infinite;
+}
+
+@keyframes fireFlicker {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+.hot-topics-subtitle {
+  text-align: center;
+  color: var(--color-gray-light);
+  font-size: 16px;
+  margin-bottom: 30px;
+  font-style: italic;
+}
+
+.hot-topics-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Hot Topic Cards */
+.hot-topic-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: 25px;
+  border-left: 5px solid var(--color-primary);
+  transition: all 300ms ease;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.hot-topic-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hot-topic-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hot-topic-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), #ff4500);
+}
+
+/* Rank styling */
+.hot-topic-card.rank-1 {
+  border-left-color: #ffd700;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+}
+
+.hot-topic-card.rank-1::before {
+  background: linear-gradient(90deg, #ffd700, #ffaa00);
+}
+
+.hot-topic-card.rank-2 {
+  border-left-color: #c0c0c0;
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+}
+
+.hot-topic-card.rank-2::before {
+  background: linear-gradient(90deg, #c0c0c0, #888888);
+}
+
+.hot-topic-card.rank-3 {
+  border-left-color: #cd7f32;
+  background: linear-gradient(135deg, rgba(205, 127, 50, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+}
+
+.hot-topic-card.rank-3::before {
+  background: linear-gradient(90deg, #cd7f32, #a0522d);
+}
+
+.hot-topic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.hot-topic-rank {
+  font-size: 36px;
+  font-weight: var(--font-weight-black);
+  opacity: 0.3;
+  line-height: 1;
+}
+
+.hot-topic-rank.rank-1 {
+  color: #ffd700;
+  opacity: 0.8;
+}
+
+.hot-topic-rank.rank-2 {
+  color: #c0c0c0;
+  opacity: 0.8;
+}
+
+.hot-topic-rank.rank-3 {
+  color: #cd7f32;
+  opacity: 0.8;
+}
+
+.hot-topic-info {
+  flex: 1;
+  margin-right: 15px;
+}
+
+.hot-topic-title {
+  font-size: 22px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-white);
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.hot-topic-description {
+  color: var(--color-gray-lighter);
+  line-height: 1.5;
+  margin: 0 0 15px 0;
+  font-size: 15px;
+}
+
+.hot-topic-frequency {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  font-size: 14px;
+}
+
+.hot-topic-frequency .fa-users {
+  font-size: 16px;
+}
+
+.frequency-bar {
+  height: 4px;
+  background: rgba(255, 102, 0, 0.2);
+  border-radius: 2px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.frequency-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), #ff4500);
+  border-radius: 2px;
+  transition: width 1s ease-out;
+  animation: fillBar 2s ease-out;
+}
+
+@keyframes fillBar {
+  from { width: 0; }
+  to { width: var(--fill-width); }
+}
+
+/* Loading, Error, and Empty States for Hot Topics */
+.hot-topics-loading,
+.hot-topics-error,
+.hot-topics-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-align: center;
+  color: var(--color-gray-light);
+}
+
+.hot-topics-loading .loading-spinner {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 15px;
+}
+
+.hot-topics-error i,
+.hot-topics-empty i {
+  font-size: 36px;
+  margin-bottom: 15px;
+  color: var(--color-gray);
+}
+
+.hot-topics-error i {
+  color: var(--color-error);
+}
+
 .section-title {
   font-size: 32px;
   font-weight: var(--font-weight-bold);
@@ -421,6 +643,24 @@
   .footer-nav {
     flex-wrap: wrap;
     justify-content: center;
+  }
+  
+  /* Hot Topics Mobile */
+  .hot-topics-container {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .hot-topic-card {
+    padding: 20px;
+  }
+  
+  .hot-topic-title {
+    font-size: 20px;
+  }
+  
+  .hot-topic-rank {
+    font-size: 28px;
   }
 }
 

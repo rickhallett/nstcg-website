@@ -72,6 +72,43 @@
       </div>
     </section>
     
+    <!-- Hot Topics Section -->
+    <section class="hot-topics">
+      <div class="container">
+        <h2 class="section-title">
+          <i class="fas fa-fire"></i>
+          Community Hot Topics
+        </h2>
+        <p class="hot-topics-subtitle">AI analysis of community feedback reveals these top concerns</p>
+        
+        <div id="hot-topics-container" class="hot-topics-container">
+          <!-- Hot topics will be loaded here -->
+        </div>
+        
+        <!-- Loading State -->
+        <div id="hot-topics-loading" class="hot-topics-loading">
+          <div class="loading-spinner"></div>
+          <p>Analyzing community concerns...</p>
+        </div>
+        
+        <!-- Error State -->
+        <div id="hot-topics-error" class="hot-topics-error" style="display: none;">
+          <i class="fas fa-exclamation-triangle"></i>
+          <p>Unable to analyze concerns at this time</p>
+          <button class="retry-button" onclick="window.feedsPage.loadHotTopics()">
+            <i class="fas fa-redo"></i> Try Again
+          </button>
+        </div>
+        
+        <!-- Empty State -->
+        <div id="hot-topics-empty" class="hot-topics-empty" style="display: none;">
+          <i class="fas fa-comments"></i>
+          <p>No comments available for analysis yet.</p>
+          <a href="/#signupForm" class="cta-button">Be the first to share your concerns</a>
+        </div>
+      </div>
+    </section>
+    
     <!-- All Feeds Section -->
     <section class="all-feeds">
       <div class="container">
