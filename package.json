@@ -1,0 +1,33 @@
+{
+  "name": "nstcg-website",
+  "version": "1.0.0",
+  "description": "North Swanage Traffic Consultation Group community action website",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "vercel-build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "^5.4.10",
+    "@vitejs/plugin-legacy": "^5.4.2",
+    "terser": "^5.36.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/nstcg-website.git"
+  },
+  "keywords": [
+    "community",
+    "traffic-safety",
+    "swanage",
+    "dorset",
+    "consultation"
+  ],
+  "author": "NSTCG",
+  "license": "MIT"
+}
