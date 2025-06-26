@@ -275,6 +275,23 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
+    
+    // Create gamification profile and process referral if applicable
+    if (process.env.NOTION_GAMIFICATION_DB_ID) {
+      try {
+        await processGamificationRegistration({
+          email,
+          firstName,
+          lastName,
+          userId: user_id,
+          referrer,
+          submissionId: submission_id
+        });
+      } catch (gamError) {
+        // Log error but don't fail the main submission
+        console.error('Gamification processing error:', gamError);
+      }
+    }
 
     // Success response
     res.status(200).json({
@@ -294,4 +311,211 @@ export default async function handler(req, res) {
       error: 'Failed to save submission. Please try again or contact support.'
     });
   }
+}
+
+/**
+ * Process gamification registration
+ * Creates user profile and awards points for registration and referrals
+ */
+async function processGamificationRegistration({ email, firstName, lastName, userId, referrer, submissionId }) {
+  const REGISTRATION_POINTS = 10;
+  const REFERRAL_POINTS = 25;
+  
+  try {
+    // Check if user already exists in gamification database
+    const existingUser = await checkExistingGamificationUser(email, userId);
+    if (existingUser) {
+      console.log('User already has gamification profile');
+      return;
+    }
+    
+    // Generate referral code for new user
+    const referralCode = generateUniqueReferralCode(firstName);
+    
+    // Create gamification profile
+    const newUserResponse = await fetch('https://api.notion.com/v1/pages', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28'
+      },
+      body: JSON.stringify({
+        parent: { database_id: process.env.NOTION_GAMIFICATION_DB_ID },
+        properties: {
+          'Email': { email: email },
+          'Name': { title: [{ text: { content: `${firstName} ${lastName}` } }] },
+          'Display Name': { rich_text: [{ text: { content: firstName } }] },
+          'User ID': { rich_text: [{ text: { content: userId } }] },
+          'Referral Code': { rich_text: [{ text: { content: referralCode } }] },
+          'Total Points': { number: REGISTRATION_POINTS },
+          'Registration Points': { number: REGISTRATION_POINTS },
+          'Share Points': { number: 0 },
+          'Referral Points': { number: 0 },
+          'Donation Points': { number: 0 },
+          'Direct Referrals Count': { number: 0 },
+          'Indirect Referrals Count': { number: 0 },
+          'Twitter Shares': { number: 0 },
+          'Facebook Shares': { number: 0 },
+          'WhatsApp Shares': { number: 0 },
+          'LinkedIn Shares': { number: 0 },
+          'Email Shares': { number: 0 },
+          'Registration Date': { date: { start: new Date().toISOString() } },
+          'Last Activity Date': { date: { start: new Date().toISOString() } },
+          'Opted Into Leaderboard': { checkbox: true },
+          'Submission ID': { rich_text: [{ text: { content: submissionId || '' } }] }
+        }
+      })
+    });
+    
+    if (!newUserResponse.ok) {
+      let errorData;
+      try {
+        errorData = await newUserResponse.json();
+      } catch (e) {
+        errorData = { message: 'Failed to parse error response' };
+      }
+      console.error('Notion API error creating gamification profile:', {
+        status: newUserResponse.status,
+        error: errorData,
+        databaseId: process.env.NOTION_GAMIFICATION_DB_ID,
+        hasToken: !!process.env.NOTION_TOKEN
+      });
+      throw new Error(`Failed to create gamification profile: ${newUserResponse.status} - ${errorData.message || errorData.code || 'Unknown error'}`);
+    }
+    
+    console.log('Created gamification profile for', email);
+    
+    // Process referral if applicable
+    if (referrer && referrer !== 'None') {
+      await processReferralReward(referrer, email);
+    }
+    
+  } catch (error) {
+    console.error('Error in gamification processing:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check if user already exists in gamification database
+ */
+async function checkExistingGamificationUser(email, userId) {
+  try {
+    if (!email) return false;
+    
+    const response = await fetch(`https://api.notion.com/v1/databases/${process.env.NOTION_GAMIFICATION_DB_ID}/query`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28'
+      },
+      body: JSON.stringify({
+        filter: {
+          property: 'Email',
+          email: { equals: email }
+        },
+        page_size: 1
+      })
+    });
+    
+    if (!response.ok) {
+      return false;
+    }
+    
+    const data = await response.json();
+    return data.results.length > 0;
+    
+  } catch (error) {
+    console.error('Error checking existing user:', error);
+    return false;
+  }
+}
+
+/**
+ * Process referral reward for the referrer
+ */
+async function processReferralReward(referralCode, referredEmail) {
+  const REFERRAL_POINTS = 25;
+  const FIRST_REFERRAL_BONUS = 10;
+  
+  try {
+    // Find referrer by referral code
+    const response = await fetch(`https://api.notion.com/v1/databases/${process.env.NOTION_GAMIFICATION_DB_ID}/query`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28'
+      },
+      body: JSON.stringify({
+        filter: {
+          property: 'Referral Code',
+          rich_text: { equals: referralCode }
+        },
+        page_size: 1
+      })
+    });
+    
+    if (!response.ok || !response.json) {
+      console.log('Referrer not found:', referralCode);
+      return;
+    }
+    
+    const data = await response.json();
+    if (data.results.length === 0) {
+      console.log('Referrer not found:', referralCode);
+      return;
+    }
+    
+    const referrerPage = data.results[0];
+    const props = referrerPage.properties;
+    
+    // Calculate points to award
+    const currentTotalPoints = props['Total Points']?.number || 0;
+    const currentReferralPoints = props['Referral Points']?.number || 0;
+    const currentDirectReferrals = props['Direct Referrals']?.number || 0;
+    
+    let pointsToAward = REFERRAL_POINTS;
+    if (currentDirectReferrals === 0) {
+      // First referral bonus
+      pointsToAward += FIRST_REFERRAL_BONUS;
+    }
+    
+    // Update referrer's points
+    const updateResponse = await fetch(`https://api.notion.com/v1/pages/${referrerPage.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28'
+      },
+      body: JSON.stringify({
+        properties: {
+          'Total Points': { number: currentTotalPoints + pointsToAward },
+          'Referral Points': { number: currentReferralPoints + pointsToAward },
+          'Direct Referrals': { number: currentDirectReferrals + 1 },
+          'Last Activity': { date: { start: new Date().toISOString() } }
+        }
+      })
+    });
+    
+    if (updateResponse.ok) {
+      console.log(`Awarded ${pointsToAward} points to referrer ${referralCode}`);
+    }
+    
+  } catch (error) {
+    console.error('Error processing referral reward:', error);
+  }
+}
+
+/**
+ * Generate unique referral code
+ */
+function generateUniqueReferralCode(firstName) {
+  const prefix = firstName.slice(0, 3).toUpperCase();
+  const timestamp = Date.now().toString(36).slice(-4).toUpperCase();
+  const random = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `${prefix}${timestamp}${random}`;
 }
