@@ -139,6 +139,162 @@ class StateManager {
   }
 
   /**
+   * Check if a value exists at the given path
+   * @param {string} path - Dot-notation path to check
+   * @returns {boolean} True if the path exists and has a non-undefined value
+   */
+  has(path) {
+    if (!path) return Object.keys(this._state).length > 0;
+    
+    const keys = path.split('.');
+    let current = this._state;
+    
+    for (const key of keys) {
+      if (current[key] === undefined) return false;
+      current = current[key];
+    }
+    
+    return true;
+  }
+
+  /**
+   * Get preload cache status for API data
+   * @param {string} apiKey - API key to check
+   * @returns {Object} Cache status information
+   */
+  getPreloadStatus(apiKey) {
+    const apiData = this.get(`api.${apiKey}`);
+    const metadata = this.get(`metadata.preload.${apiKey}`) || {};
+    
+    return {
+      isLoaded: !!apiData,
+      data: apiData,
+      timestamp: metadata.timestamp,
+      age: metadata.timestamp ? Date.now() - metadata.timestamp : null,
+      isStale: metadata.ttl ? Date.now() > (metadata.timestamp + metadata.ttl) : false,
+      priority: metadata.priority || 'normal'
+    };
+  }
+
+  /**
+   * Set preloaded API data with metadata
+   * @param {string} apiKey - API key
+   * @param {*} data - API response data
+   * @param {Object} options - Preload metadata options
+   */
+  setPreloadedData(apiKey, data, options = {}) {
+    const timestamp = Date.now();
+    
+    // Set the actual data
+    this.set(`api.${apiKey}`, data);
+    
+    // Set metadata for cache management
+    this.set(`metadata.preload.${apiKey}`, {
+      timestamp,
+      ttl: options.ttl || (5 * 60 * 1000), // 5 minutes default
+      priority: options.priority || 'normal',
+      source: 'preload',
+      retries: options.retries || 0
+    });
+    
+    // Track preload metrics
+    this._updatePreloadMetrics(apiKey, 'success');
+  }
+
+  /**
+   * Mark preload as failed for tracking
+   * @param {string} apiKey - API key that failed
+   * @param {Error} error - Error object
+   */
+  markPreloadFailed(apiKey, error) {
+    const timestamp = Date.now();
+    
+    this.set(`metadata.preload.${apiKey}`, {
+      timestamp,
+      failed: true,
+      error: error.message,
+      source: 'preload'
+    });
+    
+    this._updatePreloadMetrics(apiKey, 'failed', error);
+  }
+
+  /**
+   * Get all preloaded APIs status
+   * @returns {Object} Status of all preloaded APIs
+   */
+  getAllPreloadStatus() {
+    const apiData = this.get('api') || {};
+    const metadata = this.get('metadata.preload') || {};
+    
+    const status = {};
+    
+    // Check loaded APIs
+    Object.keys(apiData).forEach(apiKey => {
+      status[apiKey] = this.getPreloadStatus(apiKey);
+    });
+    
+    // Check failed APIs
+    Object.keys(metadata).forEach(apiKey => {
+      if (!status[apiKey]) {
+        status[apiKey] = this.getPreloadStatus(apiKey);
+      }
+    });
+    
+    return status;
+  }
+
+  /**
+   * Clear expired preloaded data
+   */
+  clearExpiredPreloads() {
+    const metadata = this.get('metadata.preload') || {};
+    const now = Date.now();
+    
+    Object.entries(metadata).forEach(([apiKey, meta]) => {
+      if (meta.ttl && now > (meta.timestamp + meta.ttl)) {
+        this.set(`api.${apiKey}`, null);
+        this.set(`metadata.preload.${apiKey}`, null);
+      }
+    });
+  }
+
+  /**
+   * Update preload metrics
+   * @private
+   */
+  _updatePreloadMetrics(apiKey, status, error = null) {
+    const metrics = this.get('metrics.preload') || {
+      total: 0,
+      success: 0,
+      failed: 0,
+      failures: [],
+      lastUpdate: Date.now()
+    };
+    
+    metrics.total++;
+    metrics.lastUpdate = Date.now();
+    
+    if (status === 'success') {
+      metrics.success++;
+    } else if (status === 'failed') {
+      metrics.failed++;
+      metrics.failures.push({
+        apiKey,
+        error: error?.message || 'Unknown error',
+        timestamp: Date.now()
+      });
+      
+      // Keep only last 10 failures
+      if (metrics.failures.length > 10) {
+        metrics.failures = metrics.failures.slice(-10);
+      }
+    }
+    
+    this.set('metrics.preload', metrics);
+  }
+
+  /**
    * Get a snapshot of the current state
    * @returns {Object} Deep clone of the current state
    */
