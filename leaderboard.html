@@ -21,7 +21,7 @@
 </head>
 <body>
     <!-- Navigation will be included here -->
-    <div id="nav-placeholder"></div>
+    <div id="navigation-placeholder"></div>
     
     <main class="leaderboard-page">
         <section class="leaderboard-hero">
@@ -141,8 +141,10 @@
     <footer id="footer-placeholder"></footer>
     
     <!-- Scripts -->
-    <script src="js/utils/include-nav.js"></script>
-    <script src="js/modules/referral-tracking.js"></script>
+    <script type="module" src="js/utils/include-nav.js"></script>
+    <!-- Leaderboard Access Control -->
+    <script type="module" src="js/modules/leaderboard-features.js"></script>
+    <!-- Leaderboard functionality -->
     <script src="js/modules/leaderboard.js"></script>
 </body>
 </html>
