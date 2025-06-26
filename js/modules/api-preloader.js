@@ -4,8 +4,8 @@
  * @module APIPreloader
  */
 
-import { StateManager } from '../core/StateManager.js';
-import { CacheManager } from '../core/CacheManager.js';
+import StateManager from '../core/StateManager.js';
+import CacheManager from '../core/CacheManager.js';
 
 // Preloading configuration
 const PRELOAD_CONFIG = {
@@ -195,12 +195,28 @@ class APIPreloader {
       throw new Error(`Unknown API key: ${apiKey}`);
     }
 
-    // Check if already cached and still valid
+    // Check if already cached (fresh or stale-but-usable)
     const cacheKey = `preload_${apiKey}`;
-    const cached = this.cacheManager.get(cacheKey);
-    if (cached && !this.cacheManager.isExpired(cacheKey)) {
+    const cached = this.cacheManager.get(cacheKey, {
+      revalidate: async (key) => {
+        // Background revalidation function
+        try {
+          const response = await this.fetchWithRetry(endpoint, apiKey, 'revalidate');
+          return response;
+        } catch (error) {
+          console.warn(`Background revalidation failed for ${apiKey}:`, error);
+          return null;
+        }
+      }
+    });
+    
+    if (cached) {
       preloadMetrics.cached.push(apiKey);
-      this.stateManager.set(`api.${apiKey}`, cached);
+      this.stateManager.setPreloadedData(apiKey, cached, {
+        ttl: PRELOAD_CONFIG.cacheTTL,
+        priority: priority,
+        source: this.cacheManager.isStale(cacheKey) ? 'stale-cache' : 'fresh-cache'
+      });
       return cached;
     }
 

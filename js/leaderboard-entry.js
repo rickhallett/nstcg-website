@@ -63,6 +63,10 @@ async function initializePreloading() {
     // Start idle preloading
     startIdlePreload();
     
+    // Enable fetch integration for transparent preload usage
+    const { enableFetchIntegration } = await import('./modules/api-integration.js');
+    enableFetchIntegration();
+    
     console.log('API preloading system initialized for leaderboard page');
   } catch (error) {
     console.warn('Failed to initialize API preloading:', error);
