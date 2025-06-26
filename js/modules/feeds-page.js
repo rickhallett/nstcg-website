@@ -22,7 +22,11 @@ const FeedsConfig = {
     errorState: '#error-state',
     emptyState: '#empty-state',
     graphLoading: '#graph-loading',
-    signupChart: '#signup-chart'
+    signupChart: '#signup-chart',
+    hotTopicsContainer: '#hot-topics-container',
+    hotTopicsLoading: '#hot-topics-loading',
+    hotTopicsError: '#hot-topics-error',
+    hotTopicsEmpty: '#hot-topics-empty'
   },
   
   colors: {
@@ -41,6 +45,7 @@ class FeedsPageManager {
     this.participants = [];
     this.chart = null;
     this.isLoading = false;
+    this.hotTopics = null;
   }
 
   /**
@@ -99,6 +104,9 @@ class FeedsPageManager {
       
       // Create line graph
       this.createLineGraph();
+      
+      // Load hot topics
+      await this.loadHotTopics();
       
       // Hide loading state
       this.hideLoadingState();
@@ -450,6 +458,161 @@ class FeedsPageManager {
     if (loadingState) loadingState.style.display = 'none';
     if (errorState) errorState.style.display = 'none';
     if (emptyState) emptyState.style.display = 'flex';
+  }
+
+  /**
+   * Load hot topics analysis from API
+   */
+  async loadHotTopics() {
+    this.showHotTopicsLoading();
+
+    try {
+      const response = await fetch('/api/analyze-concerns');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch hot topics');
+      }
+
+      const data = await response.json();
+      this.hotTopics = data;
+      
+      // Render hot topics
+      this.renderHotTopics();
+      
+      // Emit success event
+      eventBus.emit('hot-topics-loaded', data);
+
+    } catch (error) {
+      console.error('Error loading hot topics:', error);
+      this.showHotTopicsError();
+      
+      eventBus.emit('hot-topics-error', error);
+    }
+  }
+
+  /**
+   * Render hot topics cards
+   */
+  renderHotTopics() {
+    const container = document.querySelector(FeedsConfig.selectors.hotTopicsContainer);
+    if (!container) return;
+
+    // Hide loading/error states
+    this.hideHotTopicsLoading();
+
+    // Check if we have concerns to display
+    if (!this.hotTopics.concerns || this.hotTopics.concerns.length === 0) {
+      this.showHotTopicsEmpty();
+      return;
+    }
+
+    // Clear container
+    container.innerHTML = '';
+
+    // Get max frequency for percentage calculations
+    const maxFrequency = Math.max(...this.hotTopics.concerns.map(c => c.frequency));
+
+    // Create cards for each concern
+    this.hotTopics.concerns.forEach((concern, index) => {
+      const card = this.createHotTopicCard(concern, maxFrequency);
+      container.appendChild(card);
+    });
+
+    // Show container
+    container.style.display = 'grid';
+
+    // Add staggered animation
+    requestAnimationFrame(() => {
+      const cards = container.querySelectorAll('.hot-topic-card');
+      cards.forEach((card, index) => {
+        setTimeout(() => {
+          card.classList.add('visible');
+        }, index * 200); // 200ms delay between cards
+      });
+    });
+  }
+
+  /**
+   * Create hot topic card element
+   */
+  createHotTopicCard(concern, maxFrequency) {
+    const card = document.createElement('div');
+    card.className = `hot-topic-card rank-${concern.rank}`;
+    
+    // Calculate frequency percentage for bar
+    const frequencyPercent = (concern.frequency / maxFrequency) * 100;
+    
+    card.innerHTML = `
+      <div class="hot-topic-header">
+        <div class="hot-topic-info">
+          <h3 class="hot-topic-title">${concern.title}</h3>
+          <p class="hot-topic-description">${concern.description}</p>
+          <div class="hot-topic-frequency">
+            <i class="fas fa-users"></i>
+            <span>${concern.frequency} mentions</span>
+          </div>
+          <div class="frequency-bar">
+            <div class="frequency-fill" style="--fill-width: ${frequencyPercent}%; width: ${frequencyPercent}%;"></div>
+          </div>
+        </div>
+        <div class="hot-topic-rank rank-${concern.rank}">${concern.rank}</div>
+      </div>
+    `;
+
+    return card;
+  }
+
+  /**
+   * Show hot topics loading state
+   */
+  showHotTopicsLoading() {
+    const loading = document.querySelector(FeedsConfig.selectors.hotTopicsLoading);
+    const error = document.querySelector(FeedsConfig.selectors.hotTopicsError);
+    const empty = document.querySelector(FeedsConfig.selectors.hotTopicsEmpty);
+    const container = document.querySelector(FeedsConfig.selectors.hotTopicsContainer);
+
+    if (loading) loading.style.display = 'flex';
+    if (error) error.style.display = 'none';
+    if (empty) empty.style.display = 'none';
+    if (container) container.style.display = 'none';
+  }
+
+  /**
+   * Hide hot topics loading state
+   */
+  hideHotTopicsLoading() {
+    const loading = document.querySelector(FeedsConfig.selectors.hotTopicsLoading);
+    if (loading) loading.style.display = 'none';
+  }
+
+  /**
+   * Show hot topics error state
+   */
+  showHotTopicsError() {
+    const loading = document.querySelector(FeedsConfig.selectors.hotTopicsLoading);
+    const error = document.querySelector(FeedsConfig.selectors.hotTopicsError);
+    const empty = document.querySelector(FeedsConfig.selectors.hotTopicsEmpty);
+    const container = document.querySelector(FeedsConfig.selectors.hotTopicsContainer);
+
+    if (loading) loading.style.display = 'none';
+    if (error) error.style.display = 'flex';
+    if (empty) empty.style.display = 'none';
+    if (container) container.style.display = 'none';
+  }
+
+  /**
+   * Show hot topics empty state
+   */
+  showHotTopicsEmpty() {
+    const loading = document.querySelector(FeedsConfig.selectors.hotTopicsLoading);
+    const error = document.querySelector(FeedsConfig.selectors.hotTopicsError);
+    const empty = document.querySelector(FeedsConfig.selectors.hotTopicsEmpty);
+    const container = document.querySelector(FeedsConfig.selectors.hotTopicsContainer);
+
+    if (loading) loading.style.display = 'none';
+    if (error) error.style.display = 'none';
+    if (empty) empty.style.display = 'flex';
+    if (container) container.style.display = 'none';
   }
 }
 
