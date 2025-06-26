@@ -1,11 +1,16 @@
+// Simple in-memory cache
+let cachedData = null;
+let cacheTime = 0;
+const CACHE_DURATION = 900000; // 15 minutes
+
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
-  // Cache for 15 minutes
-  res.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=2592000');
+  // Cache for 15 minutes with stale-while-revalidate for better performance
+  res.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=86400, max-age=300');
 
   // Handle OPTIONS request
   if (req.method === 'OPTIONS') {
@@ -15,6 +20,12 @@ export default async function handler(req, res) {
   // Only allow GET
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Check cache
+  const now = Date.now();
+  if (cachedData !== null && (now - cacheTime) < CACHE_DURATION) {
+    return res.status(200).json(cachedData);
   }
 
   try {
@@ -131,20 +142,36 @@ export default async function handler(req, res) {
       new Date(p.timestamp) >= weekStart
     ).length;
 
-    // Return all participants with statistics
-    res.status(200).json({ 
+    // Prepare response data
+    const responseData = { 
       participants: allParticipants,
       totalCount: allParticipants.length + 215, // Base count + database count
       todayCount: todayCount,
       weekCount: weekCount,
       timestamp: new Date().toISOString()
-    });
+    };
+    
+    // Update cache
+    cachedData = responseData;
+    cacheTime = now;
+    
+    // Return all participants with statistics
+    res.status(200).json(responseData);
 
   } catch (error) {
     console.error('Error fetching all participants:', {
       error: error.message,
       timestamp: new Date().toISOString()
     });
+
+    // Return cached data if available (even if stale)
+    if (cachedData !== null) {
+      console.log('Returning stale cache due to error');
+      return res.status(200).json({
+        ...cachedData,
+        stale: true
+      });
+    }
 
     // Return error response
     res.status(500).json({ 

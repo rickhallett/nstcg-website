@@ -1,4 +1,5 @@
 // Get total donations amount with caching
+import { requireFeatures } from './middleware/feature-flags.js';
 
 // Cache configuration
 let cache = null;
@@ -6,10 +7,17 @@ let cacheTime = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
 
 export default async function handler(req, res) {
+  // Check if donations feature is enabled
+  if (await requireFeatures('donations.enabled', 'donations.showTotalDonations')(req, res) !== true) {
+    return; // Response already sent by middleware
+  }
+  
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  // Cache for 5 minutes with stale-while-revalidate
+  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=3600, max-age=300');
   
   // Handle preflight
   if (req.method === 'OPTIONS') {

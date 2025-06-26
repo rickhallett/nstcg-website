@@ -1,5 +1,6 @@
 // Stripe webhook handler for processing successful donations
 import { Client } from '@notionhq/client';
+import { requireFeature } from '../middleware/feature-flags.js';
 
 // Buffer raw body for webhook verification
 export const config = {
@@ -18,6 +19,11 @@ async function buffer(readable) {
 }
 
 export default async function handler(req, res) {
+  // Check if donations feature is enabled
+  if (await requireFeature('donations.enabled')(req, res) !== true) {
+    return; // Response already sent by middleware
+  }
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

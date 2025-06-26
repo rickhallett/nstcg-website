@@ -1,5 +1,12 @@
 // Create Stripe checkout session for donations
+import { requireFeature } from './middleware/feature-flags.js';
+
 export default async function handler(req, res) {
+  // Check if donations feature is enabled
+  if (await requireFeature('donations.enabled')(req, res) !== true) {
+    return; // Response already sent by middleware
+  }
+  
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
