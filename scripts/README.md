@@ -43,11 +43,58 @@ This script will:
    - Initial 10 registration points
    - Default privacy settings (opted-out of public leaderboard)
 
+### test-notion-connection.js
+
+Tests your Notion API connection and verifies access to databases.
+
+```bash
+npm run test-connection
+# or
+node test-notion-connection.js
+```
+
+This will verify:
+- API token is valid
+- Access to submissions database
+- Access to gamification database (if created)
+- Access to parent page for database creation
+
+### example-gamification-usage.js
+
+Demonstrates common gamification operations with example code.
+
+```bash
+npm run example
+# or
+node example-gamification-usage.js
+```
+
+Examples include:
+- Adding users to gamification system
+- Updating points for shares and referrals
+- Fetching leaderboard data
+- Handling privacy settings
+
+### cleanup-test-databases.js
+
+Helps clean up test databases created during development.
+
+```bash
+node cleanup-test-databases.js
+```
+
+Features:
+- Lists all gamification databases
+- Shows creation dates and IDs
+- Option to archive individual or all test databases
+- Protects current active database from accidental deletion
+
 ### Database Schema
 
 The gamification database includes:
 
 #### Identity & Display
+- **Name** (title) - Required Notion title property (full name)
 - **Email** (email) - Primary identifier
 - **Display Name** (text) - Public name for leaderboard
 - **Is Anonymous** (checkbox) - Hide real name option
