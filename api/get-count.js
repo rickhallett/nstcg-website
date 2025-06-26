@@ -8,7 +8,8 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=2592000');
+  // Cache for 15 minutes with stale-while-revalidate
+  res.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=86400, max-age=300');
 
   // Handle OPTIONS request
   if (req.method === 'OPTIONS') {
@@ -99,6 +100,15 @@ export default async function handler(req, res) {
       error: error.message,
       timestamp: new Date().toISOString()
     });
+
+    // Return cached count if available (even if stale)
+    if (cachedCount !== null) {
+      console.log('Returning stale cache due to error');
+      return res.status(200).json({ 
+        count: cachedCount,
+        stale: true 
+      });
+    }
 
     // Return default count on error
     res.status(200).json({ count: 215 });

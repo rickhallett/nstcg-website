@@ -1,4 +1,5 @@
 // Get recent donations from Notion database
+import { requireFeatures } from './middleware/feature-flags.js';
 
 // Cache configuration
 let cache = null;
@@ -6,10 +7,17 @@ let cacheTime = 0;
 const CACHE_DURATION = 60 * 1000; // 1 minute cache
 
 export default async function handler(req, res) {
+  // Check if donations feature is enabled
+  if (await requireFeatures('donations.enabled', 'donations.showRecentDonations')(req, res) !== true) {
+    return; // Response already sent by middleware
+  }
+  
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  // Cache for 1 minute with stale-while-revalidate
+  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300, max-age=60');
 
   // Handle preflight
   if (req.method === 'OPTIONS') {
