@@ -29,6 +29,9 @@ async function includeNavigation() {
     // Import and initialize navigation module
     const navigationModule = await import('../modules/navigation.js');
     
+    // Import and initialize navigation features (conditional rendering)
+    const navigationFeatures = await import('../modules/navigation-features.js');
+    
     console.log('Navigation loaded successfully');
   } catch (error) {
     console.error('Error loading navigation:', error);
