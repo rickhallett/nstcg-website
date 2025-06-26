@@ -352,18 +352,14 @@ async function processGamificationRegistration({ email, firstName, lastName, use
           'Registration Points': { number: REGISTRATION_POINTS },
           'Share Points': { number: 0 },
           'Referral Points': { number: 0 },
-          'Donation Points': { number: 0 },
           'Direct Referrals Count': { number: 0 },
           'Indirect Referrals Count': { number: 0 },
           'Twitter Shares': { number: 0 },
           'Facebook Shares': { number: 0 },
           'WhatsApp Shares': { number: 0 },
-          'LinkedIn Shares': { number: 0 },
           'Email Shares': { number: 0 },
-          'Registration Date': { date: { start: new Date().toISOString() } },
           'Last Activity Date': { date: { start: new Date().toISOString() } },
-          'Opted Into Leaderboard': { checkbox: true },
-          'Submission ID': { rich_text: [{ text: { content: submissionId || '' } }] }
+          'Opted Into Leaderboard': { checkbox: true }
         }
       })
     });
