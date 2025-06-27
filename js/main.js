@@ -1046,7 +1046,7 @@ function showReferralBanner(referralInfo) {
 }
 
 // Initialize counts on page load
-window.addEventListener('load', async function () {
+async function initializePageLoad() {
   // Check for referral (only if not disabled)
   const referralInfo = window.DISABLE_REFERRAL_TRACKING ? null : checkReferral();
   
@@ -1086,7 +1086,14 @@ window.addEventListener('load', async function () {
 
   // Set up smart polling
   setupSmartPolling();
-});
+}
+
+// Check if page is already loaded, otherwise wait for load event
+if (document.readyState === 'complete') {
+  initializePageLoad();
+} else {
+  window.addEventListener('load', initializePageLoad);
+}
 
 // Store original modal content for reset
 let originalModalContent;
@@ -1097,15 +1104,20 @@ let originalModalContent;
   const isRegistered = localStorage.getItem('nstcg_registered') === 'true';
   if (isRegistered) {
     // Add a class to body immediately to allow CSS-based UI changes
-    document.addEventListener('DOMContentLoaded', function() {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('user-registered');
+        initializeRegistrationState();
+      }, { once: true });
+    } else {
       document.body.classList.add('user-registered');
       initializeRegistrationState();
-    }, { once: true });
+    }
   }
 })();
 
-// Wait for DOM to be ready
-document.addEventListener('DOMContentLoaded', function () {
+// Initialize DOM-dependent code
+function initializeDOMContent() {
   // Only initialize if not already done above
   if (!document.body.classList.contains('user-registered')) {
     initializeRegistrationState();
@@ -1156,7 +1168,14 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
   }, true); // Use capture phase to intercept before MicroModal
-});
+}
+
+// Check if DOM is already loaded, otherwise wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeDOMContent);
+} else {
+  initializeDOMContent();
+}
 
 // Extract form submission handler to a named function
 async function handleModalFormSubmit(e) {
@@ -1436,7 +1455,7 @@ async function handleModalFormSubmit(e) {
 }
 
 // Handle continue to survey button in main confirmation
-document.addEventListener('DOMContentLoaded', function () {
+function initializeSurveyButton() {
   // Main form survey button
   const continueSurveyBtn = document.getElementById('continue-survey-btn');
   if (continueSurveyBtn) {
@@ -1547,7 +1566,14 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
-});
+}
+
+// Check if DOM is already loaded for survey button initialization
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeSurveyButton);
+} else {
+  initializeSurveyButton();
+}
 
 // Generate simple user ID for referral tracking
 function generateUserId() {
