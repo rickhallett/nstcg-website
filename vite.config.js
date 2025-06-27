@@ -14,12 +14,7 @@ export default defineConfig({
         leaderboard: resolve(__dirname, 'leaderboard.html'),
         privacy: resolve(__dirname, 'privacy-policy.html'),
         terms: resolve(__dirname, 'terms-and-conditions.html'),
-        notfound: resolve(__dirname, '404.html'),
-        main_js: resolve(__dirname, 'js/main-entry.js'),
-        feeds_js: resolve(__dirname, 'js/feeds-entry.js'),
-        donate_js: resolve(__dirname, 'js/donate-entry.js'),
-        leaderboard_js: resolve(__dirname, 'js/leaderboard-entry.js'),
-        share_js: resolve(__dirname, 'js/share-entry.js')
+        notfound: resolve(__dirname, '404.html')
       },
       output: {
         // Optimize chunk splitting for preloading system
