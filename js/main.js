@@ -97,11 +97,40 @@ function startCountdown() {
 // Add immediate console log to verify script is loading
 console.log('main.js loaded');
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', startCountdown);
+// Check for email activation parameters
+const urlParams = new URLSearchParams(window.location.search);
+const activationEmail = urlParams.get('user_email');
+const bonusPoints = urlParams.get('bonus');
+
+// If activation parameters are present, handle activation flow
+if (activationEmail && bonusPoints) {
+  console.log('Email activation detected:', activationEmail, 'with', bonusPoints, 'bonus points');
+  
+  // Wait for DOM and MicroModal to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      // Delay to ensure MicroModal is initialized
+      setTimeout(() => handleEmailActivation(activationEmail, bonusPoints), 500);
+    });
+  } else {
+    // DOM is ready, but wait for MicroModal
+    setTimeout(() => handleEmailActivation(activationEmail, bonusPoints), 500);
+  }
+  
+  // Still start countdown timer
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startCountdown);
+  } else {
+    startCountdown();
+  }
 } else {
-  // DOM is already ready
-  startCountdown();
+  // Normal flow
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startCountdown);
+  } else {
+    // DOM is already ready
+    startCountdown();
+  }
 }
 
 // API call to Vercel function
@@ -1978,6 +2007,143 @@ function addSocialShareButtons(containerId, count, userComment, isDisabled = fal
     </div>
     <p class="share-impact-text">${isDisabled ? 'Preparing share options...' : 'Your voice amplifies our message. Together we\'re stronger! 💪'}</p>
   `;
+}
+
+// Handle email activation from campaign
+async function handleEmailActivation(email, bonusPoints) {
+  console.log('Handling email activation for:', email);
+  
+  try {
+    // Decode email
+    const decodedEmail = decodeURIComponent(email);
+    const points = parseInt(bonusPoints, 10);
+    
+    // Validate bonus points
+    if (isNaN(points) || points < 10 || points > 50) {
+      console.error('Invalid bonus points:', bonusPoints);
+      return;
+    }
+    
+    // Check if MicroModal is available
+    if (typeof MicroModal === 'undefined') {
+      console.error('MicroModal not loaded yet');
+      setTimeout(() => handleEmailActivation(email, bonusPoints), 500);
+      return;
+    }
+    
+    // Clean URL to remove parameters
+    const cleanUrl = window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+    
+    // Show activation modal
+    MicroModal.show('modal-activation');
+    
+    // Update bonus points display
+    const bonusDisplay = document.getElementById('activation-bonus-points');
+    if (bonusDisplay) {
+      bonusDisplay.textContent = points;
+    }
+    
+    // Store email for form submission
+    window.activationEmail = decodedEmail;
+    window.activationBonus = points;
+    
+  } catch (error) {
+    console.error('Error handling email activation:', error);
+  }
+}
+
+// Handle activation form submission
+async function handleActivationSubmit(event) {
+  event.preventDefault();
+  
+  const form = event.target;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const visitorType = form.querySelector('input[name="visitor_type"]:checked')?.value;
+  
+  if (!visitorType) {
+    alert('Please select whether you are a local resident or visitor');
+    return;
+  }
+  
+  if (!window.activationEmail || !window.activationBonus) {
+    console.error('Missing activation data');
+    return;
+  }
+  
+  // Disable form
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Activating...';
+  
+  // Show processing state
+  const activationForm = document.getElementById('activation-form');
+  const processingDiv = document.getElementById('activation-processing');
+  const successDiv = document.getElementById('activation-success');
+  
+  activationForm.style.display = 'none';
+  processingDiv.style.display = 'block';
+  
+  try {
+    // Call activation API
+    const response = await fetch('/api/activate-user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: window.activationEmail,
+        visitor_type: visitorType,
+        bonusPoints: window.activationBonus
+      })
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Activation failed');
+    }
+    
+    const result = await response.json();
+    
+    // Store user data in localStorage
+    if (result.userData) {
+      localStorage.setItem('nstcg_user_id', result.userData.user_id);
+      localStorage.setItem('nstcg_email', result.userData.email);
+      localStorage.setItem('nstcg_registered', 'true');
+      localStorage.setItem('nstcg_referral_code', result.userData.referral_code || '');
+      localStorage.setItem('nstcg_first_name', result.userData.first_name || '');
+      localStorage.setItem('nstcg_comment', result.userData.comment || '');
+      localStorage.setItem('nstcg_visitor_type', result.userData.visitor_type);
+      
+      // Show success state
+      processingDiv.style.display = 'none';
+      successDiv.style.display = 'block';
+      
+      // Update success message with referral code
+      const referralCodeDisplay = document.getElementById('activation-referral-code');
+      if (referralCodeDisplay && result.userData.referral_code) {
+        referralCodeDisplay.textContent = result.userData.referral_code;
+      }
+      
+      // Reload page after 3 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+    }
+    
+  } catch (error) {
+    console.error('Activation error:', error);
+    
+    // Show error state
+    processingDiv.style.display = 'none';
+    activationForm.style.display = 'block';
+    
+    // Re-enable form
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Activate & Claim Points';
+    
+    // Show error message
+    alert('Activation failed: ' + error.message + '\nPlease try again or contact support.');
+  }
 }
 
 // Modal survey instructions functions

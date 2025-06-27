@@ -351,6 +351,78 @@
         </div>
       </div>
     </div>
+
+    <!-- Email Activation Modal -->
+    <div id="modal-activation" class="modal" aria-hidden="true">
+      <div class="modal__overlay" tabindex="-1">
+        <div class="modal__container animate__animated animate__fadeInUp" role="dialog" aria-modal="true"
+          aria-labelledby="modal-activation-title">
+          <header class="modal__header">
+            <h2 class="modal__title" id="modal-activation-title">
+              🎉 Welcome Back!
+            </h2>
+            <button class="modal__close" aria-label="Close modal" data-micromodal-close>×</button>
+          </header>
+
+          <main class="modal__content" id="modal-activation-content">
+            <!-- Initial Form State -->
+            <div id="activation-form">
+              <div class="activation-bonus-alert">
+                <span class="bonus-icon">🎁</span>
+                <div>
+                  <h3>You've earned <span id="activation-bonus-points">25</span> bonus points!</h3>
+                  <p>Activate your account to claim them and access your referral code.</p>
+                </div>
+              </div>
+
+              <form id="activationForm" onsubmit="handleActivationSubmit(event)">
+                <div class="modal-form-group">
+                  <fieldset class="radio-group">
+                    <legend>I am a:</legend>
+                    <div class="radio-options">
+                      <label class="radio-label">
+                        <input type="radio" name="visitor_type" value="local" required>
+                        <span class="radio-custom"></span>
+                        <span>Local Resident</span>
+                      </label>
+                      <label class="radio-label">
+                        <input type="radio" name="visitor_type" value="tourist" required>
+                        <span class="radio-custom"></span>
+                        <span>Visitor/Tourist</span>
+                      </label>
+                    </div>
+                  </fieldset>
+                </div>
+
+                <button type="submit" class="modal-submit-btn">
+                  Activate & Claim Points
+                </button>
+              </form>
+            </div>
+
+            <!-- Processing State -->
+            <div id="activation-processing" style="display: none; text-align: center; padding: 40px 20px;">
+              <div class="loading-spinner" style="margin: 0 auto 20px;">
+                <div class="spinner"></div>
+              </div>
+              <h3>Activating your account...</h3>
+              <p style="color: #999;">This will just take a moment.</p>
+            </div>
+
+            <!-- Success State -->
+            <div id="activation-success" style="display: none; text-align: center; padding: 40px 20px;">
+              <div style="font-size: 48px; margin-bottom: 20px;">✅</div>
+              <h3 style="color: #00ff00; margin-bottom: 15px;">Account Activated!</h3>
+              <p style="margin-bottom: 20px;">Your referral code is:</p>
+              <div class="referral-code-display" style="background: rgba(0, 255, 0, 0.1); border: 2px solid #00ff00; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <span id="activation-referral-code" style="font-size: 24px; font-weight: bold; color: #00ff00;">LOADING...</span>
+              </div>
+              <p style="color: #999; font-size: 14px;">Redirecting to dashboard...</p>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- Micromodal CDN -->
