@@ -12,13 +12,13 @@ import './utils/include-nav.js'
 import './modules/referral-utils.js'
 
 // Social sharing functions (expose globally for backward compatibility)
-import { 
-  shareOnTwitter, 
-  shareOnFacebook, 
-  shareOnWhatsApp, 
-  shareOnLinkedIn, 
-  shareOnInstagram, 
-  shareByEmail, 
+import {
+  shareOnTwitter,
+  shareOnFacebook,
+  shareOnWhatsApp,
+  shareOnLinkedIn,
+  shareOnInstagram,
+  shareByEmail,
   shareNative,
   addSocialShareButtons,
   showToast
@@ -46,37 +46,37 @@ async function initializePreloading() {
   try {
     // First check if preloading is enabled
     const { isPreloadingEnabled } = await import('./modules/api-preloader.js');
-    
+
     if (!isPreloadingEnabled()) {
       console.log('API preloading is disabled via configuration');
       return;
     }
-    
-    const { 
-      initializePreloading, 
-      trackPageView, 
-      trackActivity, 
-      startIdlePreload 
+
+    const {
+      initializePreloading,
+      trackPageView,
+      trackActivity,
+      startIdlePreload
     } = await import('./modules/api-preloader.js');
-    
+
     // Track current page view
     trackPageView('index');
-    
+
     // Set up activity tracking
     ['click', 'scroll', 'mousemove', 'keypress'].forEach(event => {
       document.addEventListener(event, trackActivity, { passive: true });
     });
-    
+
     // Start preloading system
     await initializePreloading();
-    
+
     // Start idle preloading
     startIdlePreload();
-    
+
     // Enable fetch integration for transparent preload usage
     const { enableFetchIntegration } = await import('./modules/api-integration.js');
     enableFetchIntegration();
-    
+
     console.log('API preloading system initialized');
   } catch (error) {
     console.warn('Failed to initialize API preloading:', error);
@@ -88,13 +88,13 @@ async function initialize() {
   try {
     // Initialize feature flags and make them globally available
     await initializeFeatureFlags();
-    
+
     // Initialize homepage features (sets up window.featureFlags)
     await initHomepageFeatures();
-    
+
     // Initialize API preloading system (after a short delay)
     setTimeout(initializePreloading, 1000);
-    
+
     console.log('Feature flags loaded, NSTCG Website initialized via Vite');
   } catch (error) {
     console.warn('Failed to load feature flags:', error);
