@@ -59,33 +59,33 @@ export default defineConfig({
           return `assets/[ext]/[name]-[hash][extname]`;
         }
       },
-      // Enable tree shaking
+      // Enable tree shaking but preserve main.js side effects
       treeshake: {
-        moduleSideEffects: false,
+        moduleSideEffects: ['**/main.js', '**/main-entry.js'], // Preserve countdown timer initialization
         preset: 'recommended'
       }
     },
-    // Minification settings
-    minify: 'terser',
+    // Minification settings - TEMPORARILY DISABLED FOR DEBUGGING
+    minify: false, // Disabled to preserve readable code
     terserOptions: {
       compress: {
-        drop_console: process.env.NODE_ENV === 'production', // Keep console.log in dev
-        drop_debugger: true,
-        pure_funcs: ['console.info', 'console.debug'], // Remove specific console methods
-        passes: 2 // Multiple compression passes for better optimization
+        drop_console: false, // PRESERVE console logs for debugging
+        drop_debugger: false, // PRESERVE debugger statements
+        pure_funcs: [], // Don't remove any console methods
+        passes: 1 // Single pass to preserve readability
       },
       mangle: {
-        // Preserve function names for better debugging
-        keep_fnames: process.env.NODE_ENV === 'development'
+        // Preserve function names for global access and debugging
+        keep_fnames: true // ALWAYS preserve function names
       },
       format: {
-        comments: false // Remove comments in production
+        comments: true // Keep comments for debugging
       }
     },
     // CSS minification
     cssMinify: true,
-    // Generate source maps only in development
-    sourcemap: process.env.NODE_ENV === 'development',
+    // Generate source maps for debugging
+    sourcemap: true, // ENABLED for production debugging
     // Output directory
     outDir: 'dist',
     // Clear output directory before build
