@@ -126,7 +126,7 @@ export default defineConfig({
   ],
 
   // Base URL configuration
-  base: './',
+  base: '/',
 
   // Public directory (will be copied to dist root)
   publicDir: 'public',
