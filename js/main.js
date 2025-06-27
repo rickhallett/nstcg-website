@@ -2007,3 +2007,13 @@ function toggleModalSurveyButton() {
 function openOfficialSurvey() {
   window.open('https://www.dorsetcoasthaveyoursay.co.uk/swanage-green-seafront-stabilisation/surveys/swanage-green-seafront-survey-2025?ref=nstcg', '_blank');
 }
+// Expose functions globally for inline event handlers and external usage
+window.updateCountdown = updateCountdown;
+window.generateReferralCode = generateReferralCode;
+window.showModalSurveyInstructions = showModalSurveyInstructions;
+window.toggleModalSurveyButton = toggleModalSurveyButton;
+window.openOfficialSurvey = openOfficialSurvey;
+window.addSocialShareButtons = addSocialShareButtons;
+window.showToast = showToast;
+
+// Note: Social sharing functions are already exposed in main-entry.js

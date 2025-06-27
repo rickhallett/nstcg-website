@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Global Functions</title>
+</head>
+<body>
+    <h1>Testing Global Function Exports</h1>
+    <div id="results"></div>
+    
+    <script type="module">
+        // Wait for main-entry.js to load
+        import './js/main-entry.js';
+        
+        // Test after a delay to ensure everything is loaded
+        setTimeout(() => {
+            const results = document.getElementById('results');
+            const functions = [
+                'updateCountdown',
+                'generateReferralCode',
+                'showModalSurveyInstructions',
+                'toggleModalSurveyButton',
+                'openOfficialSurvey',
+                'addSocialShareButtons',
+                'showToast',
+                'shareOnTwitter',
+                'shareOnFacebook',
+                'shareOnWhatsApp',
+                'shareOnLinkedIn',
+                'shareOnInstagram',
+                'shareByEmail'
+            ];
+            
+            let html = '<h2>Function Availability:</h2><ul>';
+            functions.forEach(fn => {
+                const available = typeof window[fn] === 'function';
+                const status = available ? '✅' : '❌';
+                html += `<li>${status} window.${fn}: ${available ? 'Available' : 'Missing'}</li>`;
+            });
+            html += '</ul>';
+            
+            // Check feature flags
+            html += '<h2>Feature Flags:</h2>';
+            if (window.featureFlags) {
+                html += '<pre>' + JSON.stringify(window.featureFlags, null, 2) + '</pre>';
+            } else {
+                html += '<p>❌ window.featureFlags is not available</p>';
+            }
+            
+            results.innerHTML = html;
+        }, 2000);
+    </script>
+</body>
+</html>
