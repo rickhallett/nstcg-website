@@ -16,7 +16,7 @@ const DAILY_SHARE_LIMITS = {
   email: 10
 };
 
-const POINTS_PER_SHARE = 3;
+const POINTS_PER_SHARE = 0; // No points awarded for shares
 
 export default async function handler(req, res) {
   // Check if referral and share tracking features are enabled
@@ -123,8 +123,8 @@ export default async function handler(req, res) {
       });
     }
 
-    // Calculate points to award
-    const pointsToAward = POINTS_PER_SHARE;
+    // No points awarded for shares anymore
+    const pointsToAward = 0;
     const currentTotalPoints = props['Total Points']?.number || 0;
     const currentSharePoints = props['Share Points']?.number || 0;
 
@@ -163,8 +163,9 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       success: true,
-      points_awarded: pointsToAward,
-      total_points: currentTotalPoints + pointsToAward,
+      points_awarded: 0,
+      message: 'Share tracked successfully. Earn points when friends complete registration!',
+      total_points: currentTotalPoints,
       share_count: currentShares + 1,
       platform: platform,
       daily_shares_remaining: DAILY_SHARE_LIMITS[platform] - dailyShareCount - 1
@@ -288,8 +289,8 @@ async function recordShareForNewUser(pageId, platform) {
     const platformShareField = `${capitalizeFirst(platform)} Shares`;
 
     const updates = {
-      'Total Points': { number: POINTS_PER_SHARE },
-      'Share Points': { number: POINTS_PER_SHARE },
+      'Total Points': { number: 0 }, // No points for shares
+      'Share Points': { number: 0 }, // No points for shares
       [platformShareField]: { number: 1 },
       [`Daily ${capitalizeFirst(platform)} Shares`]: { number: 1 },
       'Last Share Date': { date: { start: new Date().toISOString() } },
@@ -312,8 +313,9 @@ async function recordShareForNewUser(pageId, platform) {
 
     return {
       success: true,
-      points_awarded: POINTS_PER_SHARE,
-      total_points: POINTS_PER_SHARE,
+      points_awarded: 0,
+      message: 'Share tracked successfully. Earn points when friends complete registration!',
+      total_points: 0,
       share_count: 1,
       platform: platform,
       daily_shares_remaining: DAILY_SHARE_LIMITS[platform] - 1,

@@ -318,7 +318,9 @@ export default async function handler(req, res) {
  * Creates user profile and awards points for registration and referrals
  */
 async function processGamificationRegistration({ email, firstName, lastName, userId, referrer, submissionId }) {
-  const REGISTRATION_POINTS = 10;
+  // Award 100 points if user was referred, 0 otherwise
+  const isReferred = referrer && referrer !== 'None';
+  const REGISTRATION_POINTS = isReferred ? 100 : 0;
   const REFERRAL_POINTS = 25;
   
   try {
@@ -434,7 +436,6 @@ async function checkExistingGamificationUser(email, userId) {
  */
 async function processReferralReward(referralCode, referredEmail) {
   const REFERRAL_POINTS = 25;
-  const FIRST_REFERRAL_BONUS = 10;
   
   try {
     // Find referrer by referral code
@@ -473,11 +474,7 @@ async function processReferralReward(referralCode, referredEmail) {
     const currentReferralPoints = props['Referral Points']?.number || 0;
     const currentDirectReferrals = props['Direct Referrals']?.number || 0;
     
-    let pointsToAward = REFERRAL_POINTS;
-    if (currentDirectReferrals === 0) {
-      // First referral bonus
-      pointsToAward += FIRST_REFERRAL_BONUS;
-    }
+    const pointsToAward = REFERRAL_POINTS;
     
     // Update referrer's points
     const updateResponse = await fetch(`https://api.notion.com/v1/pages/${referrerPage.id}`, {

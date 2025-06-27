@@ -144,18 +144,6 @@ class SocialShareManager {
       .replace('{baseMessage}', baseMessage);
   }
 
-  /**
-   * Generate referral code
-   * @returns {string} Referral code
-   */
-  generateReferralCode() {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < 8; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-  }
 
   /**
    * Get share URL with referral tracking
@@ -170,8 +158,8 @@ class SocialShareManager {
     await this.loadSocialCodes();
     const platformCode = this.socialCodes.platforms[platform] || 'dr';
     
-    // Generate referral code in same format as main.js
-    const referralCode = this.generateReferralCode();
+    // Use centralized referral code logic from ReferralUtils (now async)
+    const referralCode = await window.ReferralUtils.getUserReferralCode();
 
     return `${this.baseUrl}?ref=${referralCode}&src=${platformCode}`;
   }
