@@ -1,0 +1,11 @@
+{
+  "platforms": {
+    "twitter": "tw",
+    "facebook": "fb",
+    "whatsapp": "wa",
+    "linkedin": "li",
+    "instagram": "ig",
+    "email": "em",
+    "direct": "dr"
+  }
+}
