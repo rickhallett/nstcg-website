@@ -64,10 +64,16 @@ export default defineConfig({
           return `assets/[ext]/[name]-[hash][extname]`;
         }
       },
-      // Enable tree shaking but preserve main.js side effects
+      // Enable tree shaking but preserve critical modules with side effects
       treeshake: {
-        moduleSideEffects: ['**/main.js', '**/main-entry.js'], // Preserve countdown timer initialization
-        preset: 'recommended'
+        moduleSideEffects: [
+          '**/js/main.js',
+          '**/js/main-entry.js',
+          '**/js/utils/include-nav.js',
+          '**/js/modules/navigation.js',
+          '**/js/modules/navigation-features.js',
+          '**/js/modules/nav-timer.js'
+        ]
       }
     },
     // Minification settings
