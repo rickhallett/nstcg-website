@@ -182,7 +182,20 @@ function createMockResponse(data) {
  * Monkey patch the global fetch to automatically use preloaded data
  * This allows existing code to transparently benefit from preloading
  */
-export function enableFetchIntegration() {
+export async function enableFetchIntegration() {
+  // Check if preloading is enabled before patching fetch
+  try {
+    const { isPreloadingEnabled } = await import('./api-preloader.js');
+    
+    if (!isPreloadingEnabled()) {
+      console.log('[APIIntegration] Fetch integration skipped - preloading is disabled');
+      return;
+    }
+  } catch (error) {
+    console.warn('[APIIntegration] Could not check preloading status:', error);
+    return;
+  }
+  
   // Prevent double-patching
   if (window._originalFetch) {
     console.warn('[APIIntegration] Fetch integration already enabled');

@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   if (await requireFeatures('donations.enabled', 'donations.showRecentDonations')(req, res) !== true) {
     return; // Response already sent by middleware
   }
-  
+
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -121,9 +121,9 @@ export default async function handler(req, res) {
 
 // Anonymize donor names for privacy
 function anonymizeName(fullName) {
-  if (!fullName || fullName === 'Anonymous') {
-    return 'Anonymous';
-  }
+  // if (!fullName || fullName === 'Anonymous') {
+  //   return 'Anonymous';
+  // }
 
   const parts = fullName.trim().split(' ');
 

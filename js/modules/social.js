@@ -234,17 +234,20 @@ class SocialShareManager {
 
   /**
    * Share on LinkedIn
+   * @param {number} count - Participant count
+   * @param {string} userComment - User's comment
    */
-  async shareOnLinkedIn() {
+  async shareOnLinkedIn(count, userComment) {
+    const text = this.generateShareText(count, userComment);
     const url = await this.getShareUrl('linkedin');
-    const params = new URLSearchParams({ url: url });
+    
+    // LinkedIn shareActive only supports text parameter - include URL within text
+    const fullText = `${text} ${url}`;
+    const linkedInUrl = `https://www.linkedin.com/feed/?shareActive&mini=true&text=${encodeURIComponent(fullText)}`;
+    
+    this.openShareWindow(linkedInUrl, 'linkedin');
 
-    this.openShareWindow(
-      `${SocialConfig.platforms.linkedin.shareUrl}?${params}`,
-      'linkedin'
-    );
-
-    this.trackShare('linkedin');
+    this.trackShare('linkedin', { count, hasComment: !!userComment });
   }
 
   /**
@@ -281,23 +284,23 @@ class SocialShareManager {
 
     // Use a more reliable method to open email client
     try {
-      // Create a temporary anchor element and click it (most reliable method)
-      const link = document.createElement('a');
-      link.href = mailtoUrl;
-      link.target = '_blank';
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Method 1: Direct navigation (most reliable for mailto)
+      window.location.href = mailtoUrl;
     } catch (error) {
-      console.warn('Failed to open email client via anchor element:', error);
-      // Fallback to window.open
+      console.warn('Failed to open email client via location.href:', error);
+      // Fallback: Create temporary anchor element and click it
       try {
-        window.open(mailtoUrl, '_blank');
+        const link = document.createElement('a');
+        link.href = mailtoUrl;
+        // Don't use target="_blank" for mailto links
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       } catch (error2) {
-        console.warn('Failed to open email client via window.open:', error2);
-        // Last resort - direct location change
-        window.location.href = mailtoUrl;
+        console.warn('Failed to open email client via anchor element:', error2);
+        // Last resort - window.open without target
+        window.open(mailtoUrl);
       }
     }
 
@@ -505,7 +508,7 @@ class SocialShareManager {
             await this.shareOnWhatsApp(count, userComment);
             break;
           case 'linkedin':
-            await this.shareOnLinkedIn();
+            await this.shareOnLinkedIn(count, userComment);
             break;
           case 'instagram':
             await this.shareOnInstagram();
@@ -539,7 +542,7 @@ const socialShareManager = new SocialShareManager();
 export const shareOnTwitter = (count, comment) => socialShareManager.shareOnTwitter(count, comment);
 export const shareOnFacebook = () => socialShareManager.shareOnFacebook();
 export const shareOnWhatsApp = (count, comment) => socialShareManager.shareOnWhatsApp(count, comment);
-export const shareOnLinkedIn = () => socialShareManager.shareOnLinkedIn();
+export const shareOnLinkedIn = (count, comment) => socialShareManager.shareOnLinkedIn(count, comment);
 export const shareOnInstagram = () => socialShareManager.shareOnInstagram();
 export const shareByEmail = (count, comment) => socialShareManager.shareByEmail(count, comment);
 export const shareNative = (count, comment) => socialShareManager.shareNative(count, comment);

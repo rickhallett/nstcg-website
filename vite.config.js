@@ -21,28 +21,28 @@ export default defineConfig({
         manualChunks: {
           // Core system chunks
           'core': ['./js/core/StateManager.js', './js/core/CacheManager.js'],
-          
+
           // API and preloading chunks (lazy-loaded)
           'preloader': ['./js/modules/api-preloader.js', './js/modules/api-integration.js'],
-          
+
           // Feature-specific chunks
           'social': ['./js/modules/social.js'],
           'gamification': ['./js/modules/leaderboard.js', './js/modules/share-features.js'],
-          
+
           // Utility chunks
           'utils': [
             './js/utils/feature-flags.js',
             './js/utils/include-nav.js',
             './js/modules/referral-utils.js'
           ],
-          
+
           // Vendor chunks
           'vendor': ['micromodal']
         },
         // Optimize chunk file names
         chunkFileNames: (chunkInfo) => {
-          const facadeModuleId = chunkInfo.facadeModuleId 
-            ? chunkInfo.facadeModuleId.split('/').pop().replace('.js', '') 
+          const facadeModuleId = chunkInfo.facadeModuleId
+            ? chunkInfo.facadeModuleId.split('/').pop().replace('.js', '')
             : 'chunk';
           return `assets/js/[name]-[hash].js`;
         },
@@ -95,10 +95,10 @@ export default defineConfig({
     // Chunk size warning limit (increased for preloading modules)
     chunkSizeWarningLimit: 1500
   },
-  
+
   // Development server configuration
   server: {
-    port: 3000,
+    port: 5173,
     open: true,
     host: true, // Allow external connections
     // Proxy API calls to maintain compatibility
@@ -106,17 +106,17 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
-        rewrite: (path) => path
+        // rewrite: (path) => path
       }
     }
   },
-  
+
   // Preview server configuration
   preview: {
     port: 4173,
     host: true
   },
-  
+
   // Plugin configuration
   plugins: [
     // Legacy browser support
@@ -124,22 +124,22 @@ export default defineConfig({
       targets: ['defaults', 'not IE 11']
     })
   ],
-  
+
   // Base URL configuration
   base: './',
-  
+
   // Public directory (will be copied to dist root)
   publicDir: 'public',
-  
+
   // Asset handling
   assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg', '**/*.webp'],
-  
+
   // CSS configuration
   css: {
     // Enable CSS source maps
     devSourcemap: true
   },
-  
+
   // Define global constants
   define: {
     __DEV__: JSON.stringify(process.env.NODE_ENV === 'development')

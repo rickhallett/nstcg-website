@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
+
   // Cache for 15 minutes with stale-while-revalidate for better performance
   res.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=86400, max-age=300');
 
@@ -71,43 +71,43 @@ export default async function handler(req, res) {
       }
 
       const data = await response.json();
-      
+
       // Process results
       const processedResults = data.results.map(page => {
         try {
           // Extract name
           const nameProperty = page.properties['Name'];
           let fullName = 'Anonymous';
-          
+
           if (nameProperty && nameProperty.rich_text && nameProperty.rich_text.length > 0) {
             fullName = nameProperty.rich_text[0].plain_text;
           }
-          
+
           // Anonymize name: First name + last initial
           const nameParts = fullName.trim().split(' ');
           let displayName = nameParts[0];
-          
+
           if (nameParts.length > 1) {
             const lastNameInitial = nameParts[nameParts.length - 1].charAt(0).toUpperCase();
             displayName = `${nameParts[0]} ${lastNameInitial}.`;
           }
-          
+
           // Extract timestamp
           const timestampProperty = page.properties['Timestamp'];
           let timestamp = new Date().toISOString();
-          
+
           if (timestampProperty && timestampProperty.date && timestampProperty.date.start) {
             timestamp = timestampProperty.date.start;
           }
-          
+
           // Extract comment
           const commentProperty = page.properties['Comments'];
           let comment = null;
-          
+
           if (commentProperty && commentProperty.rich_text && commentProperty.rich_text.length > 0) {
             comment = commentProperty.rich_text[0].plain_text;
           }
-          
+
           return {
             name: displayName,
             timestamp: timestamp,
@@ -130,31 +130,31 @@ export default async function handler(req, res) {
     const now = new Date();
     const todayStart = new Date(now);
     todayStart.setHours(0, 0, 0, 0);
-    
+
     const weekStart = new Date(now);
     weekStart.setDate(weekStart.getDate() - 7);
-    
-    const todayCount = allParticipants.filter(p => 
+
+    const todayCount = allParticipants.filter(p =>
       new Date(p.timestamp) >= todayStart
     ).length;
-    
-    const weekCount = allParticipants.filter(p => 
+
+    const weekCount = allParticipants.filter(p =>
       new Date(p.timestamp) >= weekStart
     ).length;
 
     // Prepare response data
-    const responseData = { 
+    const responseData = {
       participants: allParticipants,
-      totalCount: allParticipants.length + 215, // Base count + database count
+      totalCount: allParticipants.length, // Just database count, frontend adds base count
       todayCount: todayCount,
       weekCount: weekCount,
       timestamp: new Date().toISOString()
     };
-    
+
     // Update cache
     cachedData = responseData;
     cacheTime = now;
-    
+
     // Return all participants with statistics
     res.status(200).json(responseData);
 
@@ -174,10 +174,10 @@ export default async function handler(req, res) {
     }
 
     // Return error response
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to fetch participants',
       participants: [],
-      totalCount: 215, // Base count only
+      totalCount: 0, // No participants fetched
       todayCount: 0,
       weekCount: 0,
       timestamp: new Date().toISOString()

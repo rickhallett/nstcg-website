@@ -38,7 +38,7 @@ This is a community action website for the North Swanage Traffic Consultation Gr
   
 - `/api/get-count.js`: Returns participant count
   - Caches results for 1 minute
-  - Base count of 847 + database entries
+  - Base count of 215 + database entries
   - Handles Notion API pagination
 
 ### Notion Integration

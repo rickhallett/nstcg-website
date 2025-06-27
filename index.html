@@ -2,142 +2,384 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NSTCG - Site Maintenance</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Neighbours Are Taking Action - North Swanage Traffic Safety</title>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
+  <!-- Open Graph Meta Tags for Social Sharing -->
+  <meta property="og:title" content="⚠️ Traffic Crisis Coming to North Swanage - Take Action NOW!">
+  <meta property="og:description"
+    content="Join 215+ Neighbours fighting against dangerous traffic changes. Swanage Town Council  could flood YOUR street with traffic. Time is running out!">
+  <meta property="og:image" content="https://nstcg.org/images/social-share-preview.jpg">
+  <meta property="og:url" content="https://nstcg.org">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="North Swanage Traffic Safety">
 
-        .maintenance-container {
-            max-width: 600px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="⚠️ Traffic Crisis Coming to North Swanage">
+  <meta name="twitter:description"
+    content="Join 215+ Neighbours fighting dangerous traffic changes. Act now before it's too late!">
+  <meta name="twitter:image" content="https://nstcg.org/images/social-share-preview.jpg">
 
-        .logo {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #fff;
-        }
+  <!-- Additional SEO Meta Tags -->
+  <meta name="description"
+    content="North Swanage residents are uniting against the Nassau traffic initiative. Join your Neighbours in protecting our streets from dangerous traffic increases.">
+  <meta name="keywords" content="North Swanage, traffic safety, NSTCG, Shore Road, community action, Dorset">
 
-        .maintenance-title {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            color: #fff;
-        }
+  <!-- Animate.css CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 
-        .signup-count {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #FFD700;
-            margin: 30px 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-    </style>
+  <!-- Font Awesome CDN for social media icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- CSS will be bundled by Vite -->
-
-    <!-- Preload map images for faster loading -->
-    <link rel="preload" as="image" href="/images/impact_non_sat_height.webp" type="image/webp">
-    <link rel="preload" as="image" href="/images/impact_non_sat_height_compressed.png" type="image/png">
-
-    <!-- Critical inline script for instant UI updates -->
-    <script>
-        // Check registration status immediately for fastest possible UI update
-        if (localStorage.getItem('nstcg_registered') === 'true') {
-            document.documentElement.classList.add('user-registered');
-        }
-    </script>
-
-    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LdmSm4rAAAAAGwGVAsN25wdZ2Q2gFoEAtQVt7lX" async
-        defer></script>
+  <!-- Local Styles - Modular CSS -->
+  <link rel="stylesheet" href="css/main.css">
+  
+  <!-- Preload map images for faster loading -->
+  <link rel="preload" as="image" href="images/impact_non_sat_height.webp" type="image/webp">
+  <link rel="preload" as="image" href="images/impact_non_sat_height_compressed.png" type="image/png">
+  
+  <!-- Critical inline script for instant UI updates -->
+  <script>
+    // Check registration status immediately for fastest possible UI update
+    if (localStorage.getItem('nstcg_registered') === 'true') {
+      document.documentElement.classList.add('user-registered');
+    }
+  </script>
 </head>
 
 <body>
-    <div class="maintenance-container">
-        <div class="icon">🚧</div>
-        <div class="logo">NSTCG</div>
-        <h1 class="maintenance-title">Site in Temporary Maintenance</h1>
-
-        <div class="signup-count">Current sign ups: 556!</div>
-
-        <div class="countdown-container">
-            <div class="countdown-title">Estimated downtime:</div>
-            <div class="countdown-timer" id="countdown">
-                <div class="time-unit">
-                    <span class="time-value" id="days">--</span>
-                    <span class="time-label">Days</span>
-                </div>
-                <div class="time-unit">
-                    <span class="time-value" id="hours">--</span>
-                    <span class="time-label">Hours</span>
-                </div>
-                <div class="time-unit">
-                    <span class="time-value" id="minutes">--</span>
-                    <span class="time-label">Minutes</span>
-                </div>
-                <div class="time-unit">
-                    <span class="time-value" id="seconds">--</span>
-                    <span class="time-label">Seconds</span>
-                </div>
-            </div>
+  <!-- Navigation -->
+  <div id="navigation-placeholder"></div>
+  
+  <header class="alert-header">
+    <div class="header-content">
+      <div class="alert-badge">
+        <span class="pulse-dot"></span>
+        <span>COMMUNITY ACTION REQUIRED</span>
+      </div>
+      <div class="header-countdown">
+        <div class="header-time-unit days">
+          <span class="header-time-value header-days">00</span>
+          <span class="header-time-label">Days</span>
         </div>
-
-        <div class="message">
-            We're working hard to resolve some technical issues. The site will be back online shortly. Thank you for
-            your patience!
+        <div class="header-time-unit hours">
+          <span class="header-time-value header-hours">00</span>
+          <span class="header-time-label">Hours</span>
         </div>
+        <div class="header-time-unit minutes">
+          <span class="header-time-value header-minutes">00</span>
+          <span class="header-time-label">Min</span>
+        </div>
+        <div class="header-time-unit seconds">
+          <span class="header-time-value header-seconds">00</span>
+          <span class="header-time-label">Sec</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+  <div class="container">
+    <div class="hero">
+      <h1>
+        <span class="highlight">YOUR Neighbours</span><br>
+        ARE TAKING ACTION<br>
+        RIGHT NOW
+      </h1>
+      <p style="margin-top: 20px;">
+        The North Swanage Traffic Safety Consultation is happening NOW,
+        and your community is speaking up. Don't let others decide your future.
+      </p>
     </div>
 
-    <script>
-        // Target date: Friday 27 Jun 2025 12:30 GMT
-        const targetDate = new Date('2025-06-27T12:30:00Z').getTime();
+    <div class="impact-map">
+      <h2>Shore Road Impact Zone</h2>
+      <div id="map-container">
+        <div class="map-placeholder">
+          <div class="map-overlay">
+            <p style="font-size: 24px; font-weight: bold; color: #3498db;">
+              Traffic Impact Map Loading...
+            </p>
+            <p style="margin-top: 10px; color: #ccc;">
+              See how the Nassau initiative will affect YOUR street
+            </p>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top: 20px; font-size: 18px; color: #ff6b6b; font-weight: bold;">
+        ⚠️ Properties within 1km of Shore Road face immediate traffic changes
+      </p>
+    </div>
 
-        function updateCountdown() {
-            const now = new Date().getTime();
-            const timeLeft = targetDate - now;
-            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+    <div class="survey-button-section">
+      <button class="survey-btn" onclick="MicroModal.show('modal-survey');">
+        TAKE SURVEY NOW!
+      </button>
+    </div>
 
-            document.getElementById('days').textContent = days.toString().padStart(2, '0');
-            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
-        }
+    <div class="community-counter">
+      <div class="counter-number">0</div>
+      <div class="counter-label">Neighbours Have Already Signed Up</div>
+      <a href="/feeds.html" class="see-all-link">See all participants →</a>
+    </div>
 
-        // Update countdown immediately and then every second
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-    </script>
+    <div class="live-feed">
+      <div class="feed-header">
+        <div class="live-indicator">
+          <span class="pulse-dot"></span>
+          <span>LIVE</span>
+        </div>
+        <span>RECENT COMMUNITY ACTIVITY</span>
+      </div>
+      <div class="feed-loading">
+        <div class="loading-spinner"></div>
+        <p>Loading recent activity...</p>
+      </div>
+    </div>
 
-    <!-- Vite Entry Point -->
-    <script type="module" src="/js/main-entry.js"></script>
+    <div class="thought-bubbles-section">
+      <div class="thought-bubbles-grid" id="thought-bubbles-container">
+        <!-- Thought bubbles will be dynamically loaded here -->
+      </div>
+    </div>
 
+    <div class="form-section">
+      <div class="form-header">
+        <h2 class="form-title">DON'T BE LEFT OUT</h2>
+        <p class="form-subtitle">Add Your Voice to the Community Consensus NOW</p>
+      </div>
+      <form id="signupForm" class="signup-form">
+        <div class="form-group-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" name="firstName" required placeholder="First name">
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" name="lastName" required placeholder="Last name">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="Stay connected with updates">
+        </div>
+        <div class="form-group">
+          <fieldset class="radio-group">
+            <legend>Are you a:</legend>
+            <div class="radio-options">
+              <label class="radio-label">
+                <input type="radio" name="visitorType" value="local" required checked>
+                <span class="radio-custom"></span>
+                <span>Local Resident</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="visitorType" value="tourist" required>
+                <span class="radio-custom"></span>
+                <span>Visitor/Tourist</span>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+        <div class="form-group">
+          <textarea id="comment" name="comment" rows="2" maxlength="150"
+            placeholder="Share why this matters to you (optional)" style="resize: none;"></textarea>
+          <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">Your comment will be publicly
+            visible</small>
+        </div>
+        <button type="submit" class="submit-btn">
+          <span id="submit-btn-text">JOIN YOUR Neighbours NOW</span>
+        </button>
+      </form>
+    </div>
 
-    </script>
+    <!-- Campaign Financial Status -->
+    <div class="financial-status-card">
+      <h2 class="card-title">Campaign Financial Status</h2>
+      <div class="financial-grid">
+        <div class="financial-item costs">
+          <div class="financial-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="financial-content loading">
+            <h3>Running Costs</h3>
+            <div class="skeleton-loader"></div>
+            <div class="amount" id="campaign-costs">£0</div>
+            <p class="sublabel">Since June 14, 2025</p>
+          </div>
+        </div>
+        
+        <div class="financial-item donations">
+          <div class="financial-icon">
+            <i class="fas fa-hand-holding-heart"></i>
+          </div>
+          <div class="financial-content loading">
+            <h3>Total Donations</h3>
+            <div class="skeleton-loader"></div>
+            <div class="amount" id="total-donations">£0</div>
+            <p class="sublabel"><span id="donation-count">0</span> supporters</p>
+          </div>
+        </div>
+        
+        <div class="financial-item balance">
+          <div class="financial-icon">
+            <i class="fas fa-balance-scale"></i>
+          </div>
+          <div class="financial-content loading">
+            <h3>Campaign Balance</h3>
+            <div class="skeleton-loader"></div>
+            <div class="amount" id="campaign-balance">£0</div>
+            <p class="sublabel">
+              <span id="balance-status">Breaking even</span>
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="donate-cta">
+        <p>Help us cover campaign costs and fight for safer streets</p>
+        <a href="/donate.html" class="donate-button">
+          <i class="fas fa-donate"></i> Donate Now
+        </a>
+      </div>
+    </div>
+
+    <div id="confirmation" class="confirmation">
+      <h3>✓ WELCOME TO THE MOVEMENT!</h3>
+      <p style="font-size: 18px; margin-bottom: 20px;">
+        You are now part of <strong><span id="confirmation-count">---</span> Neighbours</strong> fighting for safer
+        streets.
+      </p>
+      <p style="color: #00ff00; font-weight: bold;">
+        Check your email for next steps and community updates.
+      </p>
+      <button id="continue-survey-btn" class="survey-continue-btn" style="
+        margin-top: 20px;
+        background: #00ff00;
+        color: #1a1a1a;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 5px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+      " onmouseover="this.style.background='#00cc00'" onmouseout="this.style.background='#00ff00'">
+        Continue to Official Survey →
+      </button>
+    </div>
+
+    <footer class="footer">
+      <p>
+        North Swanage Community Group | Protecting Our Neighborhoods Since 2020
+      </p>
+      <div class="footer-links">
+        <a href="/privacy-policy.html">Privacy Policy</a>
+        <span class="footer-separator">·</span>
+        <a href="/terms-and-conditions.html">Terms & Conditions</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Survey Modal -->
+  <div id="modal-survey" class="modal" aria-hidden="true">
+    <div class="modal__overlay" tabindex="-1">
+      <div class="modal__container animate__animated animate__fadeInUp" role="dialog" aria-modal="true"
+        aria-labelledby="modal-survey-title">
+        <header class="modal__header">
+          <h2 class="modal__title" id="modal-survey-title">
+            Community Safety Survey
+          </h2>
+          <button class="modal__close" aria-label="Close modal" data-micromodal-close>×</button>
+        </header>
+
+        <main class="modal__content" id="modal-survey-content">
+          <div id="modalMessage" class="message"></div>
+
+          <form id="surveyModalForm">
+            <div class="form-group-row">
+              <div class="modal-form-group">
+                <label for="modalFirstName">First Name</label>
+                <input type="text" id="modalFirstName" name="firstName" required placeholder="First name">
+              </div>
+              <div class="modal-form-group">
+                <label for="modalLastName">Last Name</label>
+                <input type="text" id="modalLastName" name="lastName" required placeholder="Last name">
+              </div>
+            </div>
+
+            <div class="modal-form-group">
+              <label for="modalEmail">Email Address</label>
+              <input type="email" id="modalEmail" name="email" required placeholder="Enter your email">
+            </div>
+
+            <div class="modal-form-group">
+              <fieldset class="radio-group">
+                <legend>Are you a:</legend>
+                <div class="radio-options">
+                  <label class="radio-label">
+                    <input type="radio" name="modalVisitorType" value="local" required checked>
+                    <span class="radio-custom"></span>
+                    <span>Local Resident</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="modalVisitorType" value="tourist" required>
+                    <span class="radio-custom"></span>
+                    <span>Visitor/Tourist</span>
+                  </label>
+                </div>
+              </fieldset>
+            </div>
+
+            <div class="modal-form-group">
+              <textarea id="modalComment" name="comment" rows="2" maxlength="150"
+                placeholder="Share why this matters to you (optional)"
+                style="resize: none; width: 100%; padding: 15px; background: rgba(255, 255, 255, 0.1); border: 2px solid #666; border-radius: 5px; color: #fff; font-size: 16px; transition: all 0.3s ease;"></textarea>
+              <small style="color: #999; font-size: 12px; display: block; margin-top: 5px;">Your comment will be
+                publicly visible</small>
+            </div>
+
+            <button type="submit" class="modal-submit-btn">
+              Join the Movement!
+            </button>
+          </form>
+        </main>
+      </div>
+    </div>
+  </div>
+  </main>
+
+  <!-- Micromodal CDN -->
+  <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
+
+  <!-- Alpine.js CDN for reactive templating -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- Local JavaScript -->
+  <!-- Navigation Include -->
+  <script type="module" src="js/utils/include-nav.js"></script>
+  
+  <!-- Homepage Features (conditional rendering) -->
+  <script type="module" src="js/modules/homepage-features.js"></script>
+  
+  <!-- Referral Utilities -->
+  <script src="js/modules/referral-utils.js"></script>
+  
+  <script src="js/main.js"></script>
+
+  <script>
+    // Only load Vercel Speed Insights in production
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+      
+      const script = document.createElement('script');
+      script.defer = true;
+      script.src = '/_vercel/speed-insights/script.js';
+      document.head.appendChild(script);
+    }
+  </script>
 </body>
 
 </html>

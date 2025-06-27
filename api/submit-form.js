@@ -344,8 +344,8 @@ async function processGamificationRegistration({ email, firstName, lastName, use
         parent: { database_id: process.env.NOTION_GAMIFICATION_DB_ID },
         properties: {
           'Email': { email: email },
-          'Name': { title: [{ text: { content: `${firstName} ${lastName}` } }] },
-          'Display Name': { rich_text: [{ text: { content: firstName } }] },
+          'Name': { title: [{ text: { content: firstName && lastName ? `${firstName} ${lastName}` : firstName || email.split('@')[0] } }] },
+          'Display Name': { rich_text: [{ text: { content: firstName || email.split('@')[0] } }] },
           'User ID': { rich_text: [{ text: { content: userId } }] },
           'Referral Code': { rich_text: [{ text: { content: referralCode } }] },
           'Total Points': { number: REGISTRATION_POINTS },
