@@ -5,6 +5,20 @@
  * Updates user records and awards bonus points.
  */
 
+// Initialize Google credentials if in Vercel environment
+if (process.env.VERCEL && process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+    const credentialsPath = path.join('/tmp', 'google-credentials.json');
+    fs.writeFileSync(credentialsPath, JSON.stringify(credentials, null, 2));
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
+  } catch (error) {
+    console.error('Failed to initialize Google credentials:', error);
+  }
+}
+
 // Rate limiting for activation attempts
 const activationAttempts = new Map();
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
