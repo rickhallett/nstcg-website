@@ -17,13 +17,11 @@ export default defineConfig({
         notfound: resolve(__dirname, '404.html')
       },
       output: {
-        // Optimize chunk splitting for preloading system
+        // Optimize chunk splitting
         manualChunks: {
           // Core system chunks
           'core': ['./js/core/StateManager.js', './js/core/CacheManager.js'],
           
-          // API and preloading chunks (lazy-loaded)
-          'preloader': ['./js/modules/api-preloader.js', './js/modules/api-integration.js'],
           
           // Feature-specific chunks
           'social': ['./js/modules/social.js'],
@@ -92,8 +90,8 @@ export default defineConfig({
     emptyOutDir: true,
     // Asset optimization
     assetsDir: 'assets',
-    // Chunk size warning limit (increased for preloading modules)
-    chunkSizeWarningLimit: 1500
+    // Chunk size warning limit
+    chunkSizeWarningLimit: 500
   },
   
   // Development server configuration
