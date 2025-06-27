@@ -38,9 +38,6 @@ window.showToast = showToast;
 // Homepage features
 import { initHomepageFeatures } from './modules/homepage-features.js'
 
-// Main application logic
-import './main.js'
-
 // API Preloading system (lazy-loaded)
 async function initializePreloading() {
   try {
@@ -91,6 +88,9 @@ async function initialize() {
 
     // Initialize homepage features (sets up window.featureFlags)
     await initHomepageFeatures();
+    
+    // NOW import main.js after dependencies are ready
+    await import('./main.js');
 
     // Initialize API preloading system (after a short delay)
     setTimeout(initializePreloading, 1000);
