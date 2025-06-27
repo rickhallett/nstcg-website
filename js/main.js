@@ -240,6 +240,14 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     if (formData.comment) {
       localStorage.setItem('nstcg_comment', formData.comment);
     }
+    
+    // Fetch and sync referral code from server
+    try {
+      const referralCode = await window.ReferralUtils.getUserReferralCode();
+      console.log('Synced referral code:', referralCode);
+    } catch (error) {
+      console.warn('Failed to sync referral code:', error);
+    }
 
     // Hide form section
     document.querySelector('.form-section').style.display = 'none';
@@ -772,6 +780,9 @@ function checkReferral() {
   const sourceCode = urlParams.get('src');
 
   if (referralCode) {
+    // Add class to body for CSS styling
+    document.body.classList.add('referred-visitor');
+    
     // Store referral information in session storage
     sessionStorage.setItem('referrer', referralCode);
     sessionStorage.setItem('referral_code', referralCode);
@@ -869,20 +880,20 @@ function setupSmartPolling() {
 }
 
 // Function to check registration status and update UI
-function initializeRegistrationState() {
+async function initializeRegistrationState() {
   const isRegistered = localStorage.getItem('nstcg_registered') === 'true';
   const userId = localStorage.getItem('nstcg_user_id');
 
   if (isRegistered && userId) {
     // Transform UI for registered users
-    transformSurveyButtonToShare();
+    await transformSurveyButtonToShare();
     transformBottomFormToShare();
     showModalButtonNotification();
   }
 }
 
 // Transform survey button to share section for registered users
-function transformSurveyButtonToShare() {
+async function transformSurveyButtonToShare() {
   const surveySection = document.querySelector('.survey-button-section');
   if (surveySection) {
     const userComment = localStorage.getItem('nstcg_comment') || '';
@@ -917,7 +928,7 @@ function transformSurveyButtonToShare() {
         <div class="reward-items" style="display: grid; gap: 12px;">
           <div class="reward-item" style="display: flex; align-items: center; gap: 10px;">
             <i class="fas fa-users" style="color: #00ff00; font-size: 18px;"></i>
-            <span><strong>10 points</strong> for each friend who joins through your link</span>
+            <span><strong>25 points</strong> when your friend completes registration</span>
           </div>
           <div class="reward-item" style="display: flex; align-items: center; gap: 10px;">
             <i class="fas fa-chart-line" style="color: #ff9900; font-size: 18px;"></i>
@@ -929,7 +940,7 @@ function transformSurveyButtonToShare() {
           </div>
         </div>
         <p style="margin-top: 15px; font-size: 14px; opacity: 0.9;">
-          Your unique referral code: <strong>${generateReferralCode()}</strong>
+          Your unique referral code: <strong>${await window.ReferralUtils.getUserReferralCode()}</strong>
         </p>
       </div>
     `;
@@ -1127,22 +1138,22 @@ let originalModalContent;
   if (isRegistered) {
     // Add a class to body immediately to allow CSS-based UI changes
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function () {
+      document.addEventListener('DOMContentLoaded', async function () {
         document.body.classList.add('user-registered');
-        initializeRegistrationState();
+        await initializeRegistrationState();
       }, { once: true });
     } else {
       document.body.classList.add('user-registered');
-      initializeRegistrationState();
+      initializeRegistrationState(); // Fire and forget
     }
   }
 })();
 
 // Initialize DOM-dependent code
-function initializeDOMContent() {
+async function initializeDOMContent() {
   // Only initialize if not already done above
   if (!document.body.classList.contains('user-registered')) {
-    initializeRegistrationState();
+    await initializeRegistrationState();
   }
 
   originalModalContent = document.getElementById('modal-survey-content').innerHTML;
@@ -1272,6 +1283,14 @@ async function handleModalFormSubmit(e) {
     localStorage.setItem('nstcg_last_name', formData.lastName);
     if (formData.comment) {
       localStorage.setItem('nstcg_comment', formData.comment);
+    }
+    
+    // Fetch and sync referral code from server
+    try {
+      const referralCode = await window.ReferralUtils.getUserReferralCode();
+      console.log('Synced referral code:', referralCode);
+    } catch (error) {
+      console.warn('Failed to sync referral code:', error);
     }
 
     // Replace modal content with success message (with loading state)
@@ -1616,8 +1635,8 @@ function generateShareText(count, userComment) {
 // Social codes now handled by ReferralUtils
 
 async function getShareUrl(platform = 'direct') {
-  // Get or generate referral code
-  const referralCode = generateReferralCode();
+  // Get or generate referral code using centralized logic (now async)
+  const referralCode = await window.ReferralUtils.getUserReferralCode();
 
   // Use shared utility to generate URL
   return window.ReferralUtils.generateShareUrl(referralCode, platform);
@@ -1706,17 +1725,6 @@ function showToast(message) {
   }, 3000);
 }
 
-// Generate referral code from user data
-function generateReferralCode() {
-  const stored = localStorage.getItem('nstcg_referral_code');
-  if (stored) return stored;
-
-  const firstName = localStorage.getItem('nstcg_first_name') || 'USER';
-  const code = window.ReferralUtils.generateReferralCode(firstName);
-
-  localStorage.setItem('nstcg_referral_code', code);
-  return code;
-}
 
 // Calculate running costs since campaign start
 function calculateRunningCosts() {

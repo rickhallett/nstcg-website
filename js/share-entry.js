@@ -35,9 +35,8 @@ window.generateShareText = function(count, userComment) {
 };
 
 window.getShareUrl = async function(platform = 'direct') {
-  // Get or generate referral code
-  const referralCode = window.generateReferralCode ? window.generateReferralCode() : 
-    (localStorage.getItem('nstcg_referral_code') || window.ReferralUtils.generateReferralCode());
+  // Get or generate referral code using centralized logic (now async)
+  const referralCode = await window.ReferralUtils.getUserReferralCode();
   
   // Get platform code
   const platformCode = window.ReferralUtils.PLATFORM_CODES[platform] || 'dr';
@@ -84,17 +83,8 @@ window.shareNative = shareNative;
 window.addSocialShareButtons = addSocialShareButtons;
 window.showToast = showToast;
 
-// Helper to generate referral code
-window.generateReferralCode = function() {
-  const stored = localStorage.getItem('nstcg_referral_code');
-  if (stored) return stored;
-  
-  const firstName = localStorage.getItem('nstcg_first_name') || 'USER';
-  const code = window.ReferralUtils.generateReferralCode(firstName);
-  
-  localStorage.setItem('nstcg_referral_code', code);
-  return code;
-};
+// Helper to generate referral code - use centralized version
+window.generateReferralCode = window.ReferralUtils.getUserReferralCode;
 
 // Share page specific modules
 import './modules/share-features.js'  

@@ -261,3 +261,27 @@ textarea::placeholder {
     font-size: 15px;
   }
 }
+
+/* Referral Bonus Notice */
+.referred-visitor .referral-bonus-notice {
+  display: block !important;
+  color: #00ff00;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 18px;
+  padding: 10px;
+  background: rgba(0, 255, 0, 0.1);
+  border: 2px solid #00ff00;
+  border-radius: 5px;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+.blinking-text {
+  animation: blink 1s infinite;
+  display: inline-block;
+}

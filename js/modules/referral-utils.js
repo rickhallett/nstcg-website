@@ -42,6 +42,71 @@ window.ReferralUtils.generateReferralCode = function(firstName = 'USER') {
 }
 
 /**
+ * Get or generate user's referral code with persistence
+ * This is the SINGLE source of truth for getting a user's referral code
+ * 
+ * @returns {Promise<string>} User's persisted referral code
+ */
+window.ReferralUtils.getUserReferralCode = async function() {
+  // Check if already persisted
+  let code = localStorage.getItem('nstcg_referral_code');
+  if (code) return code;
+  
+  // If user is registered, try to fetch from server
+  const email = localStorage.getItem('nstcg_email');
+  const userId = localStorage.getItem('nstcg_user_id');
+  
+  if (email || userId) {
+    try {
+      const stats = await window.ReferralUtils.fetchUserStats(email, userId);
+      if (stats && stats.referralCode) {
+        // Store the server-generated code
+        localStorage.setItem('nstcg_referral_code', stats.referralCode);
+        return stats.referralCode;
+      }
+    } catch (error) {
+      console.warn('Failed to fetch referral code from server:', error);
+    }
+  }
+  
+  // Generate new one if needed (for unregistered users)
+  const firstName = localStorage.getItem('nstcg_first_name') || 'USER';
+  code = window.ReferralUtils.generateReferralCode(firstName);
+  localStorage.setItem('nstcg_referral_code', code);
+  return code;
+}
+
+/**
+ * Fetch user stats from the server
+ * 
+ * @param {string} email - User's email
+ * @param {string} userId - User's ID
+ * @returns {Promise<Object|null>} User stats including referral code
+ */
+window.ReferralUtils.fetchUserStats = async function(email, userId) {
+  try {
+    const params = new URLSearchParams();
+    if (email) params.append('email', email);
+    if (userId) params.append('user_id', userId);
+    
+    const response = await fetch(`/api/get-user-stats?${params}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch user stats');
+    }
+    
+    const data = await response.json();
+    if (data.exists && data.stats) {
+      return data.stats;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error fetching user stats:', error);
+    return null;
+  }
+}
+
+/**
  * Generate a share URL with referral tracking
  * Format: https://example.com?ref=[referralCode]
  * 
