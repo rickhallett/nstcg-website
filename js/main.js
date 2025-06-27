@@ -22,10 +22,16 @@ function updateCountdown() {
   const deadline = new Date('2025-06-29T23:59:59+01:00'); // BST (British Summer Time)
   const now = new Date().getTime();
   const timeLeft = deadline - now;
+  
+  // Debug: Check if countdown elements exist
+  const countdownElements = document.querySelectorAll('.header-countdown');
+  if (countdownElements.length === 0) {
+    console.warn('No countdown elements found with class .header-countdown');
+    return;
+  }
 
   if (timeLeft < 0) {
     // Handle expired state
-    const countdownElements = document.querySelectorAll('.header-countdown');
     countdownElements.forEach(el => {
       el.innerHTML = '<span style="color: #ff6b6b; font-weight: bold;">Consultation Closed</span>';
     });
@@ -79,8 +85,22 @@ function applyTimerFeatures(totalHours) {
   }
 }
 
-setInterval(updateCountdown, 1000);
-updateCountdown();
+// Initialize countdown when DOM is ready
+function startCountdown() {
+  console.log('Starting countdown timer...');
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+}
+
+// Add immediate console log to verify script is loading
+console.log('main.js loaded');
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startCountdown);
+} else {
+  // DOM is already ready
+  startCountdown();
+}
 
 // API call to Vercel function
 async function submitToNotion(formData) {
@@ -2017,3 +2037,4 @@ window.addSocialShareButtons = addSocialShareButtons;
 window.showToast = showToast;
 
 // Note: Social sharing functions are already exposed in main-entry.js
+
