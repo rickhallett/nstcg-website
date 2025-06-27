@@ -1,3 +1,6 @@
+import imageUrlWebp from '../images/impact_non_sat_height.webp';
+import imageUrlPng from '../images/impact_non_sat_height_compressed.png';
+
 // Load map as soon as DOM is ready for consistent fast loading
 document.addEventListener('DOMContentLoaded', function () {
   // Deliberately show loading screen for 3 seconds to build anticipation
@@ -7,8 +10,8 @@ document.addEventListener('DOMContentLoaded', function () {
       mapContainer.innerHTML = `
         <div class="map-image fade-in" id="traffic-impact-map">
           <picture>
-            <source srcset="/images/impact_non_sat_height.webp" type="image/webp">
-            <img src="/images/impact_non_sat_height_compressed.png" alt="Map of North Swanage">
+            <source srcset="${imageUrlWebp}" type="image/webp">
+            <img src="${imageUrlPng}" alt="Map of North Swanage">
           </picture>
           <div class="impact-overlay"></div>
         </div>
