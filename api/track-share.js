@@ -7,16 +7,7 @@
 
 import { requireFeatures } from './middleware/feature-flags.js';
 
-// Daily share limits per platform
-const DAILY_SHARE_LIMITS = {
-  twitter: 5,
-  facebook: 5,
-  whatsapp: 10,
-  linkedin: 5,
-  email: 10
-};
-
-const POINTS_PER_SHARE = 3;
+const POINTS_PER_SHARE = 10;
 
 export default async function handler(req, res) {
   // Check if referral and share tracking features are enabled
@@ -104,24 +95,8 @@ export default async function handler(req, res) {
     const userPage = data.results[0];
     const props = userPage.properties;
     
-    // Check daily share limit
     const platformShareField = `${capitalizeFirst(platform)} Shares`;
     const currentShares = props[platformShareField]?.number || 0;
-    const lastShareDate = props['Last Share Date']?.date?.start;
-    
-    // Reset daily count if it's a new day
-    const isNewDay = !lastShareDate || !isSameDay(new Date(lastShareDate), new Date());
-    const dailyShareCount = isNewDay ? 0 : (props[`Daily ${capitalizeFirst(platform)} Shares`]?.number || 0);
-    
-    if (dailyShareCount >= DAILY_SHARE_LIMITS[platform]) {
-      return res.status(200).json({
-        success: true,
-        points_awarded: 0,
-        message: `Daily share limit reached for ${platform}`,
-        daily_limit: DAILY_SHARE_LIMITS[platform],
-        shares_today: dailyShareCount
-      });
-    }
     
     // Calculate points to award
     const pointsToAward = POINTS_PER_SHARE;
@@ -133,19 +108,8 @@ export default async function handler(req, res) {
       'Total Points': { number: currentTotalPoints + pointsToAward },
       'Share Points': { number: currentSharePoints + pointsToAward },
       [platformShareField]: { number: currentShares + 1 },
-      [`Daily ${capitalizeFirst(platform)} Shares`]: { number: dailyShareCount + 1 },
-      'Last Share Date': { date: { start: new Date().toISOString() } },
-      'Last Activity': { date: { start: new Date().toISOString() } }
+      'Last Activity Date': { date: { start: new Date().toISOString() } }
     };
-    
-    // Reset all daily counters if it's a new day
-    if (isNewDay) {
-      validPlatforms.forEach(p => {
-        if (p !== platform) {
-          updates[`Daily ${capitalizeFirst(p)} Shares`] = { number: 0 };
-        }
-      });
-    }
     
     const updateResponse = await fetch(`https://api.notion.com/v1/pages/${userPage.id}`, {
       method: 'PATCH',
@@ -158,7 +122,14 @@ export default async function handler(req, res) {
     });
     
     if (!updateResponse.ok) {
-      throw new Error('Failed to update user points');
+      const errorData = await updateResponse.json();
+      console.error('Notion API error updating user points:', {
+        status: updateResponse.status,
+        error: errorData,
+        pageId: userPage.id,
+        updates: updates
+      });
+      throw new Error(`Failed to update user points: ${updateResponse.status} - ${errorData.message || errorData.code || 'Unknown error'}`);
     }
     
     res.status(200).json({
@@ -166,8 +137,7 @@ export default async function handler(req, res) {
       points_awarded: pointsToAward,
       total_points: currentTotalPoints + pointsToAward,
       share_count: currentShares + 1,
-      platform: platform,
-      daily_shares_remaining: DAILY_SHARE_LIMITS[platform] - dailyShareCount - 1
+      platform: platform
     });
     
   } catch (error) {
@@ -184,12 +154,6 @@ function capitalizeFirst(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// Helper function to check if two dates are the same day
-function isSameDay(date1, date2) {
-  return date1.getFullYear() === date2.getFullYear() &&
-         date1.getMonth() === date2.getMonth() &&
-         date1.getDate() === date2.getDate();
-}
 
 // Create new gamification profile
 async function createGamificationProfile(email, userId, referralCode) {
@@ -257,9 +221,7 @@ async function recordShareForNewUser(pageId, platform) {
       'Total Points': { number: POINTS_PER_SHARE },
       'Share Points': { number: POINTS_PER_SHARE },
       [platformShareField]: { number: 1 },
-      [`Daily ${capitalizeFirst(platform)} Shares`]: { number: 1 },
-      'Last Share Date': { date: { start: new Date().toISOString() } },
-      'Last Activity': { date: { start: new Date().toISOString() } }
+      'Last Activity Date': { date: { start: new Date().toISOString() } }
     };
     
     const response = await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
@@ -273,7 +235,14 @@ async function recordShareForNewUser(pageId, platform) {
     });
     
     if (!response.ok) {
-      throw new Error('Failed to update new user with share');
+      const errorData = await response.json();
+      console.error('Notion API error updating new user with share:', {
+        status: response.status,
+        error: errorData,
+        pageId: pageId,
+        updates: updates
+      });
+      throw new Error(`Failed to update new user with share: ${response.status} - ${errorData.message || errorData.code || 'Unknown error'}`);
     }
     
     return {
@@ -282,7 +251,6 @@ async function recordShareForNewUser(pageId, platform) {
       total_points: POINTS_PER_SHARE,
       share_count: 1,
       platform: platform,
-      daily_shares_remaining: DAILY_SHARE_LIMITS[platform] - 1,
       new_user: true
     };
     

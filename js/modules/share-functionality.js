@@ -164,8 +164,14 @@ function setupEventListeners() {
 async function copyReferralLink() {
   const copyBtn = document.getElementById('copy-link-btn');
   
+  // Get the referral code
+  const referralCode = userStats?.referralCode || localStorage.getItem('nstcg_referral_code');
+  
+  // Generate copy-specific URL
+  const copyUrl = window.ReferralUtils.generateShareUrl(referralCode, 'copy');
+  
   try {
-    const success = await window.ReferralUtils.copyToClipboard(referralLink);
+    const success = await window.ReferralUtils.copyToClipboard(copyUrl);
     
     if (success) {
       // Show success feedback
@@ -181,6 +187,9 @@ async function copyReferralLink() {
       }, 2000);
       
       showNotification('Link copied to clipboard!', 'success');
+      
+      // Track the copy action
+      await trackShare('copy');
     } else {
       showNotification('Failed to copy link. Please try selecting and copying manually.', 'error');
     }
@@ -194,10 +203,16 @@ async function copyReferralLink() {
  * Share on social platform
  */
 async function shareOnPlatform(platform) {
+  // Get the referral code
+  const referralCode = userStats?.referralCode || localStorage.getItem('nstcg_referral_code');
+  
+  // Generate platform-specific URL
+  const platformUrl = window.ReferralUtils.generateShareUrl(referralCode, platform);
+  
   const shareMessages = {
-    twitter: `🚨 North Swanage residents: Our streets are at risk! Join me in the fight against dangerous traffic changes. Every voice counts! ${referralLink} #NorthSwanage #TrafficSafety`,
-    facebook: `Important for North Swanage residents! The proposed Nassau traffic initiative could flood our quiet streets with dangerous levels of traffic. I've joined the community campaign - will you? ${referralLink}`,
-    whatsapp: `Hi! This is really important for our neighbourhood. The council is planning traffic changes that could make our streets dangerous. Please take 2 minutes to join the campaign: ${referralLink}`,
+    twitter: `🚨 North Swanage residents: Our streets are at risk! Join me in the fight against dangerous traffic changes. Every voice counts! ${platformUrl} #NorthSwanage #TrafficSafety`,
+    facebook: `Important for North Swanage residents! The proposed Nassau traffic initiative could flood our quiet streets with dangerous levels of traffic. I've joined the community campaign - will you? ${platformUrl}`,
+    whatsapp: `Hi! This is really important for our neighbourhood. The council is planning traffic changes that could make our streets dangerous. Please take 2 minutes to join the campaign: ${platformUrl}`,
     email: {
       subject: 'Urgent: North Swanage Traffic Safety - We Need Your Voice',
       body: `Hi,
@@ -208,7 +223,7 @@ The proposed Nassau traffic initiative could redirect significant traffic throug
 
 Our community is coming together to voice our concerns, and every signature matters. It only takes 2 minutes to join.
 
-Please visit: ${referralLink}
+Please visit: ${platformUrl}
 
 Together, we can keep our streets safe.
 
@@ -224,7 +239,7 @@ Thank you!`
       break;
       
     case 'facebook':
-      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}&quote=${encodeURIComponent(shareMessages.facebook)}`;
+      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(platformUrl)}&quote=${encodeURIComponent(shareMessages.facebook)}`;
       break;
       
     case 'whatsapp':
@@ -273,11 +288,6 @@ async function trackShare(platform) {
       
       // Store share action
       sessionStorage.setItem(`shared_${platform}`, 'true');
-      
-      // Check if daily limit reached
-      if (data.daily_shares_remaining === 0) {
-        showNotification(`Daily ${platform} share limit reached`, 'info');
-      }
     }
   } catch (error) {
     console.error('Error tracking share:', error);
