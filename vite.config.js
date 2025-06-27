@@ -64,17 +64,8 @@ export default defineConfig({
           return `assets/[ext]/[name]-[hash][extname]`;
         }
       },
-      // Enable tree shaking but preserve critical modules with side effects
-      treeshake: {
-        moduleSideEffects: [
-          '**/js/main.js',
-          '**/js/main-entry.js',
-          '**/js/utils/include-nav.js',
-          '**/js/modules/navigation.js',
-          '**/js/modules/navigation-features.js',
-          '**/js/modules/nav-timer.js'
-        ]
-      }
+      // Tree shaking is disabled to ensure all modules are included in the build.
+      treeshake: false
     },
     // Minification settings
     minify: true,
