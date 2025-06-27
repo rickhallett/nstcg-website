@@ -1,5 +1,7 @@
+import MicroModal from "micromodal";
+
 // Load map as soon as DOM is ready for consistent fast loading
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   // Deliberately show loading screen for 3 seconds to build anticipation
   setTimeout(() => {
     const mapContainer = document.getElementById('map-container');
@@ -48,7 +50,7 @@ function updateCountdown() {
   if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
   if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
   if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
-  
+
   // Apply color and blink features if enabled
   applyTimerFeatures(totalHours);
 }
@@ -57,22 +59,22 @@ function updateCountdown() {
 function applyTimerFeatures(totalHours) {
   const container = document.querySelector('.header-countdown');
   if (!container) return;
-  
+
   // Check feature flags from window object (set by feature-flags.js)
   const coloredTimer = window.featureFlags?.ui?.coloredTimer || false;
   const timerBlink = window.featureFlags?.ui?.timerBlink || false;
-  
+
   // Remove all color classes
   container.classList.remove('timer-yellow', 'timer-amber', 'timer-orange', 'timer-red', 'timer-blink');
-  
+
   if (coloredTimer) {
     let colorClass = 'timer-yellow';
     if (totalHours <= 1) colorClass = 'timer-red';
     else if (totalHours <= 12) colorClass = 'timer-orange';
     else if (totalHours <= 24) colorClass = 'timer-amber';
-    
+
     container.classList.add(colorClass);
-    
+
     if (timerBlink && totalHours <= 1) {
       container.classList.add('timer-blink');
     }
@@ -104,13 +106,13 @@ async function submitToNotion(formData) {
 function showEmailError() {
   const emailInput = document.getElementById('email');
   const modalEmailInput = document.getElementById('modalEmail');
-  
+
   // Add error state to main form email input
   if (emailInput) {
     emailInput.classList.add('error');
     emailInput.placeholder = 'Email already registered';
     emailInput.value = '';
-    
+
     // Remove error state when user starts typing
     const resetError = () => {
       emailInput.classList.remove('error');
@@ -119,13 +121,13 @@ function showEmailError() {
     };
     emailInput.addEventListener('input', resetError);
   }
-  
+
   // Add error state to modal email input  
   if (modalEmailInput) {
     modalEmailInput.classList.add('error');
     modalEmailInput.placeholder = 'Email already registered';
     modalEmailInput.value = '';
-    
+
     // Remove error state when user starts typing
     const resetModalError = () => {
       modalEmailInput.classList.remove('error');
@@ -136,10 +138,46 @@ function showEmailError() {
   }
 }
 
+// Helper function to copy referral code
+async function copyReferralCode(code) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(code);
+    } else {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = code;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
+    
+    // Show success feedback
+    const button = event.target;
+    const originalText = button.textContent;
+    button.textContent = 'Copied!';
+    button.style.background = '#00cc00';
+    
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.style.background = '#00ff00';
+    }, 2000);
+  } catch (error) {
+    console.error('Failed to copy:', error);
+    alert('Failed to copy. Please select and copy manually.');
+  }
+}
+
+// Make it globally available
+window.copyReferralCode = copyReferralCode;
+
 // Form Submission with Error Handling
 document.getElementById('signupForm').addEventListener('submit', async function (e) {
   e.preventDefault();
-  
+
   // Immediately disable submit button to prevent double-clicks
   const submitBtn = this.querySelector('button[type="submit"]');
   if (submitBtn.disabled) return; // Already processing
@@ -151,6 +189,11 @@ document.getElementById('signupForm').addEventListener('submit', async function 
   const userId = generateUserId();
   const submissionId = `${userId}-${Date.now()}`; // Unique submission ID
   const visitorType = document.querySelector('input[name="visitorType"]:checked')?.value || 'local';
+  
+  // Generate referral code for the new user
+  const firstName = document.getElementById('firstName').value.trim();
+  const newUserReferralCode = window.ReferralUtils.generateReferralCode(firstName);
+  
   const formData = {
     name: `${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`,
     firstName: document.getElementById('firstName').value.trim(),
@@ -166,7 +209,8 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     referral_code: sessionStorage.getItem('referral_code') || null,
     referral_source: sessionStorage.getItem('referral_source') || null,
     referral_platform: sessionStorage.getItem('referrer_platform') || null,
-    referral_timestamp: sessionStorage.getItem('referral_timestamp') || null
+    referral_timestamp: sessionStorage.getItem('referral_timestamp') || null,
+    referral_code_generated: newUserReferralCode // New user's own referral code
   };
 
   try {
@@ -175,8 +219,8 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     try {
       if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
         submitBtn.textContent = 'VERIFYING...';
-        recaptchaToken = await grecaptcha.enterprise.execute('6LdmSm4rAAAAAGwGVAsN25wdZ2Q2gFoEAtQVt7lX', {action: 'submit'});
-        
+        recaptchaToken = await grecaptcha.enterprise.execute('6LdmSm4rAAAAAGwGVAsN25wdZ2Q2gFoEAtQVt7lX', { action: 'submit' });
+
         // Verify token with backend
         const verifyResponse = await fetch('/api/verify-recaptcha', {
           method: 'POST',
@@ -185,16 +229,16 @@ document.getElementById('signupForm').addEventListener('submit', async function 
           },
           body: JSON.stringify({ token: recaptchaToken, action: 'submit' })
         });
-        
+
         if (!verifyResponse.ok) {
           throw new Error('Security verification failed');
         }
-        
+
         const verifyResult = await verifyResponse.json();
         if (!verifyResult.isAllowed) {
           throw new Error('Security check failed. Please try again.');
         }
-        
+
         // Add score to form data for logging
         formData.recaptchaScore = verifyResult.score;
       }
@@ -203,9 +247,9 @@ document.getElementById('signupForm').addEventListener('submit', async function 
       // Continue without reCAPTCHA in case of error (graceful degradation)
       // You might want to change this behavior based on your security requirements
     }
-    
+
     submitBtn.textContent = 'SUBMITTING...';
-    
+
     // Submit to API
     await submitToNotion(formData);
 
@@ -213,6 +257,8 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     localStorage.setItem('nstcg_user_id', userId);
     localStorage.setItem('nstcg_email', formData.email);
     localStorage.setItem('nstcg_registered', 'true');
+    localStorage.setItem('nstcg_referral_code', newUserReferralCode);
+    localStorage.setItem('nstcg_first_name', formData.firstName);
     if (formData.comment) {
       localStorage.setItem('nstcg_comment', formData.comment);
     }
@@ -267,14 +313,14 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     // Re-enable submit button on error
     submitBtn.disabled = false;
     submitBtn.textContent = originalText;
-    
+
     // Check if it's an email duplication error
     if (error.message === 'email_exists' || (error.message && error.message.includes('email_exists'))) {
       // Handle email already registered error
       showEmailError();
       return;
     }
-    
+
     // Error - Replace form with error state
     const formSection = document.querySelector('.form-section');
     formSection.innerHTML = `
@@ -311,7 +357,7 @@ document.getElementById('signupForm').addEventListener('submit', async function 
 async function fetchRealCount() {
   const CACHE_KEY = 'nstcg_participant_count_cache';
   const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-  
+
   // Check cache first
   try {
     const cached = localStorage.getItem(CACHE_KEY);
@@ -325,13 +371,13 @@ async function fetchRealCount() {
   } catch (error) {
     console.warn('Error reading count cache:', error);
   }
-  
+
   // Fetch from API
   try {
     const response = await fetch('/api/get-count');
     if (response.ok) {
       const data = await response.json();
-      
+
       // Cache the count with timestamp
       try {
         localStorage.setItem(CACHE_KEY, JSON.stringify({
@@ -341,7 +387,7 @@ async function fetchRealCount() {
       } catch (cacheError) {
         console.warn('Failed to cache count:', cacheError);
       }
-      
+
       return data.count;
     }
   } catch (error) {
@@ -428,14 +474,14 @@ async function initializeCounts() {
   const isRegistered = localStorage.getItem('nstcg_registered') === 'true';
   if (isRegistered && realCount) {
     const userComment = localStorage.getItem('nstcg_comment') || '';
-    
+
     // Update registered share container if it exists
     const registeredShareContainer = document.getElementById('registered-share-container');
     if (registeredShareContainer) {
       registeredShareContainer.innerHTML = '';
       addSocialShareButtons('registered-share-container', realCount, userComment, false);
     }
-    
+
     // Update bottom share container if it exists
     const bottomShareContainer = document.getElementById('bottom-share-container');
     if (bottomShareContainer) {
@@ -752,21 +798,23 @@ function checkReferral() {
     sessionStorage.setItem('referrer', referralCode);
     sessionStorage.setItem('referral_code', referralCode);
     
+    // Display referral code in forms
+    displayReferralCode(referralCode);
+
     // Store source platform if provided
     if (sourceCode) {
       sessionStorage.setItem('referral_source', sourceCode);
-      
+
       // Map source codes to platform names
       const platformMap = {
-        'fb': 'facebook',
-        'tw': 'twitter',
-        'wa': 'whatsapp',
-        'li': 'linkedin',
-        'ig': 'instagram',
-        'em': 'email',
-        'dr': 'direct'
+        'FB': 'facebook',
+        'TW': 'twitter',
+        'WA': 'whatsapp',
+        'LI': 'linkedin',
+        'EM': 'email',
+        'CP': 'copy'
       };
-      
+
       const platform = platformMap[sourceCode] || sourceCode;
       sessionStorage.setItem('referrer_platform', platform);
     }
@@ -777,7 +825,7 @@ function checkReferral() {
     // Clean URL without reload
     const cleanUrl = window.location.pathname;
     window.history.replaceState({}, document.title, cleanUrl);
-    
+
     // Return both codes for tracking
     return {
       referralCode,
@@ -787,6 +835,27 @@ function checkReferral() {
   }
 
   return null;
+}
+
+// Display referral code in forms
+function displayReferralCode(referralCode) {
+  // Update main form
+  const mainFormReferralInfo = document.getElementById('mainFormReferralInfo');
+  const mainFormReferralDisplay = document.getElementById('referralDisplay');
+  
+  if (mainFormReferralInfo && mainFormReferralDisplay) {
+    mainFormReferralInfo.style.display = 'block';
+    mainFormReferralDisplay.value = `Registering via referral: ${referralCode}`;
+  }
+  
+  // Update modal form
+  const modalFormReferralInfo = document.getElementById('modalFormReferralInfo');
+  const modalFormReferralDisplay = document.getElementById('modalReferralDisplay');
+  
+  if (modalFormReferralInfo && modalFormReferralDisplay) {
+    modalFormReferralInfo.style.display = 'block';
+    modalFormReferralDisplay.value = `Registering via referral: ${referralCode}`;
+  }
 }
 
 // Page load time tracking for smart polling
@@ -986,10 +1055,10 @@ function showModalButtonNotification() {
 // Show referral attribution banner
 function showReferralBanner(referralInfo) {
   if (!referralInfo || !referralInfo.referralCode) return;
-  
+
   // Check if referral banner is disabled via feature flags
   if (window.DISABLE_REFERRAL_BANNER) return;
-  
+
   const banner = document.createElement('div');
   banner.className = 'referral-banner';
   banner.style.cssText = `
@@ -1009,30 +1078,30 @@ function showReferralBanner(referralInfo) {
     text-align: center;
     max-width: 90%;
   `;
-  
+
   // Determine source text
-  const sourceText = referralInfo.sourceCode ? 
+  const sourceText = referralInfo.sourceCode ?
     ` via ${referralInfo.sourceCode === 'fb' ? 'Facebook' :
-           referralInfo.sourceCode === 'tw' ? 'Twitter' :
-           referralInfo.sourceCode === 'wa' ? 'WhatsApp' :
-           referralInfo.sourceCode === 'li' ? 'LinkedIn' :
-           referralInfo.sourceCode === 'ig' ? 'Instagram' :
-           referralInfo.sourceCode === 'em' ? 'Email' : 'a friend'}` : '';
-  
+      referralInfo.sourceCode === 'tw' ? 'Twitter' :
+        referralInfo.sourceCode === 'wa' ? 'WhatsApp' :
+          referralInfo.sourceCode === 'li' ? 'LinkedIn' :
+            referralInfo.sourceCode === 'ig' ? 'Instagram' :
+              referralInfo.sourceCode === 'em' ? 'Email' : 'a friend'}` : '';
+
   banner.innerHTML = `
     <i class="fas fa-link" style="margin-right: 10px;"></i>
     Welcome! You were referred by a community member${sourceText}
     <i class="fas fa-heart" style="margin-left: 10px; color: #ff6b6b;"></i>
   `;
-  
+
   document.body.appendChild(banner);
-  
+
   // Animate in
   setTimeout(() => {
     banner.style.opacity = '1';
     banner.style.transform = 'translateX(-50%) translateY(0)';
   }, 100);
-  
+
   // Animate out after 5 seconds
   setTimeout(() => {
     banner.style.opacity = '0';
@@ -1047,10 +1116,16 @@ function showReferralBanner(referralInfo) {
 window.addEventListener('load', async function () {
   // Check for referral (only if not disabled)
   const referralInfo = window.DISABLE_REFERRAL_TRACKING ? null : checkReferral();
-  
+
   // Show referral banner if applicable
   if (referralInfo) {
     showReferralBanner(referralInfo);
+  }
+  
+  // Also check if there's a referral code in session storage (from previous page visit)
+  const storedReferralCode = sessionStorage.getItem('referral_code');
+  if (storedReferralCode && !referralInfo) {
+    displayReferralCode(storedReferralCode);
   }
 
   // Load thought bubbles
@@ -1073,9 +1148,9 @@ window.addEventListener('load', async function () {
 
   // Initialize all counts immediately
   await initializeCounts();
-  
+
   // Load financial status (only if enabled)
-  if (!window.featureFlags || window.featureFlags.shouldLoadFinancialStatus()) {
+  if (!window.featureFlags || window.featureFlags?.donations?.enabled) {
     await loadFinancialStatus();
   }
 
@@ -1091,11 +1166,11 @@ let originalModalContent;
 
 // Check registration status as soon as script loads (for critical UI updates)
 // This runs before DOMContentLoaded for the fastest possible UI update
-(function() {
+(function () {
   const isRegistered = localStorage.getItem('nstcg_registered') === 'true';
   if (isRegistered) {
     // Add a class to body immediately to allow CSS-based UI changes
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       document.body.classList.add('user-registered');
       initializeRegistrationState();
     }, { once: true });
@@ -1108,8 +1183,9 @@ document.addEventListener('DOMContentLoaded', function () {
   if (!document.body.classList.contains('user-registered')) {
     initializeRegistrationState();
   }
-  
+
   originalModalContent = document.getElementById('modal-survey-content').innerHTML;
+
 
   // Initialize Micromodal with all configurations
   MicroModal.init({
@@ -1134,9 +1210,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Attach event listener to form
   document.getElementById('surveyModalForm').addEventListener('submit', handleModalFormSubmit);
-  
+
   // Workaround for email share button click issues in modals
-  document.addEventListener('click', function(e) {
+  document.addEventListener('click', function (e) {
     // Check if clicked element is email share button or its child
     const emailBtn = e.target.closest('.share-btn-icon.email');
     if (emailBtn && !emailBtn.disabled) {
@@ -1162,7 +1238,7 @@ async function handleModalFormSubmit(e) {
 
   const messageEl = document.getElementById('modalMessage');
   const submitBtn = this.querySelector('.modal-submit-btn');
-  
+
   // Immediately disable submit button to prevent double-clicks
   if (submitBtn.disabled) return; // Already processing
   submitBtn.disabled = true;
@@ -1173,6 +1249,11 @@ async function handleModalFormSubmit(e) {
   const userId = generateUserId();
   const submissionId = `${userId}-${Date.now()}`; // Unique submission ID
   const modalVisitorType = document.querySelector('input[name="modalVisitorType"]:checked')?.value || 'local';
+  
+  // Generate referral code for the new user
+  const firstName = document.getElementById('modalFirstName').value.trim();
+  const newUserReferralCode = window.ReferralUtils.generateReferralCode(firstName);
+  
   const formData = {
     name: `${document.getElementById('modalFirstName').value.trim()} ${document.getElementById('modalLastName').value.trim()}`,
     firstName: document.getElementById('modalFirstName').value.trim(),
@@ -1188,7 +1269,8 @@ async function handleModalFormSubmit(e) {
     referral_code: sessionStorage.getItem('referral_code') || null,
     referral_source: sessionStorage.getItem('referral_source') || null,
     referral_platform: sessionStorage.getItem('referrer_platform') || null,
-    referral_timestamp: sessionStorage.getItem('referral_timestamp') || null
+    referral_timestamp: sessionStorage.getItem('referral_timestamp') || null,
+    referral_code_generated: newUserReferralCode // New user's own referral code
   };
 
   // Basic validation
@@ -1225,6 +1307,8 @@ async function handleModalFormSubmit(e) {
     localStorage.setItem('nstcg_user_id', userId);
     localStorage.setItem('nstcg_email', formData.email);
     localStorage.setItem('nstcg_registered', 'true');
+    localStorage.setItem('nstcg_referral_code', newUserReferralCode);
+    localStorage.setItem('nstcg_first_name', formData.firstName);
     if (formData.comment) {
       localStorage.setItem('nstcg_comment', formData.comment);
     }
@@ -1243,6 +1327,16 @@ async function handleModalFormSubmit(e) {
         <p style="color: #00ff00; font-weight: bold; font-size: 16px;">
           Check your email for community updates.
         </p>
+        
+        <div style="background: #333; padding: 20px; margin: 20px 0; border-radius: 10px; border: 2px solid #00ff00;">
+          <h4 style="color: #00ff00; margin-bottom: 10px; font-size: 18px;">🎉 Your Referral Code</h4>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <code id="user-referral-code" style="background: #1a1a1a; padding: 10px 20px; border-radius: 5px; font-size: 20px; color: #00ff00; font-weight: bold; letter-spacing: 1px;">${newUserReferralCode}</code>
+            <button onclick="copyReferralCode('${newUserReferralCode}')" style="background: #00ff00; color: #1a1a1a; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Copy</button>
+          </div>
+          <p style="color: #ccc; margin-top: 10px; font-size: 14px;">Share this code to earn 50 points for each friend who joins!</p>
+        </div>
+        
         <div id="modal-share-container"></div>
         <button class="modal-survey-continue-btn" style="
           margin-top: 20px;
@@ -1379,7 +1473,7 @@ async function handleModalFormSubmit(e) {
     // Re-enable submit button on error
     submitBtn.disabled = false;
     submitBtn.textContent = originalText;
-    
+
     // Check if it's an email duplication error
     if (error.message === 'email_exists' || (error.message && error.message.includes('email_exists'))) {
       // Handle email already registered error - show error in the modal
@@ -1389,7 +1483,7 @@ async function handleModalFormSubmit(e) {
       showEmailError(); // This will also handle the modal email input
       return;
     }
-    
+
     // Replace modal content with error state
     const modalContent = document.getElementById('modal-survey-content');
     modalContent.innerHTML = `
@@ -1566,9 +1660,25 @@ function generateShareText(count, userComment) {
 async function getShareUrl(platform = 'direct') {
   // Get or generate referral code
   const referralCode = generateReferralCode();
-  
-  // Use shared utility to generate URL
-  return window.ReferralUtils.generateShareUrl(referralCode, platform);
+
+  // Use shared utility to generate URL with production domain
+  const baseUrl = window.ReferralUtils.generateShareUrl(referralCode);
+
+  // Add platform source code if needed
+  if (platform && platform !== 'direct') {
+    const platformCodes = {
+      twitter: 'tw',
+      facebook: 'fb',
+      whatsapp: 'wa',
+      linkedin: 'li',
+      instagram: 'ig',
+      email: 'em'
+    };
+    const platformCode = platformCodes[platform] || 'dr';
+    return `${baseUrl}&src=${platformCode}`;
+  }
+
+  return baseUrl;
 }
 
 async function shareOnTwitter(count, userComment) {
@@ -1655,10 +1765,10 @@ function showToast(message) {
 function generateReferralCode() {
   const stored = localStorage.getItem('nstcg_referral_code');
   if (stored) return stored;
-  
+
   const firstName = localStorage.getItem('nstcg_firstName') || 'USER';
   const code = window.ReferralUtils.generateReferralCode(firstName);
-  
+
   localStorage.setItem('nstcg_referral_code', code);
   return code;
 }
@@ -1667,25 +1777,25 @@ function generateReferralCode() {
 function calculateRunningCosts() {
   const startDate = new Date('2025-06-14');
   const now = new Date();
-  
+
   // If campaign hasn't started yet, return 0
   if (now < startDate) {
     return 0;
   }
-  
+
   // Calculate time elapsed since campaign start
   const timeElapsed = now - startDate;
   const daysElapsed = timeElapsed / (1000 * 60 * 60 * 24);
   const monthsElapsed = daysElapsed / 30.4375; // Average days per month
-  
+
   // Constants matching donate.js
   const upfrontCosts = 525; // Software (£425) + Materials (£100)
   const monthlyEngCost = 5000; // Engineering, Research & Development per month
-  
+
   // Calculate total cost: upfront + pro-rata engineering
   const engineeringCost = monthsElapsed * monthlyEngCost;
   const totalCosts = Math.floor(upfrontCosts + engineeringCost);
-  
+
   return totalCosts;
 }
 
@@ -1693,38 +1803,38 @@ function calculateRunningCosts() {
 async function loadFinancialStatus() {
   try {
     let donationData = { total: 0, count: 0 };
-    
+
     // Get donations (only if feature is enabled)
-    if (!window.featureFlags || window.featureFlags.shouldFetchDonationTotals()) {
+    if (!window.featureFlags || window.featureFlags?.donations?.showTotalDonations) {
       const donationRes = await fetch('/api/get-total-donations');
       donationData = await donationRes.json();
     }
-    
+
     // Calculate costs (only if feature is enabled)
-    const runningCosts = (!window.featureFlags || window.featureFlags.shouldShowCampaignCosts()) 
-      ? calculateRunningCosts() 
+    const runningCosts = (!window.featureFlags || window.featureFlags?.campaignCosts?.enabled)
+      ? calculateRunningCosts()
       : 0;
-    
+
     // Remove loading state from all financial content
     document.querySelectorAll('.financial-content.loading').forEach(el => {
       el.classList.remove('loading');
     });
-    
+
     // Update UI
     const costsEl = document.getElementById('campaign-costs');
     const donationsEl = document.getElementById('total-donations');
     const donationCountEl = document.getElementById('donation-count');
     const balanceEl = document.getElementById('campaign-balance');
     const statusEl = document.getElementById('balance-status');
-    
+
     if (costsEl) costsEl.textContent = `£${runningCosts.toLocaleString()}`;
     if (donationsEl) donationsEl.textContent = `£${donationData.total.toLocaleString()}`;
     if (donationCountEl) donationCountEl.textContent = donationData.count;
-    
+
     // Calculate balance
     const balance = donationData.total - runningCosts;
     if (balanceEl) balanceEl.textContent = `£${Math.abs(balance).toLocaleString()}`;
-    
+
     // Update status
     if (statusEl) {
       if (balance > 0) {
@@ -1766,7 +1876,7 @@ The North Swanage Traffic Concern Group is raising awareness about proposed traf
 Please take 2 minutes to join us and share with other Neighbours. Time is running out!`;
 
   const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  
+
   // Try multiple methods to ensure it works
   try {
     // Method 1: Direct navigation
@@ -1780,7 +1890,7 @@ Please take 2 minutes to join us and share with other Neighbours. Time is runnin
     link.click();
     setTimeout(() => document.body.removeChild(link), 100);
   }
-  
+
   // Prevent any default behavior or modal closing
   return false;
 }
@@ -1971,6 +2081,41 @@ function toggleModalSurveyButton() {
   }
 }
 
-function openOfficialSurvey() {
+async function openOfficialSurvey() {
+  // Track the survey click first
+  const email = localStorage.getItem('nstcg_email');
+  const userId = localStorage.getItem('nstcg_user_id');
+  const referrer = sessionStorage.getItem('referrer') || null;
+  
+  if (email) {
+    try {
+      const response = await fetch('/api/track-survey-click', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email,
+          user_id: userId,
+          referrer: referrer
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Survey click tracked:', data);
+        
+        // Show notification if points were awarded to referrer
+        if (data.points_awarded_to_referrer > 0) {
+          showToast(`Your referrer earned ${data.points_awarded_to_referrer} points!`);
+        }
+      }
+    } catch (error) {
+      console.error('Error tracking survey click:', error);
+      // Continue to open survey even if tracking fails
+    }
+  }
+  
+  // Open the survey
   window.open('https://www.dorsetcoasthaveyoursay.co.uk/swanage-green-seafront-stabilisation/surveys/swanage-green-seafront-survey-2025?ref=nstcg', '_blank');
 }

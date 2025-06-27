@@ -43,18 +43,24 @@ window.ReferralUtils.generateReferralCode = function(firstName = 'USER') {
 
 /**
  * Generate a share URL with referral tracking
- * Format: https://example.com?ref=[referralCode]
+ * Format: https://example.com?ref=[referralCode]&src=[platformCode]
  * 
  * @param {string} referralCode - User's referral code
  * @param {string} platform - Optional platform identifier
  * @returns {string} Complete share URL
  */
 window.ReferralUtils.generateShareUrl = function(referralCode, platform = null) {
-  const baseUrl = window.location.origin;
+  // Always use production domain for consistency across all environments
+  const baseUrl = 'https://nstcg.org';
   
-  // For consistency, we'll use just the referral code in the URL
-  // Platform tracking will be handled separately via API
-  return `${baseUrl}?ref=${referralCode}`;
+  let url = `${baseUrl}?ref=${referralCode}`;
+  
+  // Add platform source tracking if provided
+  if (platform && window.ReferralUtils.PLATFORM_CODES[platform]) {
+    url += `&src=${window.ReferralUtils.PLATFORM_CODES[platform]}`;
+  }
+  
+  return url;
 }
 
 /**
@@ -137,18 +143,37 @@ window.ReferralUtils.trackShare = async function({ email, platform, referralCode
  * @returns {Object} Platform-specific share URLs
  */
 window.ReferralUtils.getShareUrls = function(referralCode, shareText = '') {
-  const shareUrl = window.ReferralUtils.generateShareUrl(referralCode);
-  const encodedUrl = encodeURIComponent(shareUrl);
-  const encodedText = encodeURIComponent(shareText);
+  const urls = {};
   
-  return {
-    twitter: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`,
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-    whatsapp: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-    email: `mailto:?subject=${encodeURIComponent('Join me in opposing the North Swanage traffic plans')}&body=${encodedText}%20${encodedUrl}`,
-    copy: shareUrl
-  };
+  // Generate platform-specific URLs with source tracking
+  Object.keys(window.ReferralUtils.PLATFORM_CODES).forEach(platform => {
+    const shareUrl = window.ReferralUtils.generateShareUrl(referralCode, platform);
+    const encodedUrl = encodeURIComponent(shareUrl);
+    const encodedText = encodeURIComponent(shareText);
+    
+    switch(platform) {
+      case 'twitter':
+        urls.twitter = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
+        break;
+      case 'facebook':
+        urls.facebook = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+        break;
+      case 'whatsapp':
+        urls.whatsapp = `https://wa.me/?text=${encodedText}%20${encodedUrl}`;
+        break;
+      case 'linkedin':
+        urls.linkedin = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+        break;
+      case 'email':
+        urls.email = `mailto:?subject=${encodeURIComponent('Join me in opposing the North Swanage traffic plans')}&body=${encodedText}%20${encodedUrl}`;
+        break;
+      case 'copy':
+        urls.copy = shareUrl;
+        break;
+    }
+  });
+  
+  return urls;
 }
 
 /**

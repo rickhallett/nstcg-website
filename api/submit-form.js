@@ -100,7 +100,7 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Too many requests. Please try again later.' });
   }
 
-  const { name, firstName, lastName, email, timestamp, source, website, comment, user_id, submission_id, referrer, visitorType } = req.body;
+  const { name, firstName, lastName, email, timestamp, source, website, comment, user_id, submission_id, referrer, visitorType, referral_code_generated } = req.body;
 
   // Honeypot check
   if (website) {
@@ -260,6 +260,13 @@ export default async function handler(req, res) {
             select: {
               name: visitorType === 'local' ? 'Local' : 'Tourist'
             }
+          } : undefined,
+          'Referral Code': referral_code_generated ? {
+            rich_text: [{
+              text: {
+                content: referral_code_generated
+              }
+            }]
           } : undefined
         }
       })
