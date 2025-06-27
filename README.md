@@ -1,11 +1,71 @@
-# Vercel Deployment Guide
+# NSTCG Website
+
+North Swanage Traffic Consultation Group community action website.
+
+## Development Setup
+
+This project uses Vite for the frontend build system and Vercel for serverless API functions.
+
+### Prerequisites
+
+- Node.js v18 or higher
+- npm or yarn
+
+### Installation
+
+```bash
+npm install
+```
+
+### Running in Development
+
+To start both the Vite dev server and Vercel API server simultaneously:
+
+```bash
+npm run dev
+# or
+npm start
+```
+
+This will start:
+- **Vite Dev Server** on port 3002 (for frontend assets)
+- **Vercel Dev Server** on port 3000 (for API endpoints)
+
+Open http://localhost:3002 in your browser.
+
+> **Important**: Both servers must be running for the application to work properly. The Vite server proxies API calls to the Vercel server.
+
+#### Running Servers Individually
+
+If you prefer to run the servers in separate terminals:
+
+```bash
+# Terminal 1 - Vite only
+npm run dev:vite
+
+# Terminal 2 - Vercel API only
+npm run dev:vercel
+```
+
+### Building for Production
+
+```bash
+npm run build
+```
 
 ## Environment Variables Required
 
 Before deploying, you need to set up the following environment variables in Vercel:
 
 1. `NOTION_TOKEN` - Your Notion integration token
-2. `NOTION_DATABASE_ID` - The ID of your Notion database
+2. `NOTION_DATABASE_ID` - The ID of your main database
+3. `NOTION_GAMIFICATION_DB_ID` - The ID of your gamification database
+4. `NOTION_FEATURE_FLAGS_DB_ID` - The ID of your feature flags database
+5. `NOTION_DONATIONS_DB_ID` - The ID of your donations database
+6. `STRIPE_SECRET_KEY` - Your Stripe secret key
+7. `STRIPE_WEBHOOK_SECRET` - Your Stripe webhook secret
+8. `STRIPE_PRICE_ID` - Your Stripe price ID
+9. `SITE_URL` - Your site URL (e.g., https://nstcg.org)
 
 ## Setup Instructions
 

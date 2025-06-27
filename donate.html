@@ -20,10 +20,7 @@
   <!-- Font Awesome CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <!-- Shared styles -->
-  <link rel="stylesheet" href="css/main.css">
-  <!-- Page-specific styles -->
-  <link rel="stylesheet" href="css/pages/donate.css">
+  <!-- CSS will be bundled by Vite -->
 </head>
 
 <body>
@@ -211,12 +208,8 @@
 
   <!-- Stripe JS -->
   <script src="https://js.stripe.com/v3/"></script>
-  <!-- Navigation Include -->
-  <script type="module" src="js/utils/include-nav.js"></script>
-  <!-- Donate Page Features (conditional rendering) -->
-  <script type="module" src="js/modules/donate-features.js"></script>
-  <!-- Page JavaScript -->
-  <script src="js/donate.js"></script>
+  <!-- Vite Entry Point -->
+  <script type="module" src="/js/donate-entry.js"></script>
 
   <!-- Vercel Speed Insights -->
   <script>

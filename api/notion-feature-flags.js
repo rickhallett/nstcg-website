@@ -27,6 +27,13 @@ export async function fetchNotionFeatureFlags() {
     return {};
   }
 
+  // Validate database ID format (should be 32 hex characters)
+  const dbId = process.env.NOTION_FEATURE_FLAGS_DB_ID;
+  if (!/^[0-9a-f]{32}$/i.test(dbId)) {
+    console.error(`Invalid Notion database ID format: ${dbId}. Expected 32 hex characters without hyphens.`);
+    return {};
+  }
+
   try {
     const response = await fetch(`https://api.notion.com/v1/databases/${process.env.NOTION_FEATURE_FLAGS_DB_ID}/query`, {
       method: 'POST',
