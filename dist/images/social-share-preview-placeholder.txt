@@ -1,0 +1,31 @@
+Social Share Preview Image Specifications
+========================================
+
+This folder should contain: social-share-preview.jpg
+
+Recommended specifications:
+- Dimensions: 1200x630px (optimal for Facebook and Twitter)
+- File format: JPG (smaller file size)
+- Content suggestions:
+  * Impact map with red zones highlighted
+  * Text overlay: "215+ Neighbours Fighting for Safer Streets"
+  * Warning symbol or traffic icon
+  * North Swanage landmark or street view
+  * Call to action: "Join Us Before It's Too Late"
+
+Design tips:
+- Use high contrast for text readability
+- Include emotional appeal (children, families)
+- Show the severity of the traffic issue
+- Make it shareable and eye-catching
+
+The image will be displayed when links are shared on:
+- Facebook
+- Twitter/X
+- LinkedIn
+- WhatsApp (on some devices)
+- Other social platforms
+
+Alternative images to create:
+- social-share-preview-mobile.jpg (square format 1080x1080)
+- social-share-preview-story.jpg (vertical format 1080x1920)

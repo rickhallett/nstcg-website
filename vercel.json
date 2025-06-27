@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/((?!maintenance).*)",
+      "destination": "/maintenance.html",
+      "permanent": false
+    }
+  ],
   "functions": {
     "api/submit-form.js": {
       "maxDuration": 10
