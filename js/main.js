@@ -1,24 +1,23 @@
 import imageUrlWebp from '../images/impact_non_sat_height.webp';
 import imageUrlPng from '../images/impact_non_sat_height_compressed.png';
 
-// Load map as soon as DOM is ready for consistent fast loading
-document.addEventListener('DOMContentLoaded', function () {
-  // Deliberately show loading screen for 3 seconds to build anticipation
-  setTimeout(() => {
-    const mapContainer = document.getElementById('map-container');
-    if (mapContainer) {
-      mapContainer.innerHTML = `
-        <div class="map-image fade-in" id="traffic-impact-map">
-          <picture>
-            <source srcset="${imageUrlWebp}" type="image/webp">
-            <img src="${imageUrlPng}" alt="Map of North Swanage">
-          </picture>
-          <div class="impact-overlay"></div>
-        </div>
-      `;
-    }
-  }, 3000); // 3 second deliberate delay for loading screen effect
-});
+// The script is loaded as a module, which is deferred by default.
+// This means the DOM will be ready when this code executes.
+// Deliberately show loading screen for 3 seconds to build anticipation
+setTimeout(() => {
+  const mapContainer = document.getElementById('map-container');
+  if (mapContainer) {
+    mapContainer.innerHTML = `
+      <div class="map-image fade-in" id="traffic-impact-map">
+        <picture>
+          <source srcset="${imageUrlWebp}" type="image/webp">
+          <img src="${imageUrlPng}" alt="Map of North Swanage">
+        </picture>
+        <div class="impact-overlay"></div>
+      </div>
+    `;
+  }
+}, 3000); // 3 second deliberate delay for loading screen effect
 
 // Countdown Timer for alert header
 function updateCountdown() {
