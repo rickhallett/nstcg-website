@@ -96,6 +96,7 @@ Please take 2 minutes to join us and share with other Neighbours. Time is runnin
 class SocialShareManager {
   constructor() {
     this.socialCodes = null;
+    // Always use production URL for consistency
     this.baseUrl = 'https://nstcg.org';
   }
 
@@ -173,7 +174,11 @@ class SocialShareManager {
     // Generate referral code in same format as main.js
     const referralCode = this.generateReferralCode();
 
-    return `${this.baseUrl}?ref=${referralCode}&src=${platformCode}`;
+    // Use centralized URL generation from ReferralUtils
+    const baseShareUrl = window.ReferralUtils.generateShareUrl(referralCode);
+    
+    // Add platform source code for tracking
+    return `${baseShareUrl}&src=${platformCode}`;
   }
 
   /**

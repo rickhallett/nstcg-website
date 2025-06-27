@@ -13,7 +13,7 @@ Use a callback function to handle the response token.
   }
 </script>
 Add attributes to your HTML button:
-<button class="g-recaptcha"
+<button class="g-recaptcha
     data-sitekey="6LdmSm4rAAAAAGwGVAsN25wdZ2Q2gFoEAtQVt7lX"
     data-callback='onSubmit'
     data-action='submit'>

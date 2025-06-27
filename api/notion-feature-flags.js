@@ -27,15 +27,18 @@ export async function fetchNotionFeatureFlags() {
     return {};
   }
 
-  // Validate database ID format (should be 32 hex characters)
+  // Validate database ID format (accepts both with and without hyphens)
   const dbId = process.env.NOTION_FEATURE_FLAGS_DB_ID;
-  if (!/^[0-9a-f]{32}$/i.test(dbId)) {
-    console.error(`Invalid Notion database ID format: ${dbId}. Expected 32 hex characters without hyphens.`);
+  const cleanDbId = dbId.replace(/-/g, '');
+  if (!/^[0-9a-f]{32}$/i.test(cleanDbId)) {
+    console.error(`Invalid Notion database ID format: ${dbId}. Expected 32 hex characters (with or without hyphens).`);
     return {};
   }
 
+  const url = `https://api.notion.com/v1/databases/${process.env.NOTION_FEATURE_FLAGS_DB_ID}/query`
+
   try {
-    const response = await fetch(`https://api.notion.com/v1/databases/${process.env.NOTION_FEATURE_FLAGS_DB_ID}/query`, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
@@ -58,7 +61,16 @@ export async function fetchNotionFeatureFlags() {
     });
 
     if (!response.ok) {
-      console.error('Failed to query Notion feature flags:', response.status);
+      const errorText = await response.text();
+      console.error('Failed to query Notion feature flags:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText,
+        databaseId: process.env.NOTION_FEATURE_FLAGS_DB_ID
+      });
+      
+      // Return empty flags instead of throwing - the system will use defaults
+      console.log('Using default feature flags due to Notion error');
       return {};
     }
 
@@ -68,7 +80,7 @@ export async function fetchNotionFeatureFlags() {
     // Transform Notion results into a simple map
     for (const page of data.results) {
       const props = page.properties;
-      
+
       // Extract feature path (title property)
       const featurePath = props['Feature Path']?.title?.[0]?.text?.content;
       if (!featurePath) continue;
