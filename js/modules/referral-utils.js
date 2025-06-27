@@ -106,6 +106,10 @@ window.ReferralUtils.parseReferralFromUrl = function(params) {
  */
 window.ReferralUtils.trackShare = async function({ email, platform, referralCode }) {
   try {
+    // Get user's name from localStorage
+    const firstName = localStorage.getItem('nstcg_first_name') || '';
+    const lastName = localStorage.getItem('nstcg_last_name') || '';
+    
     const response = await fetch('/api/track-share', {
       method: 'POST',
       headers: {
@@ -114,7 +118,9 @@ window.ReferralUtils.trackShare = async function({ email, platform, referralCode
       body: JSON.stringify({
         email,
         platform: platform.toLowerCase(),
-        referral_code: referralCode
+        referral_code: referralCode,
+        first_name: firstName,
+        last_name: lastName
       })
     });
     

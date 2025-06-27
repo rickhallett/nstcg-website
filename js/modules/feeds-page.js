@@ -93,6 +93,14 @@ class FeedsPageManager {
 
       const data = await response.json();
       
+      console.log('Feeds API Response:', {
+        participantCount: data.participants?.length || 0,
+        totalCount: data.totalCount,
+        todayCount: data.todayCount,
+        weekCount: data.weekCount,
+        hasError: !!data.error
+      });
+      
       // Store participants
       this.participants = data.participants || [];
       
@@ -131,10 +139,11 @@ class FeedsPageManager {
    * Update statistics displays
    */
   updateStatistics(data) {
-    // Update total count
+    // Update total count (add base count to database count)
     const totalElement = document.querySelector(FeedsConfig.selectors.totalCount);
     if (totalElement) {
-      totalElement.innerHTML = this.formatNumber(data.totalCount || FeedsConfig.baseCount);
+      const totalWithBase = (data.totalCount || 0) + FeedsConfig.baseCount;
+      totalElement.innerHTML = this.formatNumber(totalWithBase);
     }
 
     // Update today count
@@ -264,7 +273,15 @@ class FeedsPageManager {
    */
   createLineGraph() {
     const canvas = document.querySelector(FeedsConfig.selectors.signupChart);
-    if (!canvas || !window.Chart) return;
+    if (!canvas) {
+      console.error('Campaign Momentum: Canvas element not found');
+      return;
+    }
+    
+    if (!window.Chart) {
+      console.error('Campaign Momentum: Chart.js not loaded');
+      return;
+    }
 
     // Hide loading state
     const graphLoading = document.querySelector(FeedsConfig.selectors.graphLoading);
@@ -272,8 +289,15 @@ class FeedsPageManager {
       graphLoading.style.display = 'none';
     }
 
-    // Prepare data
-    const graphData = this.prepareGraphData();
+    try {
+      // Prepare data
+      const graphData = this.prepareGraphData();
+      console.log('Campaign Momentum: Graph data prepared', { 
+        labels: graphData.labels.length, 
+        dataPoints: graphData.data.length,
+        firstValue: graphData.data[0],
+        lastValue: graphData.data[graphData.data.length - 1]
+      });
 
     // Create chart
     const ctx = canvas.getContext('2d');
@@ -360,6 +384,14 @@ class FeedsPageManager {
         }
       }
     });
+    } catch (error) {
+      console.error('Campaign Momentum: Error creating chart', error);
+      // Show loading state as error indicator
+      if (graphLoading) {
+        graphLoading.innerHTML = '<p style="color: #ff6b6b;">Failed to load graph</p>';
+        graphLoading.style.display = 'flex';
+      }
+    }
   }
 
   /**
@@ -368,15 +400,22 @@ class FeedsPageManager {
   prepareGraphData() {
     // Group participants by date
     const dailyCounts = {};
+    const dateToTimestamp = {}; // Store first timestamp for each date key
     
     this.participants.forEach(participant => {
       const date = new Date(participant.timestamp);
       const dateKey = date.toLocaleDateString('en-GB', { 
         day: 'numeric', 
-        month: 'short' 
+        month: 'short',
+        year: 'numeric'
       });
       
       dailyCounts[dateKey] = (dailyCounts[dateKey] || 0) + 1;
+      
+      // Store the first timestamp for this date key for sorting
+      if (!dateToTimestamp[dateKey]) {
+        dateToTimestamp[dateKey] = participant.timestamp;
+      }
     });
 
     // Convert to cumulative data
@@ -384,16 +423,18 @@ class FeedsPageManager {
     const data = [];
     let cumulative = FeedsConfig.baseCount;
     
-    // Sort dates chronologically
+    // Sort dates chronologically using actual timestamps
     const sortedDates = Object.keys(dailyCounts).sort((a, b) => {
-      const dateA = new Date(a + ' 2025');
-      const dateB = new Date(b + ' 2025');
+      const dateA = new Date(dateToTimestamp[a]);
+      const dateB = new Date(dateToTimestamp[b]);
       return dateA - dateB;
     });
 
-    sortedDates.forEach(date => {
-      cumulative += dailyCounts[date];
-      labels.push(date);
+    sortedDates.forEach(dateKey => {
+      cumulative += dailyCounts[dateKey];
+      // Remove year from label for cleaner display
+      const labelWithoutYear = dateKey.split(' ').slice(0, 2).join(' ');
+      labels.push(labelWithoutYear);
       data.push(cumulative);
     });
 

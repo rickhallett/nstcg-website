@@ -46,6 +46,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Setup event listeners
   setupEventListeners();
   
+  // Initialize social share buttons
+  initializeSocialButtons();
+  
   // Check for share completion
   checkShareCompletion();
 });
@@ -139,6 +142,32 @@ function generateReferralLink() {
 // Referral code generation moved to ReferralUtils
 
 /**
+ * Initialize social share buttons
+ */
+async function initializeSocialButtons() {
+  try {
+    // Get participant count
+    const response = await fetch('/api/get-count');
+    const data = await response.json();
+    const count = data.count || 0;
+    
+    // Get user comment from localStorage
+    const userComment = localStorage.getItem('nstcg_comment') || '';
+    
+    // Add social share buttons using the common function
+    if (window.addSocialShareButtons) {
+      window.addSocialShareButtons('share-social-buttons', count, userComment, false);
+    }
+  } catch (error) {
+    console.error('Error initializing social buttons:', error);
+    // Still add buttons even if count fetch fails
+    if (window.addSocialShareButtons) {
+      window.addSocialShareButtons('share-social-buttons', 0, '', false);
+    }
+  }
+}
+
+/**
  * Setup event listeners
  */
 function setupEventListeners() {
@@ -148,14 +177,7 @@ function setupEventListeners() {
     copyBtn.addEventListener('click', copyReferralLink);
   }
   
-  // Share buttons - attach event listeners
-  document.querySelectorAll('.share-btn[data-platform]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const platform = e.currentTarget.dataset.platform;
-      shareOnPlatform(platform);
-    });
-  });
+  // Note: Share button event listeners are now handled by addSocialShareButtons
 }
 
 /**

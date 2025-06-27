@@ -9,6 +9,9 @@ import CacheManager from '../core/CacheManager.js';
 
 // Preloading configuration
 const PRELOAD_CONFIG = {
+  // Master switch to enable/disable API preloading
+  ENABLE_API_PRELOADING: false, // Set to false to disable preloading
+  
   // Cache TTL for preloaded data (5 minutes)
   cacheTTL: 5 * 60 * 1000,
   
@@ -64,6 +67,12 @@ class APIPreloader {
    * Start preloading based on current page and user state
    */
   async startPreloading() {
+    // Check if preloading is enabled
+    if (!PRELOAD_CONFIG.ENABLE_API_PRELOADING) {
+      console.log('[APIPreloader] Preloading is disabled via configuration');
+      return;
+    }
+    
     if (this.isPreloading) {
       return;
     }
@@ -525,6 +534,11 @@ export function getBehaviorInsights() {
     navigationPatterns: userBehavior.navigationPatterns,
     predictions: preloader.predictNextPages(preloader.getCurrentPage())
   };
+}
+
+// Export configuration check function
+export function isPreloadingEnabled() {
+  return PRELOAD_CONFIG.ENABLE_API_PRELOADING;
 }
 
 // Export the preloader instance

@@ -239,7 +239,7 @@ Required properties for the Notion database:
 **Response**:
 ```json
 {
-  "count": 847
+  "count": 215
 }
 ```
 

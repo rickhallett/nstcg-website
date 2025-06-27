@@ -53,17 +53,17 @@ class ApiClient {
     try {
       const response = await this.fetchWithTimeout(url, config);
       const data = await this.handleResponse(response, endpoint);
-      
+
       // Success
       eventBus.emit(Events.API_REQUEST_SUCCESS, { endpoint, data });
       eventBus.emit(Events.DATA_LOADED, { endpoint, data });
-      
+
       return data;
     } catch (error) {
       // Error
       eventBus.emit(Events.API_REQUEST_ERROR, { endpoint, error });
       eventBus.emit(Events.DATA_ERROR, { endpoint, error });
-      
+
       throw error;
     } finally {
       stateManager.set('ui.isLoading', false);
@@ -76,7 +76,7 @@ class ApiClient {
    */
   async fetchWithTimeout(url, options) {
     const timeout = options.timeout || this.config.timeout;
-    
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -104,12 +104,12 @@ class ApiClient {
     if (!response.ok) {
       const errorData = await this.parseErrorResponse(response);
       const errorMessage = errorData.error || getErrorMessage(response.status);
-      
+
       const error = new Error(errorMessage);
       error.status = response.status;
       error.data = errorData;
       error.endpoint = endpoint;
-      
+
       throw error;
     }
 
@@ -138,10 +138,10 @@ class ApiClient {
 
     const now = Date.now();
     const windowStart = now - ApiConfig.rateLimit.windowMs;
-    
+
     // Clean old requests
     tracker.requests = tracker.requests.filter(time => time > windowStart);
-    
+
     return tracker.requests.length >= ApiConfig.rateLimit.maxRequests;
   }
 
@@ -153,7 +153,7 @@ class ApiClient {
     if (!this.rateLimitTracker.has(endpoint)) {
       this.rateLimitTracker.set(endpoint, { requests: [] });
     }
-    
+
     const tracker = this.rateLimitTracker.get(endpoint);
     tracker.requests.push(Date.now());
   }
@@ -168,7 +168,7 @@ class ApiClient {
     // Check if caching is enabled for this endpoint
     const cacheKey = `api_${endpoint}`;
     const cacheTTL = this.getCacheTTL(endpoint);
-    
+
     if (cacheTTL && !options.skipCache) {
       const cachedData = cache.get(cacheKey);
       if (cachedData) {
@@ -176,20 +176,20 @@ class ApiClient {
         return cachedData;
       }
     }
-    
+
     const data = await this.request(endpoint, {
       ...options,
       method: 'GET'
     });
-    
+
     // Cache the response if applicable
     if (cacheTTL && !options.skipCache) {
       cache.set(cacheKey, data, cacheTTL);
     }
-    
+
     return data;
   }
-  
+
   /**
    * Get cache TTL for endpoint
    * @private
@@ -204,7 +204,7 @@ class ApiClient {
       'getDonations': CACHE_TTL.DONATIONS,
       'analyzeConcerns': CACHE_TTL.HOT_TOPICS
     };
-    
+
     return ttlMap[endpoint] || null;
   }
 
@@ -267,15 +267,15 @@ const apiClient = new ApiClient();
 export async function submitForm(formData) {
   try {
     const result = await apiClient.post('submitForm', formData);
-    
+
     // Update state on success
     stateManager.update({
       'user.hasSubmitted': true,
       'user.submissionData': formData
     });
-    
+
     eventBus.emit(Events.USER_SUBMIT, { data: formData, result });
-    
+
     return result;
   } catch (error) {
     console.error('Form submission error:', error);
@@ -291,20 +291,20 @@ export async function getParticipantCount() {
   try {
     const data = await apiClient.get('getCount');
     const count = data.count || 0;
-    
+
     // Update state
     stateManager.update({
       'data.participantCount': count,
       'data.lastUpdated': new Date().toISOString()
     });
-    
+
     eventBus.emit(Events.COUNT_UPDATED, count);
-    
+
     return count;
   } catch (error) {
     console.error('Error fetching participant count:', error);
     // Return cached count or default
-    return stateManager.get('data.participantCount') || 847;
+    return stateManager.get('data.participantCount') || 215;
   }
 }
 
@@ -316,27 +316,27 @@ export async function getParticipantCount() {
  */
 export async function submitFormWithRetry(formData, retries = ApiConfig.http.retryAttempts) {
   let lastError;
-  
+
   for (let i = 0; i <= retries; i++) {
     try {
       return await submitForm(formData);
     } catch (error) {
       lastError = error;
-      
+
       // Don't retry on client errors (4xx)
       if (error.status >= 400 && error.status < 500) {
         throw error;
       }
-      
+
       // Wait before retry
       if (i < retries) {
-        await new Promise(resolve => 
+        await new Promise(resolve =>
           setTimeout(resolve, ApiConfig.http.retryDelay * (i + 1))
         );
       }
     }
   }
-  
+
   throw lastError;
 }
 

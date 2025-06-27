@@ -213,6 +213,8 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     localStorage.setItem('nstcg_user_id', userId);
     localStorage.setItem('nstcg_email', formData.email);
     localStorage.setItem('nstcg_registered', 'true');
+    localStorage.setItem('nstcg_first_name', formData.firstName);
+    localStorage.setItem('nstcg_last_name', formData.lastName);
     if (formData.comment) {
       localStorage.setItem('nstcg_comment', formData.comment);
     }
@@ -1225,6 +1227,8 @@ async function handleModalFormSubmit(e) {
     localStorage.setItem('nstcg_user_id', userId);
     localStorage.setItem('nstcg_email', formData.email);
     localStorage.setItem('nstcg_registered', 'true');
+    localStorage.setItem('nstcg_first_name', formData.firstName);
+    localStorage.setItem('nstcg_last_name', formData.lastName);
     if (formData.comment) {
       localStorage.setItem('nstcg_comment', formData.comment);
     }
@@ -1593,8 +1597,11 @@ async function shareOnWhatsApp(count, userComment) {
 }
 
 async function shareOnLinkedIn(count, userComment) {
+  const text = generateShareText(count, userComment);
   const url = await getShareUrl('linkedin');
-  const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+  // LinkedIn shareActive only supports text parameter - include URL within text
+  const fullText = `${text} ${url}`;
+  const linkedInUrl = `https://www.linkedin.com/feed/?shareActive&mini=true&text=${encodeURIComponent(fullText)}`;
   window.open(linkedInUrl, '_blank', 'width=550,height=520');
 }
 
@@ -1656,7 +1663,7 @@ function generateReferralCode() {
   const stored = localStorage.getItem('nstcg_referral_code');
   if (stored) return stored;
   
-  const firstName = localStorage.getItem('nstcg_firstName') || 'USER';
+  const firstName = localStorage.getItem('nstcg_first_name') || 'USER';
   const code = window.ReferralUtils.generateReferralCode(firstName);
   
   localStorage.setItem('nstcg_referral_code', code);

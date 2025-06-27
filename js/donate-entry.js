@@ -42,6 +42,14 @@ import './donate.js'
 // API Preloading system (lazy-loaded)
 async function initializePreloading() {
   try {
+    // First check if preloading is enabled
+    const { isPreloadingEnabled } = await import('./modules/api-preloader.js');
+    
+    if (!isPreloadingEnabled()) {
+      console.log('API preloading is disabled via configuration');
+      return;
+    }
+    
     const { 
       initializePreloading, 
       trackPageView, 

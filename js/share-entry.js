@@ -23,16 +23,78 @@ import {
   showToast
 } from './modules/social.js'
 
-// Make social functions globally available
-window.shareOnTwitter = shareOnTwitter;
-window.shareOnFacebook = shareOnFacebook;
-window.shareOnWhatsApp = shareOnWhatsApp;
-window.shareOnLinkedIn = shareOnLinkedIn;
+// Helper functions from main.js needed for social sharing
+window.generateShareText = function(count, userComment) {
+  const baseMessage = `I just joined ${count} Neighbours fighting for safer streets in North Swanage! The proposed traffic changes could flood our residential streets with dangerous traffic.`;
+
+  if (userComment) {
+    return `${baseMessage} My reason: "${userComment}" Take action now:`;
+  }
+
+  return `${baseMessage} Take action before it's too late:`;
+};
+
+window.getShareUrl = async function(platform = 'direct') {
+  // Get or generate referral code
+  const referralCode = window.generateReferralCode ? window.generateReferralCode() : 
+    (localStorage.getItem('nstcg_referral_code') || window.ReferralUtils.generateReferralCode());
+  
+  // Get platform code
+  const platformCode = window.ReferralUtils.PLATFORM_CODES[platform] || 'dr';
+  
+  // Return URL with both ref and src parameters
+  const baseUrl = window.location.origin;
+  return `${baseUrl}?ref=${referralCode}&src=${platformCode}`;
+};
+
+// Override social functions to use main.js implementations
+window.shareOnTwitter = async function(count, userComment) {
+  const text = window.generateShareText(count, userComment);
+  const url = await window.getShareUrl('twitter');
+  const hashtags = 'SaveNorthSwanage,TrafficSafety';
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${hashtags}`;
+  window.open(twitterUrl, '_blank', 'width=550,height=420');
+};
+
+window.shareOnFacebook = async function() {
+  const url = await window.getShareUrl('facebook');
+  const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+  window.open(facebookUrl, '_blank', 'width=550,height=420');
+};
+
+window.shareOnWhatsApp = async function(count, userComment) {
+  const text = window.generateShareText(count, userComment);
+  const url = await window.getShareUrl('whatsapp');
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+  window.open(whatsappUrl, '_blank');
+};
+
+window.shareOnLinkedIn = async function(count, userComment) {
+  const text = window.generateShareText(count, userComment);
+  const url = await window.getShareUrl('linkedin');
+  // LinkedIn shareActive only supports text parameter - include URL within text
+  const fullText = `${text} ${url}`;
+  const linkedInUrl = `https://www.linkedin.com/feed/?shareActive&mini=true&text=${encodeURIComponent(fullText)}`;
+  window.open(linkedInUrl, '_blank', 'width=550,height=520');
+};
+
 window.shareOnInstagram = shareOnInstagram;
 window.shareByEmail = shareByEmail;
 window.shareNative = shareNative;
 window.addSocialShareButtons = addSocialShareButtons;
 window.showToast = showToast;
+
+// Helper to generate referral code
+window.generateReferralCode = function() {
+  const stored = localStorage.getItem('nstcg_referral_code');
+  if (stored) return stored;
+  
+  const firstName = localStorage.getItem('nstcg_first_name') || 'USER';
+  const code = window.ReferralUtils.generateReferralCode(firstName);
+  
+  localStorage.setItem('nstcg_referral_code', code);
+  return code;
+};
 
 // Share page specific modules
 import './modules/share-features.js'  
@@ -41,6 +103,14 @@ import './modules/share-functionality.js'
 // API Preloading system (lazy-loaded)
 async function initializePreloading() {
   try {
+    // First check if preloading is enabled
+    const { isPreloadingEnabled } = await import('./modules/api-preloader.js');
+    
+    if (!isPreloadingEnabled()) {
+      console.log('API preloading is disabled via configuration');
+      return;
+    }
+    
     const { 
       initializePreloading, 
       trackPageView, 
