@@ -14,7 +14,8 @@ export default defineConfig({
         leaderboard: resolve(__dirname, 'leaderboard.html'),
         privacy: resolve(__dirname, 'privacy-policy.html'),
         terms: resolve(__dirname, 'terms-and-conditions.html'),
-        notfound: resolve(__dirname, '404.html')
+        notfound: resolve(__dirname, '404.html'),
+        main_js: resolve(__dirname, 'js/main-entry.js')
       },
       output: {
         // Optimize chunk splitting for preloading system
@@ -65,8 +66,8 @@ export default defineConfig({
         preset: 'recommended'
       }
     },
-    // Minification settings - TEMPORARILY DISABLED FOR DEBUGGING
-    minify: false, // Disabled to preserve readable code
+    // Minification settings
+    minify: true,
     terserOptions: {
       compress: {
         drop_console: false, // PRESERVE console logs for debugging
