@@ -170,6 +170,42 @@ document.getElementById('signupForm').addEventListener('submit', async function 
   };
 
   try {
+    // Get reCAPTCHA token
+    let recaptchaToken;
+    try {
+      if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
+        submitBtn.textContent = 'VERIFYING...';
+        recaptchaToken = await grecaptcha.enterprise.execute('6LdmSm4rAAAAAGwGVAsN25wdZ2Q2gFoEAtQVt7lX', {action: 'submit'});
+        
+        // Verify token with backend
+        const verifyResponse = await fetch('/api/verify-recaptcha', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ token: recaptchaToken, action: 'submit' })
+        });
+        
+        if (!verifyResponse.ok) {
+          throw new Error('Security verification failed');
+        }
+        
+        const verifyResult = await verifyResponse.json();
+        if (!verifyResult.isAllowed) {
+          throw new Error('Security check failed. Please try again.');
+        }
+        
+        // Add score to form data for logging
+        formData.recaptchaScore = verifyResult.score;
+      }
+    } catch (recaptchaError) {
+      console.error('reCAPTCHA error:', recaptchaError);
+      // Continue without reCAPTCHA in case of error (graceful degradation)
+      // You might want to change this behavior based on your security requirements
+    }
+    
+    submitBtn.textContent = 'SUBMITTING...';
+    
     // Submit to API
     await submitToNotion(formData);
 

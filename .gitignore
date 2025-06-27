@@ -9,6 +9,16 @@
 # Dependencies
 node_modules/
 
+# Build output
+dist/
+build/
+
+# Vite cache
+.vite/
+
+# Public directory (copied from source)
+public/
+
 # OS files
 .DS_Store
 Thumbs.db

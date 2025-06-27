@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,87 +54,34 @@
             margin: 30px 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
-
-        .countdown-container {
-            margin: 30px 0;
-        }
-
-        .countdown-title {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            opacity: 0.9;
-        }
-
-        .countdown-timer {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .time-unit {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 15px 10px;
-            min-width: 80px;
-            backdrop-filter: blur(5px);
-        }
-
-        .time-value {
-            display: block;
-            font-size: 2rem;
-            font-weight: bold;
-            line-height: 1;
-        }
-
-        .time-label {
-            display: block;
-            font-size: 0.8rem;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-
-        .message {
-            font-size: 1.1rem;
-            margin-top: 30px;
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-
-        .icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.8;
-        }
-
-        @media (max-width: 600px) {
-            .maintenance-container {
-                padding: 30px 20px;
-            }
-            
-            .countdown-timer {
-                gap: 10px;
-            }
-            
-            .time-unit {
-                min-width: 60px;
-                padding: 10px 5px;
-            }
-            
-            .time-value {
-                font-size: 1.5rem;
-            }
-        }
     </style>
+
+    <!-- CSS will be bundled by Vite -->
+
+    <!-- Preload map images for faster loading -->
+    <link rel="preload" as="image" href="/images/impact_non_sat_height.webp" type="image/webp">
+    <link rel="preload" as="image" href="/images/impact_non_sat_height_compressed.png" type="image/png">
+
+    <!-- Critical inline script for instant UI updates -->
+    <script>
+        // Check registration status immediately for fastest possible UI update
+        if (localStorage.getItem('nstcg_registered') === 'true') {
+            document.documentElement.classList.add('user-registered');
+        }
+    </script>
+
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LdmSm4rAAAAAGwGVAsN25wdZ2Q2gFoEAtQVt7lX" async
+        defer></script>
 </head>
+
 <body>
     <div class="maintenance-container">
         <div class="icon">🚧</div>
         <div class="logo">NSTCG</div>
         <h1 class="maintenance-title">Site in Temporary Maintenance</h1>
-        
+
         <div class="signup-count">Current sign ups: 556!</div>
-        
+
         <div class="countdown-container">
             <div class="countdown-title">Estimated downtime:</div>
             <div class="countdown-timer" id="countdown">
@@ -155,9 +103,10 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="message">
-            We're working hard to resolve some technical issues. The site will be back online shortly. Thank you for your patience!
+            We're working hard to resolve some technical issues. The site will be back online shortly. Thank you for
+            your patience!
         </div>
     </div>
 
@@ -168,12 +117,6 @@
         function updateCountdown() {
             const now = new Date().getTime();
             const timeLeft = targetDate - now;
-
-            if (timeLeft < 0) {
-                document.getElementById('countdown').innerHTML = '<div class="time-unit"><span class="time-value">LIVE</span><span class="time-label">Site Active</span></div>';
-                return;
-            }
-
             const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
             const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
@@ -189,5 +132,12 @@
         updateCountdown();
         setInterval(updateCountdown, 1000);
     </script>
+
+    <!-- Vite Entry Point -->
+    <script type="module" src="/js/main-entry.js"></script>
+
+
+    </script>
 </body>
+
 </html>
