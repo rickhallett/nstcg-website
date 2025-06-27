@@ -26,13 +26,15 @@ async function includeNavigation() {
     // Insert navigation HTML
     navPlaceholder.outerHTML = navHTML;
     
-    // Import and initialize navigation module
-    const navigationModule = await import('../modules/navigation.js');
+    // Now that the HTML is in the DOM, import and initialize the modules
+    const { default: navigationManager } = await import('../modules/navigation.js');
+    const { initNavigationFeatures } = await import('../modules/navigation-features.js');
     
-    // Import and initialize navigation features (conditional rendering)
-    const navigationFeatures = await import('../modules/navigation-features.js');
+    // Initialize them in order
+    navigationManager.init();
+    await initNavigationFeatures();
     
-    console.log('Navigation loaded successfully');
+    console.log('Navigation loaded and initialized successfully');
   } catch (error) {
     console.error('Error loading navigation:', error);
     
