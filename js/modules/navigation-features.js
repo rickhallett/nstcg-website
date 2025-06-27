@@ -148,9 +148,4 @@ async function addNavigationTimer() {
   });
 }
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initNavigationFeatures);
-} else {
-  initNavigationFeatures();
-}
+// No auto-initialization. This will be called from include-nav.js
