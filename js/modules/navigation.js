@@ -393,13 +393,6 @@ Object.assign(Events, NavigationEvents);
 // Create singleton instance
 const navigationManager = new NavigationManager();
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => navigationManager.init());
-} else {
-  navigationManager.init();
-}
-
 // Export
 export default navigationManager;
 export { NavigationManager, navigationManager };
