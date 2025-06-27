@@ -6,12 +6,15 @@
   "scripts": {
     "create-gamification-db": "node create-gamification-database.js",
     "test-connection": "node test-notion-connection.js",
-    "example": "node example-gamification-usage.js"
+    "example": "node example-gamification-usage.js",
+    "email-campaign": "node email-campaign.js",
+    "test-campaign": "node test-email-campaign.js"
   },
   "dependencies": {
     "@google-cloud/recaptcha-enterprise": "^6.2.0",
     "@notionhq/client": "^2.2.14",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "googleapis": "^144.0.0"
   },
   "author": "NSTCG",
   "license": "MIT"
