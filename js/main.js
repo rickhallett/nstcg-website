@@ -1308,7 +1308,7 @@ async function handleModalFormSubmit(e) {
           Check your email for community updates.
         </p>
         <div id="modal-share-container"></div>
-        <button class="modal-survey-continue-btn" style="
+        <button id="modal-survey-continue-btn" class="modal-survey-continue-btn" style="
           margin-top: 20px;
           background: #00ff00;
           color: #1a1a1a;
@@ -1320,8 +1320,7 @@ async function handleModalFormSubmit(e) {
           cursor: pointer;
           text-transform: uppercase;
           transition: all 0.3s ease;
-        " onmouseover="this.style.background='#00cc00'" onmouseout="this.style.background='#00ff00'"
-          onclick="showModalSurveyInstructions()">
+        " onmouseover="this.style.background='#00cc00'" onmouseout="this.style.background='#00ff00'">
           Continue to Official Survey →
         </button>
         
@@ -1361,16 +1360,14 @@ async function handleModalFormSubmit(e) {
           
           <div style="background: #1a1a1a; padding: 15px; border-radius: 5px; margin-bottom: 10px;">
             <label style="display: flex; align-items: center; cursor: pointer; color: #fff;">
-              <input type="checkbox" id="modal-understand-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
-                onchange="toggleModalSurveyButton()">
+              <input type="checkbox" id="modal-understand-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
               <span style="font-size: 16px;">I understand the survey structure and am ready to proceed</span>
             </label>
           </div>
           
           <div style="background: #1a1a1a; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
             <label style="display: flex; align-items: center; cursor: pointer; color: #fff;">
-              <input type="checkbox" id="modal-valid-survey-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
-                onchange="toggleModalSurveyButton()">
+              <input type="checkbox" id="modal-valid-survey-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
               <span style="font-size: 16px;">I understand that questions 1, 24, and 26 do constitute a valid and complete survey</span>
             </label>
           </div>
@@ -1387,7 +1384,7 @@ async function handleModalFormSubmit(e) {
             cursor: not-allowed;
             text-transform: uppercase;
             transition: all 0.3s ease;
-          " onclick="openOfficialSurvey()">
+          ">
             Open Official Survey →
           </button>
         </div>
@@ -1400,6 +1397,64 @@ async function handleModalFormSubmit(e) {
       modalContent.style.transition = 'opacity 0.3s ease-in';
       modalContent.style.opacity = '1';
     }, 100);
+
+    // Add event listeners for modal buttons and checkboxes
+    const surveyContBtn = document.getElementById('modal-survey-continue-btn');
+    if (surveyContBtn) {
+      surveyContBtn.addEventListener('click', function() {
+        if (typeof showModalSurveyInstructions === 'function') {
+          showModalSurveyInstructions();
+        } else if (typeof window.showModalSurveyInstructions === 'function') {
+          window.showModalSurveyInstructions();
+        } else {
+          console.error('showModalSurveyInstructions function not found');
+        }
+      });
+    }
+
+    // Add event listeners for checkboxes
+    const understandCheckbox = document.getElementById('modal-understand-checkbox');
+    const validCheckbox = document.getElementById('modal-valid-survey-checkbox');
+    
+    if (understandCheckbox) {
+      understandCheckbox.addEventListener('change', function() {
+        if (typeof toggleModalSurveyButton === 'function') {
+          toggleModalSurveyButton();
+        } else if (typeof window.toggleModalSurveyButton === 'function') {
+          window.toggleModalSurveyButton();
+        } else {
+          console.error('toggleModalSurveyButton function not found');
+        }
+      });
+    }
+    
+    if (validCheckbox) {
+      validCheckbox.addEventListener('change', function() {
+        if (typeof toggleModalSurveyButton === 'function') {
+          toggleModalSurveyButton();
+        } else if (typeof window.toggleModalSurveyButton === 'function') {
+          window.toggleModalSurveyButton();
+        } else {
+          console.error('toggleModalSurveyButton function not found');
+        }
+      });
+    }
+
+    // Add event listener for official survey button
+    const officialSurveyBtn = document.getElementById('modal-official-survey-btn');
+    if (officialSurveyBtn) {
+      officialSurveyBtn.addEventListener('click', function() {
+        if (!this.disabled) {
+          if (typeof openOfficialSurvey === 'function') {
+            openOfficialSurvey();
+          } else if (typeof window.openOfficialSurvey === 'function') {
+            window.openOfficialSurvey();
+          } else {
+            console.error('openOfficialSurvey function not found');
+          }
+        }
+      });
+    }
 
     // Store user comment for sharing
     const userComment = formData.comment;
@@ -1976,16 +2031,14 @@ function showModalSurveyInstructions() {
         
         <div class="survey-checkbox-container" style="margin-bottom: 10px;">
           <label style="display: flex; align-items: center; cursor: pointer; color: #fff;">
-            <input type="checkbox" id="modal-understand-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
-              onchange="toggleModalSurveyButton()">
+            <input type="checkbox" id="modal-understand-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
             <span style="font-size: 16px;">I understand the survey structure and am ready to proceed</span>
           </label>
         </div>
         
         <div class="survey-checkbox-container">
           <label style="display: flex; align-items: center; cursor: pointer; color: #fff;">
-            <input type="checkbox" id="modal-valid-survey-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"
-              onchange="toggleModalSurveyButton()">
+            <input type="checkbox" id="modal-valid-survey-checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
             <span style="font-size: 16px;">I understand that questions 1, 24, and 26 do constitute a valid and complete survey</span>
           </label>
         </div>
@@ -2002,11 +2055,54 @@ function showModalSurveyInstructions() {
           cursor: not-allowed;
           text-transform: uppercase;
           transition: all 0.3s ease;
-        " onclick="openOfficialSurvey()">
+        ">
           Open Official Survey →
         </button>
       </div>
     `;
+    
+    // Add event listeners for the checkboxes and button
+    const understandCheckbox = document.getElementById('modal-understand-checkbox');
+    const validCheckbox = document.getElementById('modal-valid-survey-checkbox');
+    const officialSurveyBtn = document.getElementById('modal-official-survey-btn');
+    
+    if (understandCheckbox) {
+      understandCheckbox.addEventListener('change', function() {
+        if (typeof toggleModalSurveyButton === 'function') {
+          toggleModalSurveyButton();
+        } else if (typeof window.toggleModalSurveyButton === 'function') {
+          window.toggleModalSurveyButton();
+        } else {
+          console.error('toggleModalSurveyButton function not found');
+        }
+      });
+    }
+    
+    if (validCheckbox) {
+      validCheckbox.addEventListener('change', function() {
+        if (typeof toggleModalSurveyButton === 'function') {
+          toggleModalSurveyButton();
+        } else if (typeof window.toggleModalSurveyButton === 'function') {
+          window.toggleModalSurveyButton();
+        } else {
+          console.error('toggleModalSurveyButton function not found');
+        }
+      });
+    }
+    
+    if (officialSurveyBtn) {
+      officialSurveyBtn.addEventListener('click', function() {
+        if (!this.disabled) {
+          if (typeof openOfficialSurvey === 'function') {
+            openOfficialSurvey();
+          } else if (typeof window.openOfficialSurvey === 'function') {
+            window.openOfficialSurvey();
+          } else {
+            console.error('openOfficialSurvey function not found');
+          }
+        }
+      });
+    }
   }
 }
 
