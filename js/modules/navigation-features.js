@@ -51,11 +51,39 @@ export async function updateNavigationFeatures() {
 }
 
 /**
+ * Check if user is registered
+ * @returns {boolean} True if user is registered
+ */
+function isUserRegistered() {
+  return localStorage.getItem('nstcg_registered') === 'true' ||
+         localStorage.getItem('nstcg_user_id') !== null ||
+         localStorage.getItem('nstcg_email') !== null;
+}
+
+/**
  * Add navigation items dynamically based on features
  * This can be used to add new nav items when features are enabled
+ * @param {string} href - The URL for the navigation item
+ * @param {string} text - The display text for the navigation item
+ * @param {string} dataPage - The data-page attribute value
+ * @param {string|Object} condition - Either a feature flag string or an object with feature and requiresAuth properties
  */
 export function addNavigationItem(href, text, dataPage, condition) {
-  if (!condition || !isFeatureEnabled(condition)) {
+  // Handle both string conditions (feature flags) and object conditions (feature + auth)
+  if (typeof condition === 'string') {
+    if (!isFeatureEnabled(condition)) {
+      return;
+    }
+  } else if (typeof condition === 'object') {
+    // Check feature flag
+    if (condition.feature && !isFeatureEnabled(condition.feature)) {
+      return;
+    }
+    // Check authentication requirement
+    if (condition.requiresAuth && !isUserRegistered()) {
+      return;
+    }
+  } else if (!condition) {
     return;
   }
   
@@ -95,7 +123,10 @@ export async function initNavigationFeatures() {
   // Add conditional navigation items
   // These will only be added if the features are enabled
   addNavigationItem('/leaderboard.html', 'Leaderboard', 'leaderboard', 'leaderboard.enabled');
-  addNavigationItem('/share.html', 'Share & Earn', 'share', 'referralScheme.enabled');
+  addNavigationItem('/share.html', 'Share & Earn', 'share', { 
+    feature: 'referralScheme.enabled', 
+    requiresAuth: true 
+  });
   
   // Add timer to navigation if needed
   await addNavigationTimer();
