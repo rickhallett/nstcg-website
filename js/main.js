@@ -1112,8 +1112,116 @@ function showReferralBanner(referralInfo) {
   }, 5000);
 }
 
+// Handle email activation
+async function handleEmailActivation(email, bonusPoints) {
+  // Initialize MicroModal if not already done
+  if (typeof MicroModal !== 'undefined') {
+    MicroModal.init();
+  }
+  
+  // Set bonus points display
+  const bonusDisplay = document.getElementById('bonusPointsDisplay');
+  if (bonusDisplay) {
+    bonusDisplay.textContent = bonusPoints;
+  }
+  
+  // Set email in hidden field
+  const emailField = document.getElementById('activationEmail');
+  if (emailField) {
+    emailField.value = email;
+  }
+  
+  // Set bonus points in hidden field
+  const bonusField = document.getElementById('activationBonus');
+  if (bonusField) {
+    bonusField.value = bonusPoints;
+  }
+  
+  // Setup form handler
+  const activationForm = document.getElementById('activationForm');
+  if (activationForm) {
+    activationForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      // Get visitor type
+      const visitorType = document.querySelector('input[name="activationVisitorType"]:checked')?.value;
+      
+      // Show processing state
+      activationForm.style.display = 'none';
+      document.getElementById('activationProcessing').style.display = 'block';
+      
+      try {
+        // Call activation API
+        const response = await fetch('/api/activate-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: email,
+            visitorType: visitorType,
+            bonusPoints: parseInt(bonusPoints)
+          })
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Activation failed');
+        }
+        
+        const result = await response.json();
+        const userData = result.userData;
+        
+        // Restore localStorage with user data
+        localStorage.setItem('nstcg_user_id', userData.user_id);
+        localStorage.setItem('nstcg_email', userData.email);
+        localStorage.setItem('nstcg_registered', 'true');
+        localStorage.setItem('nstcg_referral_code', userData.referral_code);
+        localStorage.setItem('nstcg_first_name', userData.first_name);
+        if (userData.comment) {
+          localStorage.setItem('nstcg_comment', userData.comment);
+        }
+        
+        // Show success state
+        document.getElementById('activationProcessing').style.display = 'none';
+        document.getElementById('earnedPoints').textContent = userData.bonus_points;
+        document.getElementById('activatedReferralCode').textContent = userData.referral_code;
+        document.getElementById('activationSuccess').style.display = 'block';
+        
+        // Clean URL
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+        
+      } catch (error) {
+        console.error('Activation error:', error);
+        document.getElementById('activationProcessing').style.display = 'none';
+        document.getElementById('activationMessage').innerHTML = `
+          <div style="background: rgba(255, 0, 0, 0.1); border: 2px solid #ff6b6b; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            <p style="color: #ff6b6b; margin: 0;">${error.message}</p>
+          </div>
+        `;
+        activationForm.style.display = 'block';
+      }
+    });
+  }
+  
+  // Show the modal
+  MicroModal.show('modal-activation');
+}
+
 // Initialize counts on page load
 window.addEventListener('load', async function () {
+  // Check for email activation parameter FIRST
+  const urlParams = new URLSearchParams(window.location.search);
+  const userEmail = urlParams.get('user_email');
+  const bonusPoints = urlParams.get('bonus') || Math.floor(Math.random() * 41) + 10;
+  
+  if (userEmail) {
+    // Show activation modal for email users
+    handleEmailActivation(userEmail, bonusPoints);
+    return; // Don't process other parameters when activating
+  }
+  
   // Check for referral (only if not disabled)
   const referralInfo = window.DISABLE_REFERRAL_TRACKING ? null : checkReferral();
 
