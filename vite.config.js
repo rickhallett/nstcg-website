@@ -18,27 +18,27 @@ export default defineConfig({
       },
       output: {
         // Optimize chunk splitting for preloading system
-        manualChunks: {
-          // Core system chunks
-          'core': ['./js/core/StateManager.js', './js/core/CacheManager.js'],
+        // manualChunks: {
+        //   // Core system chunks
+        //   'core': ['./js/core/StateManager.js', './js/core/CacheManager.js'],
 
-          // API and preloading chunks (lazy-loaded)
-          'preloader': ['./js/modules/api-preloader.js', './js/modules/api-integration.js'],
+        //   // API and preloading chunks (lazy-loaded)
+        //   'preloader': ['./js/modules/api-preloader.js', './js/modules/api-integration.js'],
 
-          // Feature-specific chunks
-          'social': ['./js/modules/social.js'],
-          'gamification': ['./js/modules/leaderboard.js', './js/modules/share-features.js'],
+        //   // Feature-specific chunks
+        //   'social': ['./js/modules/social.js'],
+        //   'gamification': ['./js/modules/leaderboard.js', './js/modules/share-features.js'],
 
-          // Utility chunks
-          'utils': [
-            './js/utils/feature-flags.js',
-            './js/utils/include-nav.js',
-            './js/modules/referral-utils.js'
-          ],
+        //   // Utility chunks
+        //   'utils': [
+        //     './js/utils/feature-flags.js',
+        //     './js/utils/include-nav.js',
+        //     './js/modules/referral-utils.js'
+        //   ],
 
-          // Vendor chunks
-          'vendor': ['micromodal']
-        },
+        //   // Vendor chunks
+        //   'vendor': ['micromodal']
+        // },
         // Optimize chunk file names
         chunkFileNames: (chunkInfo) => {
           const facadeModuleId = chunkInfo.facadeModuleId
