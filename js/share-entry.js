@@ -38,47 +38,11 @@ window.showToast = showToast;
 import './modules/share-features.js'  
 import './modules/share-functionality.js'
 
-// API Preloading system (lazy-loaded)
-async function initializePreloading() {
-  try {
-    const { 
-      initializePreloading, 
-      trackPageView, 
-      trackActivity, 
-      startIdlePreload 
-    } = await import('./modules/api-preloader.js');
-    
-    // Track current page view
-    trackPageView('share');
-    
-    // Set up activity tracking
-    ['click', 'scroll', 'mousemove', 'keypress'].forEach(event => {
-      document.addEventListener(event, trackActivity, { passive: true });
-    });
-    
-    // Start preloading system
-    await initializePreloading();
-    
-    // Start idle preloading
-    startIdlePreload();
-    
-    // Enable fetch integration for transparent preload usage
-    const { enableFetchIntegration } = await import('./modules/api-integration.js');
-    enableFetchIntegration();
-    
-    console.log('API preloading system initialized for share page');
-  } catch (error) {
-    console.warn('Failed to initialize API preloading:', error);
-  }
-}
 
 // Initialize feature flags first
 async function initialize() {
   try {
     await initializeFeatureFlags();
-    
-    // Initialize API preloading system (after a short delay)
-    setTimeout(initializePreloading, 1000);
     
     console.log('Feature flags loaded, Share page initialized via Vite');
   } catch (error) {

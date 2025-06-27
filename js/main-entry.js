@@ -41,39 +41,6 @@ import { initHomepageFeatures } from './modules/homepage-features.js'
 // Main application logic
 import './main.js'
 
-// API Preloading system (lazy-loaded)
-async function initializePreloading() {
-  try {
-    const { 
-      initializePreloading, 
-      trackPageView, 
-      trackActivity, 
-      startIdlePreload 
-    } = await import('./modules/api-preloader.js');
-    
-    // Track current page view
-    trackPageView('index');
-    
-    // Set up activity tracking
-    ['click', 'scroll', 'mousemove', 'keypress'].forEach(event => {
-      document.addEventListener(event, trackActivity, { passive: true });
-    });
-    
-    // Start preloading system
-    await initializePreloading();
-    
-    // Start idle preloading
-    startIdlePreload();
-    
-    // Enable fetch integration for transparent preload usage
-    const { enableFetchIntegration } = await import('./modules/api-integration.js');
-    enableFetchIntegration();
-    
-    console.log('API preloading system initialized');
-  } catch (error) {
-    console.warn('Failed to initialize API preloading:', error);
-  }
-}
 
 // Initialize feature flags first, then initialize application
 async function initialize() {
@@ -83,9 +50,6 @@ async function initialize() {
     
     // Initialize homepage features (sets up window.featureFlags)
     await initHomepageFeatures();
-    
-    // Initialize API preloading system (after a short delay)
-    setTimeout(initializePreloading, 1000);
     
     console.log('Feature flags loaded, NSTCG Website initialized via Vite');
   } catch (error) {

@@ -39,47 +39,11 @@ window.showToast = showToast;
 import './modules/leaderboard-features.js'
 import './modules/leaderboard.js'
 
-// API Preloading system (lazy-loaded)
-async function initializePreloading() {
-  try {
-    const { 
-      initializePreloading, 
-      trackPageView, 
-      trackActivity, 
-      startIdlePreload 
-    } = await import('./modules/api-preloader.js');
-    
-    // Track current page view
-    trackPageView('leaderboard');
-    
-    // Set up activity tracking
-    ['click', 'scroll', 'mousemove', 'keypress'].forEach(event => {
-      document.addEventListener(event, trackActivity, { passive: true });
-    });
-    
-    // Start preloading system
-    await initializePreloading();
-    
-    // Start idle preloading
-    startIdlePreload();
-    
-    // Enable fetch integration for transparent preload usage
-    const { enableFetchIntegration } = await import('./modules/api-integration.js');
-    enableFetchIntegration();
-    
-    console.log('API preloading system initialized for leaderboard page');
-  } catch (error) {
-    console.warn('Failed to initialize API preloading:', error);
-  }
-}
 
 // Initialize feature flags first
 async function initialize() {
   try {
     await initializeFeatureFlags();
-    
-    // Initialize API preloading system (after a short delay)
-    setTimeout(initializePreloading, 1000);
     
     console.log('Feature flags loaded, Leaderboard page initialized via Vite');
   } catch (error) {

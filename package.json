@@ -4,7 +4,7 @@
   "description": "North Swanage Traffic Consultation Group community action website",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -n \"vite,api\" -c \"blue,green\" \"npm run dev:vite\" \"npm run dev:vercel\"",
+    "devs": "concurrently -n \"vite,api\" -c \"blue,green\" \"npm run dev:vite\" \"npm run dev:vercel\"",
     "dev:vite": "vite",
     "dev:vercel": "vercel dev",
     "dev:all": "npm run dev",
@@ -16,6 +16,7 @@
   "devDependencies": {
     "@vitejs/plugin-legacy": "^5.4.2",
     "concurrently": "^9.2.0",
+    "dotenv": "^16.6.0",
     "terser": "^5.36.0",
     "vite": "^5.4.10"
   },
@@ -34,5 +35,8 @@
     "consultation"
   ],
   "author": "NSTCG",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "micromodal": "^0.6.1"
+  }
 }
