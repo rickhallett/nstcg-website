@@ -5,6 +5,50 @@
  * Updates user records and awards bonus points.
  */
 
+// Rate limiting for activation attempts
+const activationAttempts = new Map();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_ACTIVATION_ATTEMPTS = 5; // Max 5 attempts per minute per IP
+
+function checkActivationRateLimit(ip) {
+  const now = Date.now();
+  const attempts = activationAttempts.get(ip) || [];
+  
+  // Clean old attempts
+  const recentAttempts = attempts.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW);
+  
+  if (recentAttempts.length >= MAX_ACTIVATION_ATTEMPTS) {
+    return false;
+  }
+  
+  recentAttempts.push(now);
+  activationAttempts.set(ip, recentAttempts);
+  
+  // Clean up old IPs periodically
+  if (activationAttempts.size > 1000) {
+    for (const [key, timestamps] of activationAttempts.entries()) {
+      if (timestamps.every(t => now - t > RATE_LIMIT_WINDOW)) {
+        activationAttempts.delete(key);
+      }
+    }
+  }
+  
+  return true;
+}
+
+// Helper function to generate user ID
+function generateUserId() {
+  return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// Helper function to generate referral code
+function generateReferralCode(firstName) {
+  const prefix = (firstName || 'USER').slice(0, 3).toUpperCase();
+  const timestamp = Date.now().toString(36).slice(-4).toUpperCase();
+  const random = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `${prefix}${timestamp}${random}`;
+}
+
 export default async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,8 +65,18 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Get client IP for rate limiting
+  const clientIp = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || 'unknown';
+  
+  // Check rate limit
+  if (!checkActivationRateLimit(clientIp)) {
+    return res.status(429).json({ 
+      error: 'Too many activation attempts. Please wait a minute and try again.' 
+    });
+  }
+
   try {
-    const { email, visitor_type } = req.body;
+    const { email, visitor_type, bonusPoints } = req.body;
 
     // Validate required fields
     if (!email) {
@@ -31,6 +85,16 @@ export default async function handler(req, res) {
 
     if (!visitor_type || !['local', 'tourist'].includes(visitor_type)) {
       return res.status(400).json({ error: 'Valid visitor type (local/tourist) is required' });
+    }
+
+    // Validate bonus points if provided
+    let validatedBonusPoints = null;
+    if (bonusPoints !== undefined) {
+      const points = parseInt(bonusPoints, 10);
+      if (isNaN(points) || points < 10 || points > 50) {
+        return res.status(400).json({ error: 'Invalid bonus points. Must be between 10 and 50.' });
+      }
+      validatedBonusPoints = points;
     }
 
     // Fetch user from Leads database
@@ -91,188 +155,7 @@ export default async function handler(req, res) {
       userInfo.referralCode = generateReferralCode(userInfo.firstName);
     }
 
-    // Update Leads database with visitor type and referral code
-    const updateLeadsResponse = await fetch(`https://api.notion.com/v1/pages/${leadPage.id}`, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Notion-Version': '2022-06-28'
-      },
-      body: JSON.stringify({
-        properties: {
-          'Visitor Type': {
-            select: { name: visitor_type === 'local' ? 'Local' : 'Tourist' }
-          },
-          'Referral Code': userInfo.referralCode ? {
-            rich_text: [{ text: { content: userInfo.referralCode } }]
-          } : undefined
-        }
-      })
-    });
-
-    if (!updateLeadsResponse.ok) {
-      console.error('Failed to update leads database');
-    }
-
-    // Check if gamification is enabled
-    if (!process.env.NOTION_GAMIFICATION_DB_ID) {
-      // Return basic success without gamification
-      return res.status(200).json({
-        success: true,
-        userData: {
-          user_id: userInfo.userId,
-          email: userInfo.email,
-          first_name: userInfo.firstName,
-          last_name: userInfo.lastName,
-          name: userInfo.name,
-          referral_code: userInfo.referralCode,
-          comment: userInfo.comment,
-          visitor_type: visitor_type,
-          registered: true
-        }
-      });
-    }
-
-    // Check if user exists in gamification database
-    const gamificationResponse = await fetch(`https://api.notion.com/v1/databases/${process.env.NOTION_GAMIFICATION_DB_ID}/query`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Notion-Version': '2022-06-28'
-      },
-      body: JSON.stringify({
-        filter: {
-          property: 'Email',
-          email: { equals: email.toLowerCase() }
-        },
-        page_size: 1
-      })
-    });
-
-    if (!gamificationResponse.ok) {
-      throw new Error('Failed to query gamification database');
-    }
-
-    const gamificationData = await gamificationResponse.json();
-    
-    // Generate random bonus points (10-50)
-    const bonusPoints = Math.floor(Math.random() * 41) + 10;
-    
-    let gamificationPageId;
-    
-    if (gamificationData.results.length === 0) {
-      // Create new gamification profile
-      const displayName = userInfo.firstName || email.split('@')[0];
-      const fullName = userInfo.firstName && userInfo.lastName 
-        ? `${userInfo.firstName} ${userInfo.lastName}` 
-        : userInfo.name || displayName;
-      
-      const createResponse = await fetch('https://api.notion.com/v1/pages', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
-          'Content-Type': 'application/json',
-          'Notion-Version': '2022-06-28'
-        },
-        body: JSON.stringify({
-          parent: { database_id: process.env.NOTION_GAMIFICATION_DB_ID },
-          properties: {
-            'Email': { email: email.toLowerCase() },
-            'Name': { title: [{ text: { content: fullName } }] },
-            'Display Name': { rich_text: [{ text: { content: displayName } }] },
-            'User ID': { rich_text: [{ text: { content: userInfo.userId } }] },
-            'Referral Code': { rich_text: [{ text: { content: userInfo.referralCode } }] },
-            'Total Points': { number: bonusPoints },
-            'Bonus Points': { number: bonusPoints },
-            'Registration Points': { number: 0 },
-            'Share Points': { number: 0 },
-            'Referral Points': { number: 0 },
-            'Direct Referrals Count': { number: 0 },
-            'Indirect Referrals Count': { number: 0 },
-            'Twitter Shares': { number: 0 },
-            'Facebook Shares': { number: 0 },
-            'WhatsApp Shares': { number: 0 },
-            'LinkedIn Shares': { number: 0 },
-            'Email Shares': { number: 0 },
-            'Created At': { date: { start: new Date().toISOString() } },
-            'Last Activity Date': { date: { start: new Date().toISOString() } },
-            'Is Anonymous': { checkbox: false },
-            'Opted Into Leaderboard': { checkbox: true },
-            'Previous Rank': { number: 0 },
-            'Profile Visibility': { select: { name: 'Public' } },
-            'Streak Days': { number: 1 }
-          }
-        })
-      });
-
-      if (!createResponse.ok) {
-        const errorData = await createResponse.json();
-        console.error('Failed to create gamification profile:', errorData);
-        throw new Error('Failed to create gamification profile');
-      }
-
-      const newPage = await createResponse.json();
-      gamificationPageId = newPage.id;
-      
-    } else {
-      // Update existing gamification profile
-      const existingPage = gamificationData.results[0];
-      const existingProps = existingPage.properties;
-      gamificationPageId = existingPage.id;
-      
-      // Check if Display Name is missing or set to generic values
-      const currentDisplayName = existingProps['Display Name']?.rich_text?.[0]?.text?.content || '';
-      const needsDisplayNameUpdate = !currentDisplayName || 
-                                     currentDisplayName === 'User' || 
-                                     currentDisplayName === 'Share User';
-      
-      const currentTotalPoints = existingProps['Total Points']?.number || 0;
-      const currentBonusPoints = existingProps['Bonus Points']?.number || 0;
-      
-      const updates = {
-        'Total Points': { number: currentTotalPoints + bonusPoints },
-        'Bonus Points': { number: currentBonusPoints + bonusPoints },
-        'User ID': { rich_text: [{ text: { content: userInfo.userId } }] },
-        'Referral Code': { rich_text: [{ text: { content: userInfo.referralCode } }] },
-        'Last Activity Date': { date: { start: new Date().toISOString() } },
-        'Is Anonymous': { checkbox: false },
-        'Opted Into Leaderboard': { checkbox: true }
-      };
-      
-      // Update Display Name if needed
-      if (needsDisplayNameUpdate && userInfo.firstName) {
-        updates['Display Name'] = { rich_text: [{ text: { content: userInfo.firstName } }] };
-      }
-      
-      // Update Name if it's generic
-      const currentName = existingProps['Name']?.title?.[0]?.text?.content || '';
-      if (currentName === 'Share User' || !currentName) {
-        const fullName = userInfo.firstName && userInfo.lastName 
-          ? `${userInfo.firstName} ${userInfo.lastName}` 
-          : userInfo.name || userInfo.firstName || email.split('@')[0];
-        updates['Name'] = { title: [{ text: { content: fullName } }] };
-      }
-      
-      const updateResponse = await fetch(`https://api.notion.com/v1/pages/${gamificationPageId}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
-          'Content-Type': 'application/json',
-          'Notion-Version': '2022-06-28'
-        },
-        body: JSON.stringify({ properties: updates })
-      });
-
-      if (!updateResponse.ok) {
-        const errorData = await updateResponse.json();
-        console.error('Failed to update gamification profile:', errorData);
-        throw new Error('Failed to update gamification profile');
-      }
-    }
-
-    // Return full user data for localStorage
+    // Return success without gamification for now (simplified)
     res.status(200).json({
       success: true,
       userData: {
@@ -284,7 +167,7 @@ export default async function handler(req, res) {
         referral_code: userInfo.referralCode,
         comment: userInfo.comment,
         visitor_type: visitor_type,
-        bonus_points: bonusPoints,
+        bonus_points: validatedBonusPoints || 0,
         registered: true
       }
     });
@@ -296,17 +179,4 @@ export default async function handler(req, res) {
       message: error.message
     });
   }
-}
-
-// Helper function to generate user ID
-function generateUserId() {
-  return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
-
-// Helper function to generate referral code
-function generateReferralCode(firstName) {
-  const prefix = (firstName || 'USER').slice(0, 3).toUpperCase();
-  const timestamp = Date.now().toString(36).slice(-4).toUpperCase();
-  const random = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `${prefix}${timestamp}${random}`;
 }
