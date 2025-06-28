@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
-import { google } from 'googleapis';
+import sgMail from '@sendgrid/mail';
 import { Client } from '@notionhq/client';
-import { compileActivationEmail } from './compile-email.js';
 import dotenv from 'dotenv';
 import fs from 'fs/promises';
 import path from 'path';
@@ -31,6 +30,7 @@ const CONFIG = {
   PROGRESS_LOG_INTERVAL: 10, // Log progress every 10 emails
   FAILED_EMAILS_FILE: path.join(__dirname, 'failed-emails.json'),
   SENT_EMAILS_FILE: path.join(__dirname, 'sent-emails.json'),
+  TEMPLATE_ID: 'd-24401dab58ec4e9eb158de7034e307fe', // SendGrid template ID
 };
 
 // Show help
@@ -65,43 +65,24 @@ async function initializeServices() {
     auth: process.env.NOTION_TOKEN,
   });
 
-  // Initialize Gmail API with OAuth2 refresh token
+  // Initialize SendGrid
   try {
-    // Load saved tokens from the oauth setup
-    const tokens = JSON.parse(await fs.readFile('gmail-tokens.json', 'utf8'));
+    // Check for SendGrid API key
+    const sendgridApiKey = process.env.SENDGRID_API_KEY;
+    if (!sendgridApiKey) {
+      throw new Error('SENDGRID_API_KEY not found in environment variables');
+    }
 
-    // Create OAuth2 client with credentials
-    const auth = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      'urn:ietf:wg:oauth:2.0:oob' // For installed apps
-    );
+    // Set SendGrid API key
+    sgMail.setApiKey(sendgridApiKey);
 
-    // Set the saved tokens (including refresh token)
-    auth.setCredentials(tokens);
-
-    // Handle token refresh automatically
-    auth.on('tokens', (newTokens) => {
-      if (newTokens.refresh_token) {
-        // Update tokens if we get a new refresh token
-        tokens.refresh_token = newTokens.refresh_token;
-      }
-      tokens.access_token = newTokens.access_token;
-
-      // Save updated tokens
-      fs.writeFile('gmail-tokens.json', JSON.stringify(tokens, null, 2))
-        .catch(err => console.warn('⚠️  Could not save updated tokens:', err.message));
-    });
-
-    // Create Gmail client (this will be reused for all 300 emails)
-    const gmail = google.gmail({ version: 'v1', auth });
-
-    console.log('✅ Gmail API authenticated successfully');
-    return { notion, gmail };
+    console.log('✅ SendGrid initialized successfully');
+    console.log('📌 Make sure info@nstcg.org is verified in SendGrid Sender Authentication');
+    return { notion, sgMail };
 
   } catch (error) {
-    console.error('❌ Failed to initialize Gmail API:', error.message);
-    console.error('💡 Make sure you have run the OAuth setup first to generate gmail-tokens.json');
+    console.error('❌ Failed to initialize SendGrid:', error.message);
+    console.error('💡 Make sure SENDGRID_API_KEY is set in your .env file or environment');
     throw error;
   }
 }
@@ -217,49 +198,38 @@ async function saveFailedEmail(user, error) {
 /**
  * Send email to a single user
  */
-async function sendEmail(gmail, user, bonusPoints, dryRun = false) {
-  // Compile email template
-  const htmlContent = compileActivationEmail(user.email, bonusPoints);
-
-  // Create email message
-  const subject = `⏰ TIME RUNNING OUT: Activate Your Account & Claim ${bonusPoints} Points!`;
-  const message = [
-    'Content-Type: text/html; charset=utf-8',
-    'MIME-Version: 1.0',
-    `From: North Swanage Traffic Concern Group <info@nstcg.org>`,
-    `To: ${user.email}`,
-    `Subject: ${subject}`,
-    '',
-    htmlContent,
-  ].join('\n');
-
-  // Encode message
-  const encodedMessage = Buffer.from(message)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+async function sendEmail(sgMail, user, bonusPoints, dryRun = false) {
+  // Create email message using SendGrid template
+  const msg = {
+    to: user.email,
+    from: 'engineering@nstcg.org',
+    templateId: CONFIG.TEMPLATE_ID,
+    dynamic_template_data: {
+      email: user.email,
+      bonusPoints: bonusPoints,
+      firstName: user.firstName,
+      name: user.name,
+    },
+  };
 
   if (dryRun) {
     console.log(`📧 [DRY RUN] Would send to: ${user.email} (${bonusPoints} points)`);
-    return { id: 'dry-run-' + Date.now(), threadId: 'dry-run' };
+    return { messageId: 'dry-run-' + Date.now() };
   }
 
-  // Send email
-  const result = await gmail.users.messages.send({
-    userId: 'me',
-    requestBody: {
-      raw: encodedMessage,
-    },
-  });
+  // Send email using SendGrid
+  const [response] = await sgMail.send(msg);
 
-  return result.data;
+  return {
+    messageId: response.headers['x-message-id'],
+    statusCode: response.statusCode
+  };
 }
 
 /**
  * Process a batch of users
  */
-async function processBatch(gmail, users, startIndex, batchSize, sentEmails, dryRun) {
+async function processBatch(sgMail, users, startIndex, batchSize, sentEmails, dryRun) {
   const endIndex = Math.min(startIndex + batchSize, users.length);
   const batch = users.slice(startIndex, endIndex);
 
@@ -287,7 +257,7 @@ async function processBatch(gmail, users, startIndex, batchSize, sentEmails, dry
       const bonusPoints = getBonusPoints();
 
       // Send email
-      const result = await sendEmail(gmail, user, bonusPoints, dryRun);
+      const result = await sendEmail(sgMail, user, bonusPoints, dryRun);
 
       // Track success
       successCount++;
@@ -361,7 +331,7 @@ async function runCampaign() {
 
   try {
     // Initialize services
-    const { notion, gmail } = await initializeServices();
+    const { notion, sgMail } = await initializeServices();
 
     // Fetch users
     const users = await fetchUsersFromNotion(notion);
@@ -390,7 +360,7 @@ async function runCampaign() {
     // Process users in batches
     for (let i = 0; i < users.length; i += flags.batchSize) {
       const batchStats = await processBatch(
-        gmail,
+        sgMail,
         users,
         i,
         flags.batchSize,
