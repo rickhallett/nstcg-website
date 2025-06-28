@@ -3,6 +3,13 @@
  * Form styles and input elements
  */
 
+/* Ensure proper box sizing for all form elements */
+form *,
+form *::before,
+form *::after {
+  box-sizing: border-box;
+}
+
 .form-section {
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
@@ -64,6 +71,7 @@ textarea {
   font-size: 16px;
   transition: all var(--transition-base);
   font-family: inherit;
+  box-sizing: border-box;
 }
 
 input[type="text"]:focus,

@@ -94,17 +94,30 @@ function startCountdown() {
   setInterval(updateCountdown, 1000);
 }
 
+// Initialize debug logger for activation flow
+const debugLogger = new window.DebugLogger('email-activation');
+
 // Add immediate console log to verify script is loading
 console.log('main.js loaded');
+debugLogger.info('main.js loaded');
 
 // Check for email activation parameters
 const urlParams = new URLSearchParams(window.location.search);
 const activationEmail = urlParams.get('user_email');
 const bonusPoints = urlParams.get('bonus');
 
+debugLogger.info('URL parameters checked', { 
+  hasEmail: !!activationEmail, 
+  hasBonus: !!bonusPoints,
+  email: activationEmail,
+  bonus: bonusPoints,
+  fullUrl: window.location.href
+});
+
 // If activation parameters are present, handle activation flow
 if (activationEmail && bonusPoints) {
   console.log('Email activation detected:', activationEmail, 'with', bonusPoints, 'bonus points');
+  debugLogger.info('Email activation detected', { email: activationEmail, bonusPoints });
   
   // Wait for DOM and MicroModal to be ready
   if (document.readyState === 'loading') {
@@ -2068,6 +2081,7 @@ function addSocialShareButtons(containerId, count, userComment, isDisabled = fal
 // Handle email activation from campaign
 async function handleEmailActivation(email, bonusPoints) {
   console.log('Handling email activation for:', email);
+  debugLogger.info('handleEmailActivation called', { email, bonusPoints });
   
   try {
     // Decode email
@@ -2092,6 +2106,7 @@ async function handleEmailActivation(email, bonusPoints) {
     window.history.replaceState({}, document.title, cleanUrl);
     
     // Show activation modal
+    debugLogger.info('Showing activation modal');
     MicroModal.show('modal-activation');
     
     // Update bonus points display
