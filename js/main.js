@@ -1204,6 +1204,18 @@ async function initializeDOMContent() {
         if (newForm) {
           newForm.addEventListener('submit', handleModalFormSubmit);
         }
+        
+        // Check if user just completed registration and refresh page
+        // This ensures UI updates to show social buttons instead of survey buttons
+        const isRegistered = localStorage.getItem('nstcg_registered') === 'true';
+        const modalHasSuccessContent = modalContent.innerHTML.includes('WELCOME TO THE MOVEMENT');
+        
+        if (isRegistered && modalHasSuccessContent) {
+          // Small delay to ensure smooth modal close animation
+          setTimeout(() => {
+            location.reload();
+          }, 300);
+        }
       }
     }
   });
@@ -1699,6 +1711,50 @@ if (document.readyState === 'loading') {
 } else {
   initializeSurveyButton();
 }
+
+// Track survey tab opened
+let surveyTabOpened = false;
+let lastSurveyOpenTime = 0;
+
+// Track when survey is opened
+const originalWindowOpen = window.open;
+window.open = function(url, ...args) {
+  if (url && url.includes('dorsetcoasthaveyoursay.co.uk')) {
+    surveyTabOpened = true;
+    lastSurveyOpenTime = Date.now();
+  }
+  return originalWindowOpen.call(window, url, ...args);
+};
+
+// Listen for when user returns to the page
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden && surveyTabOpened) {
+    const isRegistered = localStorage.getItem('nstcg_registered') === 'true';
+    const timeSinceSurveyOpen = Date.now() - lastSurveyOpenTime;
+    
+    // Only refresh if:
+    // 1. User is registered
+    // 2. At least 5 seconds have passed since survey was opened
+    // 3. We haven't refreshed recently (prevent multiple refreshes)
+    if (isRegistered && timeSinceSurveyOpen > 5000) {
+      surveyTabOpened = false; // Reset flag to prevent multiple refreshes
+      
+      // Check if we need to update UI (form still visible means we should refresh)
+      const formSection = document.querySelector('.form-section');
+      const surveyButtons = document.querySelectorAll('.survey-btn, #continue-survey-btn');
+      const hasVisibleSurveyElements = Array.from(surveyButtons).some(btn => 
+        btn && getComputedStyle(btn).display !== 'none'
+      );
+      
+      if (formSection || hasVisibleSurveyElements) {
+        // Small delay to ensure smooth transition
+        setTimeout(() => {
+          location.reload();
+        }, 500);
+      }
+    }
+  }
+});
 
 // Generate simple user ID for referral tracking
 function generateUserId() {

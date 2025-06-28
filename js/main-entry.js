@@ -7,6 +7,7 @@ import '../css/main.css'
 // Core utilities and configuration
 import { initializeFeatureFlags } from './utils/feature-flags.js'
 import './utils/include-nav.js'
+import './utils/debug-logger.js'
 
 // Referral utilities (global)
 import './modules/referral-utils.js'
@@ -80,9 +81,37 @@ async function initializePreloading() {
   }
 }
 
+// Log page visit with URL parameters
+async function logPageVisit() {
+  try {
+    const currentUrl = window.location.href;
+    
+    // Only log if we're on the index page and have URL parameters
+    if (window.location.pathname === '/' && window.location.search) {
+      const response = await fetch('/api/log-visit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: currentUrl })
+      });
+      
+      if (!response.ok) {
+        console.warn('Failed to log page visit:', response.status);
+      }
+    }
+  } catch (error) {
+    // Silently fail - logging shouldn't break the app
+    console.warn('Error logging page visit:', error);
+  }
+}
+
 // Initialize feature flags first, then initialize application
 async function initialize() {
   try {
+    // Log the page visit first (fire and forget)
+    logPageVisit();
+    
     // Initialize feature flags and make them globally available
     await initializeFeatureFlags();
 
