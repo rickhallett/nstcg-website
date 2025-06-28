@@ -2,6 +2,27 @@ import { defineConfig } from 'vite'
 import legacy from '@vitejs/plugin-legacy'
 import { resolve } from 'path'
 
+// Custom plugin to preserve direct CSS links in HTML
+const preserveCssLinks = () => {
+  return {
+    name: 'preserve-css-links',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html) {
+        // Ensure main.css link is present in the head
+        if (!html.includes('href="css/main.css"') && !html.includes('href="/css/main.css"')) {
+          // Add the CSS link right after the <title> tag
+          html = html.replace(
+            '</title>',
+            '</title>\n    <link rel="stylesheet" href="/css/main.css">'
+          )
+        }
+        return html
+      }
+    }
+  }
+}
+
 export default defineConfig({
   // Multi-page app configuration
   build: {
@@ -83,6 +104,8 @@ export default defineConfig({
     cssMinify: true,
     // Generate source maps for debugging
     sourcemap: true, // ENABLED for production debugging
+    // Disable CSS code splitting to prevent FOUC
+    cssCodeSplit: false,
     // Output directory
     outDir: 'dist',
     // Clear output directory before build
@@ -116,6 +139,8 @@ export default defineConfig({
 
   // Plugin configuration
   plugins: [
+    // Preserve CSS links to prevent FOUC
+    preserveCssLinks(),
     // Legacy browser support
     legacy({
       targets: ['defaults', 'not IE 11']
@@ -134,7 +159,22 @@ export default defineConfig({
   // CSS configuration
   css: {
     // Enable CSS source maps
-    devSourcemap: true
+    devSourcemap: true,
+    // Prevent CSS code splitting to ensure CSS loads first
+    // This forces CSS to be extracted into separate files
+    postcss: {
+      plugins: []
+    }
+  },
+  
+  // Experimental features to control CSS handling
+  experimental: {
+    renderBuiltUrl(filename, { hostId, hostType, type }) {
+      // Ensure CSS files maintain their paths
+      if (type === 'css') {
+        return filename
+      }
+    }
   },
 
   // Define global constants
