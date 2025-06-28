@@ -44,4 +44,11 @@ dev-debug.log
 # OS specific
 # Task files
 tasks.json
-tasks/ 
+tasks/
+
+# OAuth tokens (sensitive)
+gmail-tokens.json
+scripts/gmail-tokens.json
+
+# Test campaign logs
+scripts/test-campaign-log.json 

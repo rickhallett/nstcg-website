@@ -27,17 +27,17 @@ const MAX_ACTIVATION_ATTEMPTS = 5; // Max 5 attempts per minute per IP
 function checkActivationRateLimit(ip) {
   const now = Date.now();
   const attempts = activationAttempts.get(ip) || [];
-  
+
   // Clean old attempts
   const recentAttempts = attempts.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW);
-  
+
   if (recentAttempts.length >= MAX_ACTIVATION_ATTEMPTS) {
     return false;
   }
-  
+
   recentAttempts.push(now);
   activationAttempts.set(ip, recentAttempts);
-  
+
   // Clean up old IPs periodically
   if (activationAttempts.size > 1000) {
     for (const [key, timestamps] of activationAttempts.entries()) {
@@ -46,7 +46,7 @@ function checkActivationRateLimit(ip) {
       }
     }
   }
-  
+
   return true;
 }
 
@@ -81,11 +81,11 @@ export default async function handler(req, res) {
 
   // Get client IP for rate limiting
   const clientIp = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || 'unknown';
-  
+
   // Check rate limit
   if (!checkActivationRateLimit(clientIp)) {
-    return res.status(429).json({ 
-      error: 'Too many activation attempts. Please wait a minute and try again.' 
+    return res.status(429).json({
+      error: 'Too many activation attempts. Please wait a minute and try again.'
     });
   }
 
@@ -105,8 +105,8 @@ export default async function handler(req, res) {
     let validatedBonusPoints = null;
     if (bonusPoints !== undefined) {
       const points = parseInt(bonusPoints, 10);
-      if (isNaN(points) || points < 10 || points > 50) {
-        return res.status(400).json({ error: 'Invalid bonus points. Must be between 10 and 50.' });
+      if (isNaN(points) || points !== 75) {
+        return res.status(400).json({ error: 'Invalid bonus points. Must be 75.' });
       }
       validatedBonusPoints = points;
     }
@@ -133,14 +133,14 @@ export default async function handler(req, res) {
     }
 
     const leadsData = await leadsResponse.json();
-    
+
     if (leadsData.results.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     const leadPage = leadsData.results[0];
     const leadProps = leadPage.properties;
-    
+
     // Extract user information
     const userInfo = {
       userId: leadProps['User ID']?.rich_text?.[0]?.text?.content || generateUserId(),
@@ -158,7 +158,7 @@ export default async function handler(req, res) {
       userInfo.firstName = nameParts[0];
       userInfo.lastName = nameParts.slice(1).join(' ');
     }
-    
+
     // Fallback to email prefix if no name available
     if (!userInfo.firstName) {
       userInfo.firstName = email.split('@')[0];
