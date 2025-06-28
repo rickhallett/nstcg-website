@@ -8,9 +8,15 @@
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   padding: 15px 20px;
   position: sticky;
-  top: 0;
+  top: 70px; /* Position below fixed navigation */
   z-index: var(--z-sticky, 1000);
   overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .alert-header {
+    top: 60px; /* Mobile nav height */
+  }
 }
 
 .header-content {

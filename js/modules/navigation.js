@@ -154,6 +154,9 @@ class NavigationManager {
   openMobileMenu() {
     if (!this.mobileToggle || !this.mobileOverlay) return;
 
+    // Quick fix: Scroll to top before opening menu to prevent rendering issues
+    window.scrollTo(0, 0);
+
     this.isMobileMenuOpen = true;
     document.body.classList.add(this.config.classes.mobileOpen);
     this.mobileToggle.setAttribute('aria-expanded', 'true');

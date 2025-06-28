@@ -6,11 +6,16 @@
 /* Navigation Base Styles */
 .main-nav {
   background: var(--bg-nav, #003366);
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 1100; /* Higher than alert header (1000) to ensure mobile menu can render above it */
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 10001; /* Highest z-index to stay above all content including mobile menu */
   transition: all 300ms ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* Ensure solid background on mobile */
+  background-color: #003366; /* Fallback solid color */
 }
 
 .main-nav.scrolled {
@@ -27,6 +32,8 @@
   justify-content: space-between;
   align-items: center;
   height: 70px;
+  position: relative; /* Establish stacking context */
+  overflow: hidden; /* Prevent any child content from bleeding out */
 }
 
 /* Navigation with timer layout */
@@ -217,7 +224,7 @@
   opacity: 0;
   visibility: hidden;
   transition: all 300ms ease;
-  z-index: 9999;
+  z-index: 9997; /* Below mobile menu and nav */
   backdrop-filter: blur(4px);
 }
 
@@ -237,7 +244,7 @@
   padding: 70px 0 20px;
   overflow-y: auto;
   transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 10000; /* Above all content */
+  z-index: 9998; /* Below main nav but above overlay */
   list-style: none;
   margin: 0;
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
@@ -279,7 +286,7 @@
   position: fixed;
   right: 20px;
   top: 20px;
-  z-index: 10001;
+  z-index: 9999; /* Below main nav */
 }
 
 .mobile-menu li {
@@ -416,6 +423,7 @@
 @media (max-width: 768px) {
   .nav-container {
     height: 60px;
+    overflow: visible; /* Allow mobile menu toggle to be clickable */
   }
   
   .nav-logo {
@@ -591,5 +599,16 @@
     display: grid;
     grid-template-columns: auto 1fr auto;
     gap: 10px;
+  }
+}
+
+/* Body padding for fixed navigation */
+body {
+  padding-top: 70px; /* Default nav height */
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-top: 60px; /* Mobile nav height */
   }
 }
