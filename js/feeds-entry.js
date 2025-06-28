@@ -1,7 +1,7 @@
 // Feeds page entry point for Vite build system
 
-// Import CSS
-import '../css/main.css'
+// CSS is now loaded directly in HTML to prevent FOUC
+// Additional page-specific CSS still bundled
 import '../css/pages/feeds.css'
 
 // Core utilities and configuration  

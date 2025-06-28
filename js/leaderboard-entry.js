@@ -1,7 +1,7 @@
 // Leaderboard page entry point for Vite build system
 
-// Import CSS
-import '../css/main.css'
+// CSS is now loaded directly in HTML to prevent FOUC
+// Additional component CSS still bundled
 import '../css/components/gamification.css'
 
 // Core utilities and configuration

@@ -1,8 +1,8 @@
 // Main entry point for Vite build system
 // This file imports and initializes all required modules
 
-// Import CSS (Vite will handle bundling)
-import '../css/main.css'
+// CSS is loaded directly in HTML for index.html
+// No need to import here to avoid duplication
 
 // Core utilities and configuration
 import { initializeFeatureFlags } from './utils/feature-flags.js'

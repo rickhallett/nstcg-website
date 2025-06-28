@@ -1,7 +1,6 @@
 // Share page entry point for Vite build system
 
-// Import CSS
-import '../css/main.css'
+// CSS is now loaded directly in HTML to prevent FOUC
 
 // Core utilities and configuration
 import { initializeFeatureFlags } from './utils/feature-flags.js'
