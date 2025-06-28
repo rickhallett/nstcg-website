@@ -22,7 +22,7 @@ export const puppeteerConfig = {
     }
   },
   testTimeout: 30000,
-  baseUrl: process.env.TEST_URL || 'http://localhost:3000',
+  baseUrl: process.env.TEST_URL || 'http://localhost:5173',
   waitOptions: {
     timeout: 10000,
     waitUntil: 'networkidle2'

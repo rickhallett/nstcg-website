@@ -10,8 +10,7 @@ export const POINTS = {
   REGISTRATION_DIRECT: 0,      // Points for direct registration
   REFERRAL_BONUS: 25,         // Points for referring someone
   SHARE_POINTS: 0,            // Points per share (currently 0)
-  EMAIL_BONUS_MIN: 10,        // Minimum email campaign bonus
-  EMAIL_BONUS_MAX: 50         // Maximum email campaign bonus
+  EMAIL_BONUS: 75             // Static email campaign bonus
 };
 
 // Rate limits
@@ -68,13 +67,13 @@ export const SUCCESS_MESSAGES = {
 
 // Test environment domains
 export const TEST_DOMAINS = {
-  LOCAL: 'http://localhost:3000',
+  LOCAL: 'http://localhost:5173',
   STAGING: 'https://staging.nstcg.com',
   PRODUCTION: 'https://nstcg.com'
 };
 
 // Notion test database IDs (from environment)
 export const NOTION_DBS = {
-  LEADS: process.env.NOTION_TEST_LEADS_DB_ID || process.env.NOTION_DATABASE_ID,
-  GAMIFICATION: process.env.NOTION_TEST_GAMIFICATION_DB_ID || process.env.NOTION_GAMIFICATION_DB_ID
+  LEADS: process.env.NOTION_DATABASE_ID,
+  GAMIFICATION: process.env.NOTION_GAMIFICATION_DB_ID
 };
