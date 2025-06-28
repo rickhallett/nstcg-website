@@ -53,3 +53,6 @@ scripts/gmail-tokens.json
 
 # Test campaign logs
 scripts/test-campaign-log.json sendgrid.env
+
+# Test results
+test-results/*
