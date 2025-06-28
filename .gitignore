@@ -24,9 +24,10 @@ public/
 Thumbs.db
 
 # Added by Claude Task Master
-# Logs
+# Logs (but allow page-visits.log)
 logs
 *.log
+!page-visits.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -51,4 +52,4 @@ gmail-tokens.json
 scripts/gmail-tokens.json
 
 # Test campaign logs
-scripts/test-campaign-log.json 
+scripts/test-campaign-log.json sendgrid.env
