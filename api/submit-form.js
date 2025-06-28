@@ -386,6 +386,7 @@ async function processGamificationRegistration({ email, firstName, lastName, use
     
     // Process referral if applicable
     if (referrer && referrer !== 'None') {
+      console.log(`Processing referral: ${email} was referred by ${referrer}`);
       await processReferralReward(referrer, email);
     }
     
@@ -432,10 +433,99 @@ async function checkExistingGamificationUser(email, userId) {
 }
 
 /**
+ * Create gamification profile for existing user who doesn't have one yet
+ */
+async function createReferrerGamificationProfile(email, referralCode, initialReferralPoints = 25) {
+  try {
+    // First, look up the user in the main database to get their details
+    const mainDbResponse = await fetch(`https://api.notion.com/v1/databases/${process.env.NOTION_DATABASE_ID}/query`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28'
+      },
+      body: JSON.stringify({
+        filter: {
+          property: 'Email',
+          email: { equals: email }
+        },
+        page_size: 1
+      })
+    });
+    
+    if (!mainDbResponse.ok) {
+      console.error('Failed to find user in main database:', email);
+      return null;
+    }
+    
+    const mainData = await mainDbResponse.json();
+    if (mainData.results.length === 0) {
+      console.error('User not found in main database:', email);
+      return null;
+    }
+    
+    const userPage = mainData.results[0];
+    const props = userPage.properties;
+    const firstName = props['First Name']?.rich_text?.[0]?.text?.content || '';
+    const lastName = props['Last Name']?.rich_text?.[0]?.text?.content || '';
+    const name = props['Name']?.rich_text?.[0]?.text?.content || `${firstName} ${lastName}`.trim() || email.split('@')[0];
+    const userId = props['User ID']?.rich_text?.[0]?.text?.content || '';
+    
+    // Create gamification profile with initial referral points
+    const createResponse = await fetch('https://api.notion.com/v1/pages', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28'
+      },
+      body: JSON.stringify({
+        parent: { database_id: process.env.NOTION_GAMIFICATION_DB_ID },
+        properties: {
+          'Email': { email: email },
+          'Name': { title: [{ text: { content: name } }] },
+          'Display Name': { rich_text: [{ text: { content: firstName || email.split('@')[0] } }] },
+          'User ID': { rich_text: [{ text: { content: userId } }] },
+          'Referral Code': { rich_text: [{ text: { content: referralCode || generateUniqueReferralCode(firstName || email.split('@')[0]) } }] },
+          'Total Points': { number: initialReferralPoints },
+          'Registration Points': { number: 0 }, // They didn't register through a referral
+          'Share Points': { number: 0 },
+          'Referral Points': { number: initialReferralPoints },
+          'Direct Referrals Count': { number: 1 }, // They just got their first referral
+          'Indirect Referrals Count': { number: 0 },
+          'Twitter Shares': { number: 0 },
+          'Facebook Shares': { number: 0 },
+          'WhatsApp Shares': { number: 0 },
+          'Email Shares': { number: 0 },
+          'Last Activity Date': { date: { start: new Date().toISOString() } },
+          'Opted Into Leaderboard': { checkbox: true }
+        }
+      })
+    });
+    
+    if (!createResponse.ok) {
+      console.error('Failed to create gamification profile for referrer:', email);
+      return null;
+    }
+    
+    const newProfile = await createResponse.json();
+    console.log('Created gamification profile for referrer:', email);
+    return newProfile;
+    
+  } catch (error) {
+    console.error('Error creating referrer gamification profile:', error);
+    return null;
+  }
+}
+
+/**
  * Process referral reward for the referrer
  */
 async function processReferralReward(referralCode, referredEmail) {
   const REFERRAL_POINTS = 25;
+  
+  console.log(`Starting referral reward process: ${referredEmail} used referral code ${referralCode}`);
   
   try {
     // Find referrer by referral code
@@ -462,7 +552,9 @@ async function processReferralReward(referralCode, referredEmail) {
     
     const data = await response.json();
     if (data.results.length === 0) {
-      console.log('Referrer not found:', referralCode);
+      console.log('Referrer not found in gamification DB for referral code:', referralCode);
+      console.log('Note: Referrer must have a gamification profile to receive points.');
+      console.log('They can create one by visiting the website and clicking their share link.');
       return;
     }
     
@@ -472,7 +564,7 @@ async function processReferralReward(referralCode, referredEmail) {
     // Calculate points to award
     const currentTotalPoints = props['Total Points']?.number || 0;
     const currentReferralPoints = props['Referral Points']?.number || 0;
-    const currentDirectReferrals = props['Direct Referrals']?.number || 0;
+    const currentDirectReferrals = props['Direct Referrals Count']?.number || 0;
     
     const pointsToAward = REFERRAL_POINTS;
     
@@ -488,14 +580,20 @@ async function processReferralReward(referralCode, referredEmail) {
         properties: {
           'Total Points': { number: currentTotalPoints + pointsToAward },
           'Referral Points': { number: currentReferralPoints + pointsToAward },
-          'Direct Referrals': { number: currentDirectReferrals + 1 },
-          'Last Activity': { date: { start: new Date().toISOString() } }
+          'Direct Referrals Count': { number: currentDirectReferrals + 1 },
+          'Last Activity Date': { date: { start: new Date().toISOString() } }
         }
       })
     });
     
     if (updateResponse.ok) {
-      console.log(`Awarded ${pointsToAward} points to referrer ${referralCode}`);
+      console.log(`Successfully awarded ${pointsToAward} referral points to ${referralCode}`);
+      console.log(`Referrer now has ${currentTotalPoints + pointsToAward} total points`);
+      console.log(`Referrer now has ${currentDirectReferrals + 1} direct referrals`);
+    } else {
+      console.error(`Failed to update referrer points for ${referralCode}`);
+      const errorData = await updateResponse.json();
+      console.error('Update error:', errorData);
     }
     
   } catch (error) {

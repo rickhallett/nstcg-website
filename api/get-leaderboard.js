@@ -6,14 +6,21 @@
  */
 
 import { requireFeatures } from './middleware/feature-flags.js';
+import Logger from './utils/logger.js';
+
+// Initialize logger
+const logger = new Logger('get-leaderboard');
 
 // Cache for leaderboard data
 const cache = new Map();
 const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 
 export default async function handler(req, res) {
+  logger.logRequest(req);
+  
   // Check if leaderboard feature is enabled
   if (await requireFeatures('leaderboard.enabled', 'referralScheme.enabled')(req, res) !== true) {
+    logger.info('Leaderboard features not enabled');
     return; // Response already sent by middleware
   }
 
@@ -50,8 +57,11 @@ export default async function handler(req, res) {
     const cacheKey = `${period}-${pageNum}-${limitNum}`;
     const cached = cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      logger.debug('Returning cached data', { cacheKey });
       return res.status(200).json(cached.data);
     }
+    
+    logger.info('Fetching leaderboard data', { period, page: pageNum, limit: limitNum });
 
     // Check if gamification database is configured
     if (!process.env.NOTION_GAMIFICATION_DB_ID) {
@@ -82,6 +92,12 @@ export default async function handler(req, res) {
       {
         property: 'Opted Into Leaderboard',
         checkbox: { equals: true }
+      },
+      {
+        property: 'Total Points',
+        number: {
+          greater_than: 0
+        }
       }
     ];
 
@@ -102,7 +118,7 @@ export default async function handler(req, res) {
         'Notion-Version': '2022-06-28'
       },
       body: JSON.stringify({
-        filter: filters.length > 1 ? { and: filters } : filters[0],
+        filter: { and: filters },
         sorts: [{
           property: 'Total Points',
           direction: 'descending'
@@ -129,24 +145,66 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
+    
+    logger.info('Notion API response received', { 
+      resultsCount: data.results.length,
+      hasMore: data.has_more 
+    });
+    
+    // Log first result structure for debugging
+    if (data.results.length > 0) {
+      logger.debug('First result properties', {
+        properties: Object.keys(data.results[0].properties),
+        sampleData: JSON.stringify(data.results[0].properties, null, 2)
+      });
+    }
 
     // Format leaderboard entries
     const leaderboard = data.results.map((page, index) => {
       const props = page.properties;
       const rank = (pageNum - 1) * limitNum + index + 1;
 
-      // Extract name - anonymize if needed
-      let displayName;
-      const firstName = props['First Name']?.rich_text?.[0]?.text?.content || '';
-      const lastName = props['Last Name']?.rich_text?.[0]?.text?.content || '';
-
-      if (firstName) {
-        // Show first name and last initial
-        const lastInitial = lastName ? lastName.charAt(0).toUpperCase() + '.' : '';
-        displayName = `${firstName} ${lastInitial}`;
+      // Log property structure for first entry
+      if (index === 0) {
+        logger.debug('Processing first entry properties', {
+          hasDisplayName: !!props['Display Name'],
+          hasName: !!props['Name'],
+          hasFirstName: !!props['First Name'],
+          hasTotalPoints: !!props['Total Points'],
+          hasDirectReferrals: !!props['Direct Referrals Count']
+        });
+      }
+      
+      // Extract name - try multiple property names
+      let displayName = 'Unknown';
+      
+      // Try Display Name first (rich_text field)
+      const displayNameProp = props['Display Name']?.rich_text?.[0]?.text?.content;
+      if (displayNameProp) {
+        displayName = displayNameProp;
+        logger.debug(`Using Display Name: ${displayName}`);
+      } else {
+        // Try Name (title field)
+        const nameProp = props['Name']?.title?.[0]?.text?.content;
+        if (nameProp) {
+          displayName = nameProp;
+          logger.debug(`Using Name: ${displayName}`);
+        } else {
+          // Fallback to First Name + Last Name
+          const firstName = props['First Name']?.rich_text?.[0]?.text?.content || '';
+          const lastName = props['Last Name']?.rich_text?.[0]?.text?.content || '';
+          
+          if (firstName) {
+            const lastInitial = lastName ? lastName.charAt(0).toUpperCase() + '.' : '';
+            displayName = `${firstName} ${lastInitial}`;
+            logger.debug(`Using First/Last Name: ${displayName}`);
+          } else {
+            logger.warn('No name found for entry', { rank });
+          }
+        }
       }
 
-      return {
+      const entryData = {
         rank,
         name: displayName,
         points: props['Total Points']?.number || 0,
@@ -161,32 +219,63 @@ export default async function handler(req, res) {
           donationPoints: props['Donation Points']?.number || 0
         }
       };
+      
+      // Log first few entries for debugging
+      if (index < 3) {
+        logger.debug(`Entry ${index + 1}`, entryData);
+      }
+      
+      return entryData;
+    });
+
+    // Filter out any entries with 0 points (backup filtering)
+    const filteredLeaderboard = leaderboard.filter(entry => {
+      if (entry.points === 0) {
+        logger.debug('Filtering out zero-point entry', { name: entry.name });
+        return false;
+      }
+      return true;
+    });
+    
+    logger.info('Filtered leaderboard', { 
+      originalCount: leaderboard.length,
+      filteredCount: filteredLeaderboard.length,
+      removedCount: leaderboard.length - filteredLeaderboard.length
     });
 
     // Get total count for pagination
     const totalCount = await getTotalOptedInCount(filters);
 
     const result = {
-      leaderboard,
-      total: totalCount,
+      leaderboard: filteredLeaderboard,
+      total: filteredLeaderboard.length,
       page: pageNum,
       limit: limitNum,
-      totalPages: Math.ceil(totalCount / limitNum),
+      totalPages: Math.ceil(filteredLeaderboard.length / limitNum),
       period,
       lastUpdated: new Date().toISOString()
     };
 
     // Cache the result
     cache.set(cacheKey, { data: result, timestamp: Date.now() });
-
+    
+    logger.info('Leaderboard data formatted', {
+      entriesCount: filteredLeaderboard.length,
+      totalCount: totalCount,
+      firstThreeNames: filteredLeaderboard.slice(0, 3).map(e => e.name)
+    });
+    
+    logger.logResponse(200, result);
     res.status(200).json(result);
 
   } catch (error) {
-    console.error('Error fetching leaderboard:', error);
-    res.status(500).json({
+    logger.error('Error fetching leaderboard', { error: error.message, stack: error.stack });
+    const errorResponse = {
       error: 'Failed to fetch leaderboard',
       message: error.message
-    });
+    };
+    logger.logResponse(500, errorResponse);
+    res.status(500).json(errorResponse);
   }
 }
 
@@ -236,7 +325,7 @@ async function getTotalOptedInCount(filters) {
         'Notion-Version': '2022-06-28'
       },
       body: JSON.stringify({
-        filter: filters.length > 1 ? { and: filters } : filters[0],
+        filter: { and: filters },
         page_size: 1 // Just need count
       })
     });
