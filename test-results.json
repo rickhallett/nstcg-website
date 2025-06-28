@@ -1,0 +1,144 @@
+{
+  "timestamp": "2025-06-28T05:13:44.203Z",
+  "totalTests": 27,
+  "passedTests": 26,
+  "passRate": 96.3,
+  "results": [
+    {
+      "name": "NOTION_TOKEN exists",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "NOTION_DATABASE_ID exists",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Notion API connection",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Database access",
+      "passed": true,
+      "details": "Found 1 records"
+    },
+    {
+      "name": "Property 'Email' exists",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Property 'Name' exists",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Property 'First Name' exists",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Property 'Last Name' exists",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Gamification database access",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Google Auth client created",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Gmail API access",
+      "passed": false,
+      "details": "Unable to access Gmail API: Insufficient Permission"
+    },
+    {
+      "name": "User data fetched",
+      "passed": true,
+      "details": "Total users: 348"
+    },
+    {
+      "name": "Email validation",
+      "passed": true,
+      "details": "100.0% have valid emails"
+    },
+    {
+      "name": "Name data",
+      "passed": true,
+      "details": "100.0% have names"
+    },
+    {
+      "name": "Template compilation",
+      "passed": true,
+      "details": "No errors"
+    },
+    {
+      "name": "Email parameter included",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Activation URL present",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Call-to-action button exists",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "All bonus point values work",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "URL encoding for simple@example.com",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "URL encoding for user+tag@example.com",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "URL encoding for test.user@sub.example.com",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "URL encoding for user@example.co.uk",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Minimum value",
+      "passed": true,
+      "details": "Min: 12"
+    },
+    {
+      "name": "Maximum value",
+      "passed": true,
+      "details": "Max: 48"
+    },
+    {
+      "name": "Average value",
+      "passed": true,
+      "details": "Avg: 29.4"
+    },
+    {
+      "name": "Bell curve distribution",
+      "passed": true,
+      "details": "Middle values more common than edges"
+    }
+  ],
+  "readyForLaunch": false
+}

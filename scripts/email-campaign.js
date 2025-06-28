@@ -27,8 +27,7 @@ const flags = {
 // Campaign configuration
 const CONFIG = {
   RATE_LIMIT_MS: 1000, // 1 second between emails
-  MIN_BONUS_POINTS: 10,
-  MAX_BONUS_POINTS: 50,
+  BONUS_POINTS: 75, // Static bonus points for all users
   PROGRESS_LOG_INTERVAL: 10, // Log progress every 10 emails
   FAILED_EMAILS_FILE: path.join(__dirname, 'failed-emails.json'),
   SENT_EMAILS_FILE: path.join(__dirname, 'sent-emails.json'),
@@ -59,39 +58,59 @@ Examples:
  * Initialize services
  */
 async function initializeServices() {
+  console.log('🔧 Initializing services...');
+
   // Initialize Notion client
   const notion = new Client({
     auth: process.env.NOTION_TOKEN,
   });
 
-  // Initialize Gmail API with ADC
-  const auth = new google.auth.GoogleAuth({
-    scopes: ['https://www.googleapis.com/auth/gmail.send'],
-  });
-  
-  const authClient = await auth.getClient();
-  const gmail = google.gmail({ version: 'v1', auth: authClient });
+  // Initialize Gmail API with OAuth2 refresh token
+  try {
+    // Load saved tokens from the oauth setup
+    const tokens = JSON.parse(await fs.readFile('gmail-tokens.json', 'utf8'));
 
-  return { notion, gmail };
+    // Create OAuth2 client with credentials
+    const auth = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      'urn:ietf:wg:oauth:2.0:oob' // For installed apps
+    );
+
+    // Set the saved tokens (including refresh token)
+    auth.setCredentials(tokens);
+
+    // Handle token refresh automatically
+    auth.on('tokens', (newTokens) => {
+      if (newTokens.refresh_token) {
+        // Update tokens if we get a new refresh token
+        tokens.refresh_token = newTokens.refresh_token;
+      }
+      tokens.access_token = newTokens.access_token;
+
+      // Save updated tokens
+      fs.writeFile('gmail-tokens.json', JSON.stringify(tokens, null, 2))
+        .catch(err => console.warn('⚠️  Could not save updated tokens:', err.message));
+    });
+
+    // Create Gmail client (this will be reused for all 300 emails)
+    const gmail = google.gmail({ version: 'v1', auth });
+
+    console.log('✅ Gmail API authenticated successfully');
+    return { notion, gmail };
+
+  } catch (error) {
+    console.error('❌ Failed to initialize Gmail API:', error.message);
+    console.error('💡 Make sure you have run the OAuth setup first to generate gmail-tokens.json');
+    throw error;
+  }
 }
 
 /**
- * Generate weighted random bonus points (10-50, weighted towards middle)
+ * Get static bonus points for all users
  */
-function generateBonusPoints() {
-  // Use multiple random numbers to create a bell curve distribution
-  const random1 = Math.random();
-  const random2 = Math.random();
-  const random3 = Math.random();
-  
-  // Average of 3 randoms creates bell curve
-  const average = (random1 + random2 + random3) / 3;
-  
-  // Scale to our range (10-50)
-  const range = CONFIG.MAX_BONUS_POINTS - CONFIG.MIN_BONUS_POINTS;
-  const points = Math.floor(CONFIG.MIN_BONUS_POINTS + (average * range));
-  
-  return points;
+function getBonusPoints() {
+  return CONFIG.BONUS_POINTS;
 }
 
 /**
@@ -99,7 +118,7 @@ function generateBonusPoints() {
  */
 async function fetchUsersFromNotion(notion) {
   console.log('📊 Fetching users from Notion Leads database...');
-  
+
   const users = [];
   let hasMore = true;
   let startCursor = undefined;
@@ -124,7 +143,7 @@ async function fetchUsersFromNotion(notion) {
         const firstName = page.properties['First Name']?.rich_text?.[0]?.text?.content || '';
         const lastName = page.properties['Last Name']?.rich_text?.[0]?.text?.content || '';
         const name = page.properties.Name?.title?.[0]?.text?.content || '';
-        
+
         if (email) {
           users.push({
             id: page.id,
@@ -201,7 +220,7 @@ async function saveFailedEmail(user, error) {
 async function sendEmail(gmail, user, bonusPoints, dryRun = false) {
   // Compile email template
   const htmlContent = compileActivationEmail(user.email, bonusPoints);
-  
+
   // Create email message
   const subject = `⏰ TIME RUNNING OUT: Activate Your Account & Claim ${bonusPoints} Points!`;
   const message = [
@@ -243,7 +262,7 @@ async function sendEmail(gmail, user, bonusPoints, dryRun = false) {
 async function processBatch(gmail, users, startIndex, batchSize, sentEmails, dryRun) {
   const endIndex = Math.min(startIndex + batchSize, users.length);
   const batch = users.slice(startIndex, endIndex);
-  
+
   console.log(`\n📦 Processing batch: ${startIndex + 1}-${endIndex} of ${users.length}`);
 
   let successCount = 0;
@@ -264,8 +283,8 @@ async function processBatch(gmail, users, startIndex, batchSize, sentEmails, dry
     }
 
     try {
-      // Generate bonus points
-      const bonusPoints = generateBonusPoints();
+      // Get bonus points
+      const bonusPoints = getBonusPoints();
 
       // Send email
       const result = await sendEmail(gmail, user, bonusPoints, dryRun);
@@ -290,7 +309,7 @@ async function processBatch(gmail, users, startIndex, batchSize, sentEmails, dry
       failCount++;
       console.error(`❌ Failed to send to ${user.email}:`, error.message);
       await saveFailedEmail(user, error);
-      
+
       // Continue with next user
       continue;
     }
@@ -362,7 +381,7 @@ async function runCampaign() {
     if (flags.dryRun) {
       console.log('\n🔍 DRY RUN - Preview of first 5 emails:');
       for (let i = 0; i < Math.min(5, users.length); i++) {
-        const bonusPoints = generateBonusPoints();
+        const bonusPoints = getBonusPoints();
         console.log(`   ${i + 1}. ${users[i].email} - ${bonusPoints} points`);
       }
       console.log('');

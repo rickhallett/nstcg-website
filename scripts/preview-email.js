@@ -26,25 +26,25 @@ const sampleUsers = [
     email: 'john.doe@example.com',
     firstName: 'John',
     lastName: 'Doe',
-    bonusPoints: 10
+    bonusPoints: 75
   },
   {
     email: 'jane.smith@example.com',
     firstName: 'Jane',
     lastName: 'Smith',
-    bonusPoints: 25
+    bonusPoints: 75
   },
   {
     email: 'test.user@example.com',
     firstName: 'Test',
     lastName: 'User',
-    bonusPoints: 40
+    bonusPoints: 75
   },
   {
     email: 'no.name@example.com',
     firstName: '',
     lastName: '',
-    bonusPoints: 50
+    bonusPoints: 75
   }
 ];
 
@@ -60,18 +60,18 @@ async function generatePreview(userData, options = {}) {
   const { email, firstName, lastName, bonusPoints } = userData;
   const encodedEmail = encodeURIComponent(email);
   const activationUrl = generateActivationUrl(email, bonusPoints);
-  
+
   // Compile email template
   const { html, errors } = compileEmail('activate', {
     user_email: encodedEmail,
     bonus: bonusPoints.toString()
   });
-  
+
   if (errors.length > 0) {
     console.error(chalk.red('Template errors:'), errors);
     return null;
   }
-  
+
   // Add preview wrapper for better display
   const previewHtml = `
 <!DOCTYPE html>
@@ -146,7 +146,7 @@ async function generatePreview(userData, options = {}) {
   ${options.mobile ? '</div>' : ''}
 </body>
 </html>`;
-  
+
   return previewHtml;
 }
 
@@ -160,10 +160,10 @@ async function savePreview(html, filename) {
 // Generate all previews
 async function generateAllPreviews() {
   console.log(chalk.bold.blue('📧 Generating Email Previews...\n'));
-  
+
   const fs = await import('fs/promises');
   const path = await import('path');
-  
+
   // Create preview directory
   const previewDir = 'email-previews';
   try {
@@ -171,9 +171,9 @@ async function generateAllPreviews() {
   } catch (error) {
     // Directory might already exist
   }
-  
+
   const generatedFiles = [];
-  
+
   // Generate desktop previews
   console.log(chalk.bold('💻 Desktop Previews:'));
   for (const user of sampleUsers) {
@@ -185,7 +185,7 @@ async function generateAllPreviews() {
       console.log(chalk.green('✓'), `${user.firstName || user.email} (${user.bonusPoints} points)`);
     }
   }
-  
+
   // Generate mobile previews
   console.log(chalk.bold('\n📱 Mobile Previews:'));
   for (const user of sampleUsers.slice(0, 2)) { // Just first two for mobile
@@ -197,7 +197,7 @@ async function generateAllPreviews() {
       console.log(chalk.green('✓'), `${user.firstName} mobile (${user.bonusPoints} points)`);
     }
   }
-  
+
   // Generate index page
   const indexHtml = `
 <!DOCTYPE html>
@@ -288,18 +288,18 @@ async function generateAllPreviews() {
   </div>
 </body>
 </html>`;
-  
+
   const indexPath = path.join(previewDir, 'index.html');
   await savePreview(indexHtml, indexPath);
   generatedFiles.push(indexPath);
-  
+
   return { indexPath, generatedFiles };
 }
 
 // Preview specific user from database
 async function previewRealUser(email) {
   console.log(chalk.bold(`\n👤 Fetching user: ${email}`));
-  
+
   try {
     const response = await notion.databases.query({
       database_id: process.env.NOTION_DATABASE_ID,
@@ -309,35 +309,35 @@ async function previewRealUser(email) {
       },
       page_size: 1
     });
-    
+
     if (response.results.length === 0) {
       console.error(chalk.red('User not found!'));
       return;
     }
-    
+
     const user = response.results[0];
     const props = user.properties;
-    
+
     const userData = {
       email: props.Email?.email || email,
       firstName: props['First Name']?.rich_text?.[0]?.text?.content || '',
       lastName: props['Last Name']?.rich_text?.[0]?.text?.content || '',
-      bonusPoints: Math.floor(Math.random() * 41) + 10 // Random for preview
+      bonusPoints: 75 // Static points for all users
     };
-    
+
     console.log(chalk.green('✓ User found:'), userData.firstName || userData.email);
-    
+
     const html = await generatePreview(userData);
     if (html) {
       const filename = `preview-${userData.email.replace('@', '-at-')}.html`;
       await savePreview(html, filename);
       console.log(chalk.green('\n✓ Preview saved:'), filename);
-      
+
       if (!process.argv.includes('--no-open')) {
         await open(filename);
       }
     }
-    
+
   } catch (error) {
     console.error(chalk.red('Error fetching user:'), error.message);
   }
@@ -347,34 +347,34 @@ async function previewRealUser(email) {
 async function main() {
   console.log(chalk.bold.blue('🎨 Email Preview Generator'));
   console.log(chalk.gray('Generate preview emails for the campaign\n'));
-  
+
   // Check for specific email
   const emailArg = process.argv.find(arg => arg.includes('@'));
-  
+
   if (emailArg) {
     // Preview specific user
     await previewRealUser(emailArg);
   } else {
     // Generate all sample previews
     const { indexPath, generatedFiles } = await generateAllPreviews();
-    
+
     console.log(chalk.bold(`\n✅ Generated ${generatedFiles.length} preview files`));
     console.log(chalk.gray(`Preview directory: ./email-previews/`));
-    
+
     // Open index in browser unless --no-open flag
     if (!process.argv.includes('--no-open')) {
       console.log(chalk.yellow('\nOpening preview index in browser...'));
       await open(indexPath);
     }
   }
-  
+
   // Test different bonus point distributions
   if (process.argv.includes('--test-distribution')) {
     console.log(chalk.bold('\n🎲 Testing Bonus Point Distribution:'));
-    
+
     const testCount = 20;
     const points = [];
-    
+
     for (let i = 0; i < testCount; i++) {
       const random1 = Math.random();
       const random2 = Math.random();
@@ -383,7 +383,7 @@ async function main() {
       const value = Math.floor(10 + (average * 40));
       points.push(value);
     }
-    
+
     points.sort((a, b) => a - b);
     console.log(chalk.cyan(`Sample values (${testCount} samples):`), points.join(', '));
     console.log(chalk.cyan('Average:'), (points.reduce((a, b) => a + b) / testCount).toFixed(1));

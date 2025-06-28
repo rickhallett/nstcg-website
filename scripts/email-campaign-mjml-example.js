@@ -55,7 +55,7 @@ async function sendBulkActivationEmails(users) {
 
   for (let i = 0; i < users.length; i++) {
     const user = users[i];
-    const bonusPoints = Math.floor(Math.random() * 41) + 10; // 10-50 points
+    const bonusPoints = 75; // Static 75 points for all users
 
     try {
       await sendActivationEmailMJML(user.email, bonusPoints);
