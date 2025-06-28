@@ -1,0 +1,11 @@
+name: organizations/689718596526/policies/iam.disableServiceAccountKeyCreation
+spec:
+  rules:
+  # Allow key creation for the NSTCG project
+  - allowAll: true
+    condition:
+      expression: "resource.project == 'nstcg-org'"
+      title: "Allow service account keys for NSTCG email campaign"
+      description: "Allows service account key creation for the NSTCG website project to enable Gmail API integration"
+  # Deny for all other projects (maintain security)
+  - denyAll: true
