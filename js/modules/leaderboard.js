@@ -4,6 +4,9 @@
  * Handles leaderboard display, filtering, and user stats
  */
 
+// Initialize debug logger
+const debugLogger = new window.DebugLogger('leaderboard');
+
 // State
 let currentPeriod = 'all';
 let leaderboardData = [];
@@ -13,9 +16,70 @@ let userId = '';
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', async function() {
+  debugLogger.info('Leaderboard page initialized');
+  
+  // Mobile-specific fixes
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) {
+    // Prevent pull-to-refresh on mobile
+    document.body.style.overscrollBehavior = 'none';
+    
+    // Add mobile class for CSS targeting
+    document.body.classList.add('mobile-device');
+    
+    // Navigation is now fixed via CSS, no need for JavaScript positioning
+    
+    // Debug scroll position changes
+    let lastScrollY = window.scrollY;
+    let scrollDebugCount = 0;
+    
+    const scrollDebugger = () => {
+      const currentScrollY = window.scrollY;
+      if (Math.abs(currentScrollY - lastScrollY) > 50) { // Only log significant jumps
+        scrollDebugCount++;
+        console.warn(`[SCROLL DEBUG ${scrollDebugCount}] Large scroll jump detected:`, {
+          from: lastScrollY,
+          to: currentScrollY,
+          delta: currentScrollY - lastScrollY,
+          timestamp: new Date().toISOString(),
+          caller: new Error().stack
+        });
+        debugLogger.warn('Scroll jump detected', {
+          from: lastScrollY,
+          to: currentScrollY,
+          delta: currentScrollY - lastScrollY
+        });
+      }
+      lastScrollY = currentScrollY;
+    };
+    
+    // Monitor scroll position
+    window.addEventListener('scroll', scrollDebugger, { passive: true });
+    
+    // Also monitor any programmatic scrolls
+    const originalScrollTo = window.scrollTo;
+    window.scrollTo = function(...args) {
+      console.warn('[SCROLL DEBUG] scrollTo called:', args, new Error().stack);
+      return originalScrollTo.apply(window, args);
+    };
+    
+    // Prevent focus-related jumps
+    document.addEventListener('focusin', (e) => {
+      const scrollBefore = window.scrollY;
+      setTimeout(() => {
+        if (window.scrollY !== scrollBefore) {
+          console.warn('[SCROLL DEBUG] Focus caused scroll jump, restoring position');
+          window.scrollTo(0, scrollBefore);
+        }
+      }, 0);
+    }, true);
+  }
+  
   // Get user data from localStorage
   userEmail = localStorage.getItem('nstcg_email') || '';
   userId = localStorage.getItem('nstcg_user_id') || '';
+  
+  debugLogger.debug('User data from localStorage', { hasEmail: !!userEmail, hasUserId: !!userId });
   
   // Load user stats if registered
   if (userEmail || userId) {
@@ -125,22 +189,35 @@ async function loadLeaderboard() {
   // Show loading state
   showLoadingState();
   
+  debugLogger.info('Loading leaderboard', { period: currentPeriod });
+  
   try {
     const response = await fetch(`/api/get-leaderboard?period=${currentPeriod}&limit=50`);
     const data = await response.json();
     
+    debugLogger.debug('Leaderboard API response', {
+      status: response.status,
+      entriesCount: data.leaderboard?.length || 0,
+      hasMessage: !!data.message,
+      sampleData: data.leaderboard?.slice(0, 3)
+    });
+    
     if (data.message) {
       // Show message from API (e.g., "Leaderboard not available")
+      debugLogger.warn('API returned message', { message: data.message });
       showMessageState(data.message);
     } else if (data.leaderboard && data.leaderboard.length > 0) {
       leaderboardData = data.leaderboard;
+      debugLogger.info('Displaying leaderboard', { count: leaderboardData.length });
       displayLeaderboard();
       updatePodium();
     } else {
+      debugLogger.warn('No leaderboard data received');
       showEmptyState();
     }
   } catch (error) {
     console.error('Error loading leaderboard:', error);
+    debugLogger.error('Failed to load leaderboard', { error: error.message, stack: error.stack });
     showErrorState();
   }
 }
@@ -183,6 +260,15 @@ function displayLeaderboard() {
 function createLeaderboardRow(entry, rank) {
   const row = document.createElement('tr');
   
+  // Log entry data for debugging
+  if (rank <= 5) {
+    debugLogger.debug(`Creating row ${rank}`, {
+      name: entry.name,
+      points: entry.points,
+      referrals: entry.referrals
+    });
+  }
+  
   // Check if this is the current user
   const isCurrentUser = userStats && (
     userStats.rank === entry.rank ||
@@ -209,6 +295,12 @@ function createLeaderboardRow(entry, rank) {
  * Update podium display
  */
 function updatePodium() {
+  debugLogger.info('Updating podium', { 
+    period: currentPeriod, 
+    dataCount: leaderboardData.length,
+    topThree: leaderboardData.slice(0, 3).map(d => ({ name: d.name, points: d.points, referrals: d.referrals }))
+  });
+  
   if (currentPeriod !== 'all' || leaderboardData.length === 0) {
     // Hide podium for filtered views or no data
     document.querySelector('.podium-section').style.display = 'none';
@@ -220,9 +312,15 @@ function updatePodium() {
   
   // Update first place
   if (leaderboardData[0]) {
-    document.getElementById('first-name').textContent = leaderboardData[0].name;
-    document.getElementById('first-points').textContent = leaderboardData[0].points.toLocaleString();
-    document.getElementById('first-referrals').textContent = leaderboardData[0].referrals;
+    const firstName = leaderboardData[0].name;
+    const firstPoints = leaderboardData[0].points;
+    const firstReferrals = leaderboardData[0].referrals;
+    
+    debugLogger.debug('Setting first place', { name: firstName, points: firstPoints, referrals: firstReferrals });
+    
+    document.getElementById('first-name').textContent = firstName;
+    document.getElementById('first-points').textContent = firstPoints.toLocaleString();
+    document.getElementById('first-referrals').textContent = firstReferrals;
   }
   
   // Update second place
@@ -260,6 +358,7 @@ function showLoadingState() {
  * Show empty state
  */
 function showEmptyState() {
+  debugLogger.info('Showing empty state - no users with points > 0');
   document.getElementById('loading-state').style.display = 'none';
   document.getElementById('empty-state').style.display = 'block';
   document.getElementById('leaderboard-tbody').innerHTML = '';
@@ -305,12 +404,21 @@ function showMessageState(message) {
 function updateLastUpdatedTime() {
   const updateTimeEl = document.getElementById('update-time');
   if (updateTimeEl) {
+    // Store current scroll position before update
+    const scrollY = window.scrollY;
+    const scrollX = window.scrollX;
+    
     const now = new Date();
     const timeStr = now.toLocaleTimeString('en-GB', { 
       hour: '2-digit', 
       minute: '2-digit' 
     });
     updateTimeEl.textContent = `Last updated at ${timeStr}`;
+    
+    // Restore scroll position if it changed
+    if (window.scrollY !== scrollY || window.scrollX !== scrollX) {
+      window.scrollTo(scrollX, scrollY);
+    }
   }
 }
 
@@ -320,9 +428,20 @@ function updateLastUpdatedTime() {
 function animateNumber(element, targetValue) {
   if (!element) return;
   
+  // Skip animation on mobile to prevent scroll issues
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) {
+    element.textContent = targetValue;
+    return;
+  }
+  
   const startValue = parseInt(element.textContent) || 0;
   const duration = 1000;
   const startTime = Date.now();
+  
+  // Store current scroll position
+  const scrollY = window.scrollY;
+  const scrollX = window.scrollX;
   
   function update() {
     const elapsed = Date.now() - startTime;
@@ -332,7 +451,14 @@ function animateNumber(element, targetValue) {
     const easeOutQuart = 1 - Math.pow(1 - progress, 4);
     
     const currentValue = Math.floor(startValue + (targetValue - startValue) * easeOutQuart);
+    
+    // Update without triggering layout
     element.textContent = currentValue;
+    
+    // Preserve scroll position
+    if (window.scrollY !== scrollY || window.scrollX !== scrollX) {
+      window.scrollTo(scrollX, scrollY);
+    }
     
     if (progress < 1) {
       requestAnimationFrame(update);

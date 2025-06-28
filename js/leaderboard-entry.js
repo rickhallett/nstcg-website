@@ -7,6 +7,7 @@ import '../css/components/gamification.css'
 // Core utilities and configuration
 import { initializeFeatureFlags } from './utils/feature-flags.js'
 import './utils/include-nav.js'
+import './utils/debug-logger.js'
 
 // Referral utilities
 import './modules/referral-utils.js'
@@ -60,8 +61,13 @@ async function initializePreloading() {
     // Track current page view
     trackPageView('leaderboard');
     
-    // Set up activity tracking
-    ['click', 'scroll', 'mousemove', 'keypress'].forEach(event => {
+    // Set up activity tracking (skip scroll on mobile to prevent issues)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const events = isMobile 
+      ? ['click', 'mousemove', 'keypress'] // Exclude scroll on mobile
+      : ['click', 'scroll', 'mousemove', 'keypress'];
+    
+    events.forEach(event => {
       document.addEventListener(event, trackActivity, { passive: true });
     });
     

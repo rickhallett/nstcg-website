@@ -532,6 +532,9 @@
   border-radius: 15px;
   overflow: hidden;
   margin-top: 2rem;
+  /* Prevent mobile scroll issues */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .leaderboard-table {
@@ -744,5 +747,72 @@
   
   .stat-value {
     font-size: 1.5rem;
+  }
+}
+
+/* Mobile-specific fixes for scrolling issues */
+@media (max-width: 768px) {
+  /* Prevent scrolling issues on mobile */
+  .mobile-device .leaderboard-page {
+    /* Disable momentum scrolling that can cause jumps */
+    -webkit-overflow-scrolling: auto;
+  }
+  
+  .mobile-device .leaderboard-table-container {
+    /* Contain layout to prevent reflows */
+    contain: layout style;
+  }
+  
+  .mobile-device .stat-value,
+  .mobile-device .stat-number,
+  .mobile-device #update-time {
+    /* Prevent layout shifts during updates */
+    will-change: contents;
+    min-height: 1.5em;
+  }
+  
+  .mobile-device .podium-points span,
+  .mobile-device .podium-referrals span {
+    /* Reserve space for numbers */
+    display: inline-block;
+    min-width: 3ch;
+    text-align: center;
+  }
+  
+  /* Navigation is now fixed via CSS, no additional fixes needed */
+  
+  /* Disable hover effects that might trigger on touch */
+  .mobile-device .filter-btn:hover,
+  .mobile-device .share-cta-btn:hover,
+  .mobile-device tr:hover {
+    transform: none !important;
+  }
+  
+  /* Prevent touch scrolling issues */
+  .mobile-device {
+    touch-action: pan-y;
+  }
+  
+  .mobile-device .leaderboard-table-container {
+    /* Prevent horizontal scrolling */
+    overflow-x: hidden;
+    touch-action: pan-y;
+  }
+  
+  /* Ensure no elements can steal focus and cause jumps */
+  .mobile-device .filter-btn,
+  .mobile-device .share-cta-btn {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Prevent iOS rubber band scrolling */
+  .mobile-device .leaderboard-page {
+    position: relative;
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
