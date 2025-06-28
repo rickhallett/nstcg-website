@@ -1,0 +1,82 @@
+{
+  "testUsers": {
+    "basic": {
+      "firstName": "TestUser",
+      "lastName": "Basic",
+      "email": "test-basic@example.com",
+      "visitorType": "local"
+    },
+    "referrer": {
+      "firstName": "TestReferrer",
+      "lastName": "User",
+      "email": "test-referrer@example.com",
+      "visitorType": "local",
+      "totalPoints": 100,
+      "referralCode": "TES1234ABCD"
+    },
+    "tourist": {
+      "firstName": "TestTourist",
+      "lastName": "User",
+      "email": "test-tourist@example.com",
+      "visitorType": "tourist"
+    },
+    "highScorer": {
+      "firstName": "TopPlayer",
+      "lastName": "User",
+      "email": "test-top@example.com",
+      "visitorType": "local",
+      "totalPoints": 500,
+      "directReferrals": 10
+    }
+  },
+  "socialMessages": {
+    "twitter": "Join {count}+ residents fighting to preserve North Swanage! We need your voice to stop destructive traffic schemes. Take action now:",
+    "facebook": "🚨 North Swanage needs YOU! Join {count}+ residents standing against harmful traffic proposals. Your voice matters in protecting our community. Act now:",
+    "whatsapp": "Hi! I've just joined {count}+ North Swanage residents fighting against destructive traffic schemes. Our community needs your voice too. Please take 2 minutes to help:",
+    "email": {
+      "subject": "Help protect North Swanage from traffic chaos",
+      "body": "Dear Friend,\n\nI'm writing to ask for your help in protecting North Swanage from poorly conceived traffic schemes.\n\nOver {count} residents have already joined the campaign. Will you add your voice?\n\nIt only takes 2 minutes:"
+    }
+  },
+  "testComments": [
+    "This traffic scheme will negatively impact our community",
+    "We need better consultation with residents",
+    "The proposed changes don't address the real issues",
+    "Please listen to local voices and concerns",
+    "Test comment for E2E testing purposes"
+  ],
+  "invalidEmails": [
+    "notanemail",
+    "missing@",
+    "@example.com",
+    "test@",
+    "test..double@example.com",
+    "test @example.com",
+    "test@example .com"
+  ],
+  "specialCharacterNames": [
+    {
+      "firstName": "O'Connor",
+      "lastName": "Test"
+    },
+    {
+      "firstName": "José",
+      "lastName": "García"
+    },
+    {
+      "firstName": "Anne-Marie",
+      "lastName": "Smith"
+    },
+    {
+      "firstName": "Test",
+      "lastName": "Name-With-Dash"
+    },
+    {
+      "firstName": "Test",
+      "lastName": "Name.With.Dots"
+    }
+  ],
+  "bonusPointValues": [
+    75
+  ]
+}

@@ -4,15 +4,15 @@
  * Functions to generate test data for E2E tests
  */
 
-import { v4 as uuidv4 } from 'https://deno.land/std@0.119.0/uuid/mod.ts';
-import { TEST_PREFIXES, EMAIL_BONUS_MIN, EMAIL_BONUS_MAX } from '../config/test-constants.js';
+import { v4 as uuidv4 } from 'uuid';
+import { TEST_PREFIXES, POINTS } from '../config/test-constants.js';
 
 /**
  * Generate unique test user data
  */
 export function generateTestUser(overrides = {}) {
   const id = generateShortId();
-  
+
   return {
     firstName: `${TEST_PREFIXES.FIRST_NAME}${id}`,
     lastName: TEST_PREFIXES.LAST_NAME,
@@ -35,13 +35,13 @@ export function generateTestUsers(count, overrides = {}) {
 export function generateReferralCode(firstName = 'TEST') {
   // Take first 3 letters of first name
   const prefix = firstName.substring(0, 3).toUpperCase();
-  
+
   // Generate timestamp part (4 chars)
   const timestamp = Date.now().toString(36).substring(0, 4).toUpperCase();
-  
+
   // Generate random part (4 chars)
   const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-  
+
   return `${prefix}${timestamp}${random}`;
 }
 
@@ -74,7 +74,7 @@ export function generateShareMessage(platform, participantCount = 500) {
       body: `Dear Friend,\n\nI'm writing to ask for your help in protecting North Swanage from poorly conceived traffic schemes.\n\nOver ${participantCount} residents have already joined the campaign. Will you add your voice?\n\nIt only takes 2 minutes:`
     }
   };
-  
+
   return messages[platform] || messages.twitter;
 }
 
@@ -94,17 +94,17 @@ export function generateBonusPoints() {
     { value: 45, weight: 1 },
     { value: 50, weight: 1 }
   ];
-  
+
   const totalWeight = weights.reduce((sum, item) => sum + item.weight, 0);
   let random = Math.random() * totalWeight;
-  
+
   for (const item of weights) {
     if (random < item.weight) {
       return item.value;
     }
     random -= item.weight;
   }
-  
+
   return 25; // Default fallback
 }
 
@@ -127,7 +127,7 @@ export function generateMockApiResponse(type, overrides = {}) {
       message: 'Successfully saved to database',
       ...overrides
     },
-    
+
     trackShare: {
       success: true,
       points_awarded: 0,
@@ -138,7 +138,7 @@ export function generateMockApiResponse(type, overrides = {}) {
       daily_shares_remaining: 4,
       ...overrides
     },
-    
+
     getUserStats: {
       stats: {
         email: 'test@example.com',
@@ -159,7 +159,7 @@ export function generateMockApiResponse(type, overrides = {}) {
         ...overrides
       }
     },
-    
+
     getLeaderboard: {
       leaderboard: [
         {
@@ -188,20 +188,20 @@ export function generateMockApiResponse(type, overrides = {}) {
       last_updated: new Date().toISOString(),
       ...overrides
     },
-    
+
     activateUser: {
       success: true,
       message: 'Account activated successfully',
       user: {
         email: 'test@example.com',
         referralCode: generateReferralCode(),
-        bonusPoints: 25,
+        bonusPoints: 75,
         totalPoints: 25
       },
       ...overrides
     }
   };
-  
+
   return responses[type] || { success: true, ...overrides };
 }
 
@@ -216,7 +216,7 @@ export function generateTestComment() {
     'Please listen to local voices',
     'Test comment for E2E testing'
   ];
-  
+
   return comments[Math.floor(Math.random() * comments.length)];
 }
 
@@ -225,7 +225,7 @@ export function generateTestComment() {
  */
 export async function createTestUserViaAPI(baseUrl, userData = {}) {
   const user = generateTestUser(userData);
-  
+
   const response = await fetch(`${baseUrl}/api/submit-form`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -238,16 +238,16 @@ export async function createTestUserViaAPI(baseUrl, userData = {}) {
       source: 'e2e-test'
     })
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to create test user: ${response.status}`);
   }
-  
+
   const result = await response.json();
-  
+
   // Wait a bit for Notion sync
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
+
   return {
     ...user,
     ...result,
