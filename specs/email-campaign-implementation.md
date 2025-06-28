@@ -23,7 +23,7 @@ This specification outlines the implementation of an email campaign system to re
 ### Key Objectives
 - [ ] Re-engage all existing registered users
 - [ ] Enable cross-device account access
-- [ ] Incentivize participation with 10-50 bonus points
+- [ ] Incentivize participation with 75 static bonus points
 - [ ] Achieve survey participation before deadline
 - [ ] Maintain >99% delivery rate with proper authentication
 
@@ -120,7 +120,7 @@ Refs: #email-campaign
   import { compileActivationEmail } from './compile-email.js';
   ```
 - [ ] Implement user fetching from Leads database
-- [ ] Add bonus points generation (10-50 range, weighted to middle)
+- [ ] Add bonus points generation (75 static value)
 - [ ] Implement email sending with rate limiting
 - [ ] Add progress tracking and logging
 
@@ -141,7 +141,7 @@ Refs: #email-campaign
 ### Test Criteria
 - [ ] Dry run completes without errors
 - [ ] All users fetched from Notion successfully
-- [ ] Bonus points generated correctly (10-50 range)
+- [ ] Bonus points generated correctly (75 static value)
 - [ ] Rate limiting maintains 1 email/second
 - [ ] Failed emails logged for retry
 - [ ] Resume works from interruption point
@@ -244,7 +244,7 @@ Refs: #email-campaign
   ```javascript
   const { email, visitor_type, bonusPoints } = req.body;
   ```
-- [ ] Validate bonus points (10-50 range)
+- [ ] Validate bonus points (75 static value)
 - [ ] Default to server-side generation if missing
 - [ ] Pass bonus points to gamification update
 - [ ] Return bonus points in response

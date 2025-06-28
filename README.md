@@ -1,155 +1,328 @@
 # NSTCG Website
 
-North Swanage Traffic Consultation Group community action website.
+> North Swanage Traffic Consultation Group - Community Action Platform
 
-## Development Setup
+A modern web application designed to mobilize community engagement for traffic safety initiatives in North Swanage, Dorset. Built with performance, security, and user experience in mind.
 
-This project uses Vite for the frontend build system and Vercel for serverless API functions.
+## 🚀 Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/nstcg-website.git
+cd nstcg-website
+
+# Install dependencies
+npm install
+
+# Copy environment variables
+cp .env.example .env.local
+
+# Run development servers (frontend + API)
+npm run both
+
+# Open http://localhost:5173 in your browser
+```
+
+## 📋 Features
+
+- **Community Registration**: Secure participant sign-up with duplicate detection
+- **Real-time Updates**: Live countdown timers and activity feeds
+- **Gamification System**: Points, leaderboards, and referral tracking
+- **Donation Processing**: Stripe integration for campaign funding
+- **Dynamic Configuration**: Notion-based feature flags
+- **Email Campaigns**: Automated activation and engagement emails
+- **Social Sharing**: Integrated sharing with referral attribution
+- **Mobile Responsive**: Optimized for all device sizes
+
+## 🛠️ Technology Stack
+
+- **Frontend**: Vite, Vanilla JavaScript (ES6+), Modular CSS
+- **Backend**: Vercel Serverless Functions (Node.js)
+- **Database**: Notion API
+- **Payments**: Stripe
+- **Security**: Google reCAPTCHA v3
+- **Build Tools**: Vite, Vercel
+
+## 📁 Project Structure
+
+```
+nstcg-website/
+├── api/                    # Vercel serverless functions
+├── components/            # Reusable HTML components
+├── config/                # Configuration files
+├── css/                   # Modular CSS architecture
+├── data/                  # Static JSON data
+├── docs/                  # Documentation
+├── email/                 # Email templates (MJML)
+├── js/                    # JavaScript modules
+│   ├── components/       # UI components
+│   ├── core/             # Core system modules
+│   ├── modules/          # Feature modules
+│   └── utils/            # Utility functions
+├── scripts/               # Build and utility scripts
+├── specs/                 # Feature specifications
+└── *.html                # HTML pages
+```
+
+## 🔧 Development
 
 ### Prerequisites
 
-- Node.js v18 or higher
+- Node.js v22.x or higher
 - npm or yarn
+- Notion account with API access
+- Stripe account (for payment features)
+- Google reCAPTCHA account
 
-### Installation
+### Environment Variables
+
+Create a `.env.local` file with the following variables:
 
 ```bash
-npm install
+# Notion Integration
+NOTION_TOKEN=your_notion_integration_token
+NOTION_DATABASE_ID=main_participant_database_id
+NOTION_GAMIFICATION_DB_ID=gamification_database_id
+NOTION_FEATURE_FLAGS_DB_ID=feature_flags_database_id
+NOTION_DONATIONS_DB_ID=donations_database_id
+
+# Stripe Configuration
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_ID=price_...
+
+# Google reCAPTCHA
+RECAPTCHA_SECRET_KEY=your_recaptcha_secret_key
+
+# Site Configuration
+SITE_URL=http://localhost:5173  # https://nstcg.org in production
+
+# Feature Flags (optional, can use Notion instead)
+FEATURE_DONATIONS=true
+FEATURE_LEADERBOARD=true
+FEATURE_REFERRAL=true
 ```
 
-### Running in Development
-
-To start both the Vite dev server and Vercel API server simultaneously:
+### Running Development Servers
 
 ```bash
-npm run dev
-# or
-npm start
-```
+# Run both Vite and Vercel dev servers concurrently
+npm run both
 
-This will start:
-- **Vite Dev Server** on port 3002 (for frontend assets)
-- **Vercel Dev Server** on port 3000 (for API endpoints)
-
-Open http://localhost:3002 in your browser.
-
-> **Important**: Both servers must be running for the application to work properly. The Vite server proxies API calls to the Vercel server.
-
-#### Running Servers Individually
-
-If you prefer to run the servers in separate terminals:
-
-```bash
-# Terminal 1 - Vite only
-npm run dev:vite
-
-# Terminal 2 - Vercel API only
-npm run dev:vercel
+# Or run them separately:
+npm run dev:vite    # Frontend on http://localhost:5173
+npm run dev:vercel  # API on http://localhost:3000
 ```
 
 ### Building for Production
 
 ```bash
+# Build the frontend assets
 npm run build
+
+# Preview production build locally
+npm run preview
 ```
 
-## Environment Variables Required
+## 🚀 Deployment
 
-Before deploying, you need to set up the following environment variables in Vercel:
+### Deploy to Vercel
 
-1. `NOTION_TOKEN` - Your Notion integration token
-2. `NOTION_DATABASE_ID` - The ID of your main database
-3. `NOTION_GAMIFICATION_DB_ID` - The ID of your gamification database
-4. `NOTION_FEATURE_FLAGS_DB_ID` - The ID of your feature flags database
-5. `NOTION_DONATIONS_DB_ID` - The ID of your donations database
-6. `STRIPE_SECRET_KEY` - Your Stripe secret key
-7. `STRIPE_WEBHOOK_SECRET` - Your Stripe webhook secret
-8. `STRIPE_PRICE_ID` - Your Stripe price ID
-9. `SITE_URL` - Your site URL (e.g., https://nstcg.org)
+1. **Install Vercel CLI**:
+   ```bash
+   npm i -g vercel
+   ```
 
-## Setup Instructions
+2. **Deploy**:
+   ```bash
+   vercel
+   
+   # For production deployment
+   vercel --prod
+   ```
+
+3. **Set Environment Variables**:
+   - Go to your Vercel dashboard
+   - Navigate to Project Settings → Environment Variables
+   - Add all required environment variables
+
+### GitHub Integration
+
+1. Push repository to GitHub
+2. Import project in Vercel dashboard
+3. Configure environment variables
+4. Deploy automatically on push to main branch
+
+## 📊 Database Setup
 
 ### 1. Create Notion Integration
-1. Go to https://www.notion.so/my-integrations
+
+1. Visit [Notion Integrations](https://www.notion.so/my-integrations)
 2. Click "New integration"
-3. Give it a name (e.g., "Traffic Safety Form")
-4. Select the workspace
-5. Copy the Internal Integration Token
+3. Configure with these capabilities:
+   - Read content
+   - Update content
+   - Insert content
+4. Copy the integration token
 
-### 2. Create Notion Database
-1. Create a new database in Notion with these properties:
-   - Name (Title property)
-   - Email (Email property)
-   - Source (Text property)
-   - Timestamp (Date property)
-   <!-- - Status (Select property with options: New, Contacted, Completed) -->
+### 2. Create Required Databases
 
-2. Share the database with your integration:
-   - Click "..." menu on the database
-   - Click "Add connections"
-   - Search for your integration name
-   - Click to add
+Run the setup scripts:
 
-3. Get the database ID:
-   - Open the database as a full page
-   - Copy the ID from the URL: `https://www.notion.so/[workspace]/[database-id]?v=...`
-
-### 3. Deploy to Vercel
-
-#### Option A: Using Vercel CLI
 ```bash
-vercel
+# Create main participant database
+node scripts/create-database.js
 
-# Set environment variables
-vercel env add NOTION_TOKEN
-vercel env add NOTION_DATABASE_ID
+# Create gamification database
+node scripts/create-gamification-database.js
+
+# Create feature flags database
+node scripts/create-feature-flags-database.js
 ```
 
-#### Option B: Using GitHub
-1. Push this repository to GitHub
-2. Connect your GitHub repo to Vercel
-3. Set the root directory to `nstcg-website`
-4. Add environment variables in Vercel dashboard
+Or create manually with these properties:
 
-### 4. Add Honeypot Field (Optional)
-To prevent bot submissions, add this hidden field to both forms in index.html:
-```html
-<input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
-```
+**Main Database**:
+- Name (Title)
+- Email (Email)
+- First Name (Text)
+- Last Name (Text)
+- Source (Text)
+- Timestamp (Date)
+- User ID (Text)
+- Referrer (Text)
+- Comments (Text)
+- Visitor Type (Select: Local/Tourist)
 
-## API Endpoint
+**Gamification Database**:
+- Email (Email)
+- Name (Title)
+- Display Name (Text)
+- User ID (Text)
+- Referral Code (Text)
+- Total Points (Number)
+- [Additional point tracking fields...]
 
-Once deployed, your form submission endpoint will be:
-```
-https://your-domain.vercel.app/api/submit-form
-```
+### 3. Share Databases with Integration
 
-## Testing
+For each database:
+1. Click "..." menu → "Add connections"
+2. Search for your integration name
+3. Add the connection
 
-Test the form submission with:
+## 🔐 Security Features
+
+- **Rate Limiting**: 10 requests/minute per IP for form submissions
+- **Input Validation**: Client and server-side validation
+- **CSRF Protection**: Token-based protection
+- **Content Security Policy**: Strict CSP headers
+- **Bot Protection**: Google reCAPTCHA v3 + honeypot fields
+- **Data Privacy**: Email masking, opt-in features
+
+## 📝 API Documentation
+
+### Core Endpoints
+
+**POST /api/submit-form**
+- Handles participant registration
+- Rate limited
+- Returns: `{ success: true, id: "..." }`
+
+**GET /api/get-count**
+- Returns participant count
+- Cached for 1 minute
+- Returns: `{ count: 250 }`
+
+**GET /api/get-leaderboard**
+- Returns gamification leaderboard
+- Returns: `{ leaderboard: [...], stats: {...} }`
+
+**POST /api/create-checkout-session**
+- Creates Stripe checkout session
+- Returns: `{ url: "https://checkout.stripe.com/..." }`
+
+For complete API documentation, see `architecture.md`.
+
+## 🧪 Testing
+
+### Local Testing
+
 ```bash
-curl -X POST https://your-domain.vercel.app/api/submit-form \
+# Test form submission
+curl -X POST http://localhost:3000/api/submit-form \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Test User",
+    "name": "John Doe",
+    "firstName": "John",
+    "lastName": "Doe",
     "email": "test@example.com",
-    "source": "test",
-    "timestamp": "2025-01-01T00:00:00Z"
+    "visitorType": "local"
   }'
+
+# Test participant count
+curl http://localhost:3000/api/get-count
+
+# Test rate limiting (run 11 times quickly)
+for i in {1..11}; do
+  curl -X POST http://localhost:3000/api/submit-form \
+    -H "Content-Type: application/json" \
+    -d '{"name": "Test", "email": "test@example.com"}'
+done
 ```
 
-## Rate Limiting
+### Production Testing
 
-The API includes basic in-memory rate limiting:
-- 5 requests per minute per IP address
-- For production, consider using Redis or Vercel KV
+Replace `localhost:3000` with your production domain.
 
-## Security Features
+## 🎮 Feature Flags
 
-- Input validation
-- Email format verification
-- Rate limiting
-- Honeypot field support
-- CORS headers
-- Security headers in vercel.json
-- Partial email logging for privacy
+Features can be toggled via Notion database or environment variables:
+
+1. **Via Notion** (recommended):
+   - Open Feature Flags database
+   - Change value to `true`, `false`, or `unset`
+   - Changes take effect within 5 minutes
+
+2. **Via Environment Variables**:
+   - Set `FEATURE_*` variables
+   - Redeploy to apply changes
+
+## 📧 Email Campaigns
+
+### Compile Email Templates
+
+```bash
+# Compile MJML to HTML
+npm run compile-email
+
+# Send test email
+node scripts/test-send-email.js
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+- **Documentation**: See `architecture.md` for detailed technical documentation
+- **Issues**: [GitHub Issues](https://github.com/your-username/nstcg-website/issues)
+- **Contact**: support@nstcg.org
+
+## 🙏 Acknowledgments
+
+- North Swanage community members
+- Swanage Town Council
+- All contributors and supporters
+
+---
+
+Built with ❤️ for the North Swanage community

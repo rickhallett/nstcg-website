@@ -25,7 +25,7 @@ These issues result in:
 ### Primary Goals
 1. Re-engage all existing users via personalized email campaign
 2. Enable cross-device account access through email authentication
-3. Incentivize return visits with random bonus points (10-50)
+3. Incentivize return visits with static bonus points (75)
 4. Restore full session state including referral codes and user data
 5. Drive survey participation before deadline
 
@@ -33,7 +33,7 @@ These issues result in:
 - Email open rate >30%
 - Click-through rate >15%
 - Activation completion rate >50% of clicks
-- Average bonus points claimed: 30
+- Average bonus points claimed: 75
 - Referral shares post-activation >20%
 
 ## User Stories
@@ -69,7 +69,7 @@ These issues result in:
 - Fetch all users from Leads Notion database
 - Generate personalized email content
 - Calculate time remaining until survey deadline
-- Assign random bonus points (10-50)
+- Assign static bonus points (75)
 - Send via Gmail API using ADC authentication
 - Rate limit to 1 email per second
 - Track sending status and errors
@@ -121,7 +121,7 @@ if (userEmail) {
 {
   email: string,
   visitorType: 'local' | 'tourist',
-  bonusPoints: number (10-50)
+  bonusPoints: number (75 - static)
 }
 
 // Response
@@ -198,7 +198,7 @@ localStorage.setItem('nstcg_comment', userData.comment);
 ```
 
 #### Points Allocation
-- Random bonus: 10-50 points
+- Static bonus: 75 points
 - Weighted towards middle values
 - One-time bonus per activation
 - Added to total points immediately

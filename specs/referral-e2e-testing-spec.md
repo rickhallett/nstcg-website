@@ -300,7 +300,7 @@ describe('Email Activation', () => {
   test('User can activate account via email link', async () => {
     // Simulate email activation URL
     const testEmail = 'test@example.com';
-    const bonusPoints = 25;
+    const bonusPoints = 75;
     const activationUrl = `${baseUrl}?user_email=${encodeURIComponent(testEmail)}&bonus=${bonusPoints}`;
     
     // Navigate to activation URL

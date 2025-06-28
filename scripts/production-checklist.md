@@ -22,7 +22,7 @@
 - [ ] `activate-user` API endpoint tested
 - [ ] Email template renders correctly
 - [ ] Activation URLs generate properly
-- [ ] Bonus points validation working (10-50 range)
+- [ ] Bonus points validation working (75 static value)
 
 ### 3. Database Verification ✓
 - [ ] Notion Leads database accessible
