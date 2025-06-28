@@ -1,0 +1,162 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps ${{ matrix.browser }}
+    
+    - name: Start development servers
+      run: |
+        npm run both &
+        npx wait-on http://localhost:5173 -t 60000
+      env:
+        NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        NOTION_DATABASE_ID: ${{ secrets.NOTION_TEST_DATABASE_ID }}
+        NOTION_GAMIFICATION_DB_ID: ${{ secrets.NOTION_TEST_GAMIFICATION_DB_ID }}
+    
+    - name: Run E2E tests
+      run: npm run test:e2e -- --project=${{ matrix.browser }}
+      env:
+        CI: true
+        TEST_URL: http://localhost:5173
+        NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        NOTION_DATABASE_ID: ${{ secrets.NOTION_TEST_DATABASE_ID }}
+        NOTION_GAMIFICATION_DB_ID: ${{ secrets.NOTION_TEST_GAMIFICATION_DB_ID }}
+        NOTION_FEATURE_FLAGS_DB_ID: ${{ secrets.NOTION_FEATURE_FLAGS_DB_ID }}
+        RECAPTCHA_SECRET_KEY: ${{ secrets.RECAPTCHA_SECRET_KEY }}
+    
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ matrix.browser }}
+        path: |
+          test-results/
+          screenshots/
+        retention-days: 30
+    
+    - name: Upload playwright report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-report-${{ matrix.browser }}
+        path: test-results/html/
+        retention-days: 30
+
+  mobile-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps chromium
+    
+    - name: Start development servers
+      run: |
+        npm run both &
+        npx wait-on http://localhost:5173 -t 60000
+      env:
+        NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        NOTION_DATABASE_ID: ${{ secrets.NOTION_TEST_DATABASE_ID }}
+        NOTION_GAMIFICATION_DB_ID: ${{ secrets.NOTION_TEST_GAMIFICATION_DB_ID }}
+    
+    - name: Run mobile E2E tests
+      run: npm run test:e2e:mobile
+      env:
+        CI: true
+        TEST_URL: http://localhost:5173
+        NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        NOTION_DATABASE_ID: ${{ secrets.NOTION_TEST_DATABASE_ID }}
+        NOTION_GAMIFICATION_DB_ID: ${{ secrets.NOTION_TEST_GAMIFICATION_DB_ID }}
+    
+    - name: Upload mobile test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: mobile-test-results
+        path: |
+          test-results/
+          screenshots/
+        retention-days: 30
+
+  test-summary:
+    needs: [test, mobile-tests]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: all-results
+    
+    - name: Generate summary
+      run: |
+        echo "## E2E Test Results Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Check for test results
+        if [ -d "all-results" ]; then
+          echo "### Browser Tests" >> $GITHUB_STEP_SUMMARY
+          for browser in chromium firefox webkit; do
+            if [ -d "all-results/test-results-$browser" ]; then
+              echo "- ✅ $browser tests completed" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- ❌ $browser tests failed or missing" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Mobile Tests" >> $GITHUB_STEP_SUMMARY
+          if [ -d "all-results/mobile-test-results" ]; then
+            echo "- ✅ Mobile tests completed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Mobile tests failed or missing" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📊 [View detailed reports in artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
