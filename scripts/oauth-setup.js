@@ -38,7 +38,7 @@ async function setupOAuth2() {
     const oauth2Client = new google.auth.OAuth2({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      redirectUri: 'urn:ietf:wg:oauth:2.0:oob' // For installed apps
+      redirectUri: process.env.GOOGLE_REDIRECT_URI
     });
 
     // Generate authorization URL

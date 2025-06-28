@@ -74,7 +74,7 @@ async function initializeServices() {
     const auth = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      'urn:ietf:wg:oauth:2.0:oob' // For installed apps
+      process.env.GOOGLE_REDIRECT_URI
     );
 
     // Set the saved tokens (including refresh token)
