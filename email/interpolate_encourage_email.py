@@ -95,75 +95,34 @@ class EmailLinkInterpolator:
         # Start with the template
         content = self.template
         
-        # Replace referral code placeholders
+        # Replace all template variables
         content = content.replace('{{user_referral_code}}', referral_code)
         
-        # Replace the base URL in the referral link section
-        referral_url = self.generate_share_url(referral_code)
-        content = content.replace('https://nstcg.org/survey?ref={{user_referral_code}}', referral_url)
+        # Calculate dynamic values
+        response_count = user_data.get('response_count', 555)
+        target_count = user_data.get('target_count', 1000)
+        needed_count = target_count - response_count
+        progress_percentage = (response_count / target_count * 100) if target_count > 0 else 0
         
-        # Update share button links
-        # WhatsApp button (line ~336)
-        whatsapp_pattern = r'href="https://wa\.me/\?text=[^"]*"'
-        content = re.sub(whatsapp_pattern, f'href="{share_urls["whatsapp"]}"', content, count=1)
+        # Replace numeric placeholders
+        content = content.replace('{{response_count}}', str(response_count))
+        content = content.replace('{{target_count}}', str(target_count))
+        content = content.replace('{{needed_count}}', str(needed_count))
+        content = content.replace('{{progress_percentage}}', f"{progress_percentage:.1f}")
         
-        # SMS button (line ~338)
-        sms_pattern = r'href="sms:\?body=[^"]*"'
-        content = re.sub(sms_pattern, f'href="{share_urls["sms"]}"', content, count=1)
+        # Replace share text encoded placeholder
+        share_text_encoded = urllib.parse.quote(share_text if share_text else 
+                                               "The closing of Shore Road in Swanage will have impacts on traffic, tourists and residents for years to come. The survey closes midnight tonight!", 
+                                               safe='')
+        content = content.replace('{{share_text_encoded}}', share_text_encoded)
         
-        # Email button (line ~340)
-        email_pattern = r'href="mailto:\?subject=[^&]*&body=[^"]*"'
-        content = re.sub(email_pattern, f'href="{share_urls["email"]}"', content, count=1)
+        # For MJML-compiled HTML, the share URLs are already in the template with placeholders
+        # We just need to ensure all placeholders are replaced
         
-        # Social media icons
-        # Facebook (line ~348)
-        fb_pattern = r'href="https://www\.facebook\.com/sharer/sharer\.php\?u=[^"]*"'
-        content = re.sub(fb_pattern, f'href="{share_urls["facebook"]}"', content, count=1)
-        
-        # Twitter/X (line ~350)
-        twitter_pattern = r'href="https://twitter\.com/intent/tweet\?[^"]*"'
-        content = re.sub(twitter_pattern, f'href="{share_urls["twitter"]}"', content, count=1)
-        
-        # WhatsApp icon (line ~352)
-        wa_icon_pattern = r'href="https://wa\.me/\?text=[^"]*"'
-        content = re.sub(wa_icon_pattern, f'href="{share_urls["whatsapp"]}"', content, count=2)
-        
-        # LinkedIn (line ~354)
-        linkedin_pattern = r'href="https://www\.linkedin\.com/sharing/share-offsite/\?url=[^"]*"'
-        content = re.sub(linkedin_pattern, f'href="{share_urls["linkedin"]}"', content, count=1)
-        
-        # Optional: Update dynamic content if provided
-        if 'response_count' in user_data:
-            count = user_data['response_count']
-            target = user_data.get('target_count', 1000)
-            needed = target - count
-            percentage = (count / target * 100) if target > 0 else 0
-            
-            # Update status numbers
-            content = re.sub(
-                r'<div class="status-numbers">.*?</div>',
-                f'<div class="status-numbers">{count} responses ✓ | Target: {target:,} | Needed: {needed} more</div>',
-                content,
-                flags=re.DOTALL
-            )
-            
-            # Update progress bar
-            content = re.sub(
-                r'width: \d+\.?\d*%',
-                f'width: {percentage:.1f}%',
-                content,
-                count=1
-            )
-            
-            # Update percentage text
-            content = re.sub(
-                r'\d+\.?\d*% to victory',
-                f'{percentage:.1f}% to victory',
-                content
-            )
-        
+        # Optional: Update hours remaining if provided
         if 'hours_remaining' in user_data:
             hours = user_data['hours_remaining']
+            # Update any remaining time references in the compiled HTML
             content = re.sub(
                 r'Less than \d+ hours remaining!',
                 f'Less than {hours} hours remaining!',

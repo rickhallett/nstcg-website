@@ -22,7 +22,10 @@ const LOG_LEVELS = {
 class Logger {
   constructor(endpoint) {
     this.endpoint = endpoint;
-    this.logsDir = path.join(__dirname, '../../logs/api');
+    // Use /tmp directory in Vercel serverless environment
+    this.logsDir = process.env.VERCEL 
+      ? `/tmp/logs/api`
+      : path.join(__dirname, '../../logs/api');
     
     // Ensure logs directory exists
     this.ensureLogsDirectory();
@@ -34,7 +37,12 @@ class Logger {
         fs.mkdirSync(this.logsDir, { recursive: true });
       }
     } catch (error) {
-      console.error('Failed to create logs directory:', error);
+      // In serverless, directory creation might fail - that's ok
+      if (process.env.VERCEL) {
+        this.logsDir = '/tmp'; // Fallback to /tmp root
+      } else {
+        console.error('Failed to create logs directory:', error);
+      }
     }
   }
 
@@ -62,7 +70,16 @@ class Logger {
       const logEntry = this.formatLogEntry(level, message, data);
       
       // Append to log file
-      fs.appendFileSync(logPath, logEntry, 'utf8');
+      try {
+        fs.appendFileSync(logPath, logEntry, 'utf8');
+      } catch (writeError) {
+        // If file write fails in serverless, just log to console
+        if (process.env.VERCEL) {
+          console.log('Log entry:', logEntry);
+        } else {
+          throw writeError;
+        }
+      }
       
       // Also log to console for development
       console.log(`[${level}] ${message}`, data || '');

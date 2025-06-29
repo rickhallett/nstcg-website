@@ -44,11 +44,18 @@ function checkRateLimit(ip) {
 
 function getLogFilePath() {
   const date = new Date().toISOString().split('T')[0];
-  const logsDir = path.join(__dirname, '../logs/frontend');
+  // Use /tmp directory in Vercel serverless environment
+  const logsDir = process.env.VERCEL ? '/tmp/logs/frontend' : path.join(__dirname, '../logs/frontend');
   
   // Ensure directory exists
-  if (!fs.existsSync(logsDir)) {
-    fs.mkdirSync(logsDir, { recursive: true });
+  try {
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+  } catch (error) {
+    console.error('Failed to create log directory:', error);
+    // If we can't create the directory, just use /tmp directly
+    return `/tmp/activation-flow-${date}.log`;
   }
   
   return path.join(logsDir, `activation-flow-${date}.log`);
@@ -103,7 +110,13 @@ export default async function handler(req, res) {
       }) + '\n';
     }).join('');
     
-    fs.appendFileSync(logPath, logEntries, 'utf8');
+    try {
+      fs.appendFileSync(logPath, logEntries, 'utf8');
+    } catch (writeError) {
+      console.error('Failed to write logs to file:', writeError);
+      // Log to console instead if file write fails
+      console.log('Debug logs:', logEntries);
+    }
     
     res.status(200).json({
       success: true,
