@@ -8,6 +8,10 @@
  * 3. Default values
  */
 
+// Cache version - increment this to force cache clear on all users
+const FEATURE_FLAGS_CACHE_VERSION = '2.0.0'; // Increment when gamification removed
+const VERSION_KEY = 'nstcg_feature_flags_version';
+
 // Default feature configuration (synchronized with backend)
 const defaultFeatures = {
   donations: {
@@ -31,10 +35,10 @@ const defaultFeatures = {
   },
   
   referralScheme: {
-    enabled: false,
+    enabled: true,
     showShareButtons: true,
-    trackReferrals: false,
-    showReferralBanner: false,
+    trackReferrals: true,
+    showReferralBanner: true,
     awardReferralPoints: false
   },
   
@@ -48,6 +52,50 @@ const defaultFeatures = {
 // Store for runtime features
 let features = { ...defaultFeatures };
 let featuresLoaded = false;
+
+/**
+ * Check and clear outdated cache
+ * This ensures users get fresh feature flags when we update the system
+ */
+function checkAndClearOutdatedCache() {
+  try {
+    const currentVersion = localStorage.getItem(VERSION_KEY);
+    
+    if (currentVersion !== FEATURE_FLAGS_CACHE_VERSION) {
+      console.log('Feature flags cache version mismatch, clearing cache...');
+      
+      // Clear all feature flag related items
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (
+          key.startsWith('nstcg_feature_') || 
+          key === 'nstcg_feature_flags' ||
+          key.startsWith('nstcg_leaderboard') ||
+          key.startsWith('nstcg_gamification') ||
+          key.includes('_points') ||
+          key.includes('_rank') ||
+          key.includes('leaderboard') ||
+          key === 'featureFlags' // Old global cache
+        )) {
+          keysToRemove.push(key);
+        }
+      }
+      
+      // Remove all identified keys
+      keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+        console.log(`Removed outdated cache: ${key}`);
+      });
+      
+      // Set the new version
+      localStorage.setItem(VERSION_KEY, FEATURE_FLAGS_CACHE_VERSION);
+      console.log(`Updated cache version to ${FEATURE_FLAGS_CACHE_VERSION}`);
+    }
+  } catch (error) {
+    console.warn('Error checking cache version:', error);
+  }
+}
 
 /**
  * Check if a feature is enabled
@@ -104,6 +152,9 @@ export async function loadFeatureFlags() {
   if (featuresLoaded) {
     return features;
   }
+
+  // Check and clear outdated cache before loading
+  checkAndClearOutdatedCache();
 
   const CACHE_KEY = 'nstcg_feature_flags';
   const CACHE_TTL = 5 * 60 * 1000; // 5 minutes (sync with backend)
