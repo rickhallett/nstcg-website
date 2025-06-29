@@ -303,94 +303,7 @@ export default async function handler(req, res) {
   }
 }
 
-/**
- * Process gamification registration
- * Creates user profile and awards points for registration and referrals
- * DEPRECATED: Gamification system removed - referral codes now stored in leads database
- */
-/*
-async function processGamificationRegistration({ email, firstName, lastName, userId, referrer, submissionId }) {
-  // Award 100 points if user was referred, 0 otherwise
-  const isReferred = referrer && referrer !== 'None';
-  const REGISTRATION_POINTS = isReferred ? 100 : 0;
-  const REFERRAL_POINTS = 25;
-  
-  try {
-    // Check if user already exists in gamification database
-    const existingUser = await checkExistingGamificationUser(email, userId);
-    if (existingUser) {
-      console.log('User already has gamification profile');
-      return;
-    }
-    
-    // Generate referral code for new user
-    const referralCode = generateUniqueReferralCode(firstName);
-    
-    // Create gamification profile
-    const newUserResponse = await fetch('https://api.notion.com/v1/pages', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Notion-Version': '2022-06-28'
-      },
-      body: JSON.stringify({
-        parent: { database_id: process.env.NOTION_GAMIFICATION_DB_ID },
-        properties: {
-          'Email': { email: email },
-          'Name': { title: [{ text: { content: firstName && lastName ? `${firstName} ${lastName}` : firstName || email.split('@')[0] } }] },
-          'Display Name': { rich_text: [{ text: { content: firstName || email.split('@')[0] } }] },
-          'User ID': { rich_text: [{ text: { content: userId } }] },
-          'Referral Code': { rich_text: [{ text: { content: referralCode } }] },
-          'Total Points': { number: REGISTRATION_POINTS },
-          'Registration Points': { number: REGISTRATION_POINTS },
-          'Share Points': { number: 0 },
-          'Referral Points': { number: 0 },
-          'Direct Referrals Count': { number: 0 },
-          'Indirect Referrals Count': { number: 0 },
-          'Twitter Shares': { number: 0 },
-          'Facebook Shares': { number: 0 },
-          'WhatsApp Shares': { number: 0 },
-          'Email Shares': { number: 0 },
-          'Last Activity Date': { date: { start: new Date().toISOString() } },
-          'Opted Into Leaderboard': { checkbox: true }
-        }
-      })
-    });
-    
-    if (!newUserResponse.ok) {
-      let errorData;
-      try {
-        errorData = await newUserResponse.json();
-      } catch (e) {
-        errorData = { message: 'Failed to parse error response' };
-      }
-      console.error('Notion API error creating gamification profile:', {
-        status: newUserResponse.status,
-        error: errorData,
-        databaseId: process.env.NOTION_GAMIFICATION_DB_ID,
-        hasToken: !!process.env.NOTION_TOKEN
-      });
-      throw new Error(`Failed to create gamification profile: ${newUserResponse.status} - ${errorData.message || errorData.code || 'Unknown error'}`);
-    }
-    
-    console.log('Created gamification profile for', email);
-    
-    // Process referral if applicable
-    if (referrer && referrer !== 'None') {
-      console.log(`Processing referral: ${email} was referred by ${referrer}`);
-      await processReferralReward(referrer, email);
-    }
-    
-  } catch (error) {
-    console.error('Error in gamification processing:', error);
-    throw error;
-  }
-}
 
-/**
- * Check if user already exists in gamification database
- */
 async function checkExistingGamificationUser(email, userId) {
   try {
     if (!email) return false;
@@ -592,7 +505,7 @@ async function processReferralReward(referralCode, referredEmail) {
     console.error('Error processing referral reward:', error);
   }
 }
-*/
+
 
 /**
  * Generate unique referral code
