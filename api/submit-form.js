@@ -1,5 +1,3 @@
-import { title } from "process";
-
 // Simple in-memory rate limiting (consider Redis for production)
 const rateLimits = new Map();
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
@@ -28,7 +26,7 @@ function checkRateLimit(ip) {
 function checkDuplicate(email) {
   const now = Date.now();
   const lastSubmission = recentSubmissions.get(email);
-  
+
   // Clean up old entries periodically
   if (recentSubmissions.size > 1000) {
     for (const [key, timestamp] of recentSubmissions.entries()) {
@@ -37,11 +35,11 @@ function checkDuplicate(email) {
       }
     }
   }
-  
+
   if (lastSubmission && (now - lastSubmission) < DUPLICATE_WINDOW) {
     return true; // Duplicate found
   }
-  
+
   recentSubmissions.set(email, now);
   return false;
 }
@@ -134,7 +132,7 @@ export default async function handler(req, res) {
   if (visitorType && !validVisitorTypes.includes(visitorType)) {
     return res.status(400).json({ error: 'Invalid visitor type' });
   }
-  
+
   // Check for duplicate submission in memory (recent submissions)
   if (checkDuplicate(email.toLowerCase())) {
     console.log('Duplicate submission prevented (memory):', {
@@ -282,7 +280,7 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    
+
     // Gamification system removed - referral tracking now handled in leads database
 
     // Success response
@@ -396,7 +394,7 @@ async function processGamificationRegistration({ email, firstName, lastName, use
 async function checkExistingGamificationUser(email, userId) {
   try {
     if (!email) return false;
-    
+
     const response = await fetch(`https://api.notion.com/v1/databases/${process.env.NOTION_GAMIFICATION_DB_ID}/query`, {
       method: 'POST',
       headers: {
@@ -412,14 +410,14 @@ async function checkExistingGamificationUser(email, userId) {
         page_size: 1
       })
     });
-    
+
     if (!response.ok) {
       return false;
     }
-    
+
     const data = await response.json();
     return data.results.length > 0;
-    
+
   } catch (error) {
     console.error('Error checking existing user:', error);
     return false;
@@ -447,25 +445,25 @@ async function createReferrerGamificationProfile(email, referralCode, initialRef
         page_size: 1
       })
     });
-    
+
     if (!mainDbResponse.ok) {
       console.error('Failed to find user in main database:', email);
       return null;
     }
-    
+
     const mainData = await mainDbResponse.json();
     if (mainData.results.length === 0) {
       console.error('User not found in main database:', email);
       return null;
     }
-    
+
     const userPage = mainData.results[0];
     const props = userPage.properties;
     const firstName = props['First Name']?.rich_text?.[0]?.text?.content || '';
     const lastName = props['Last Name']?.rich_text?.[0]?.text?.content || '';
     const name = props['Name']?.rich_text?.[0]?.text?.content || `${firstName} ${lastName}`.trim() || email.split('@')[0];
     const userId = props['User ID']?.rich_text?.[0]?.text?.content || '';
-    
+
     // Create gamification profile with initial referral points
     const createResponse = await fetch('https://api.notion.com/v1/pages', {
       method: 'POST',
@@ -497,16 +495,16 @@ async function createReferrerGamificationProfile(email, referralCode, initialRef
         }
       })
     });
-    
+
     if (!createResponse.ok) {
       console.error('Failed to create gamification profile for referrer:', email);
       return null;
     }
-    
+
     const newProfile = await createResponse.json();
     console.log('Created gamification profile for referrer:', email);
     return newProfile;
-    
+
   } catch (error) {
     console.error('Error creating referrer gamification profile:', error);
     return null;
@@ -518,9 +516,9 @@ async function createReferrerGamificationProfile(email, referralCode, initialRef
  */
 async function processReferralReward(referralCode, referredEmail) {
   const REFERRAL_POINTS = 25;
-  
+
   console.log(`Starting referral reward process: ${referredEmail} used referral code ${referralCode}`);
-  
+
   try {
     // Find referrer by referral code
     const response = await fetch(`https://api.notion.com/v1/databases/${process.env.NOTION_GAMIFICATION_DB_ID}/query`, {
@@ -538,12 +536,12 @@ async function processReferralReward(referralCode, referredEmail) {
         page_size: 1
       })
     });
-    
+
     if (!response.ok || !response.json) {
       console.log('Referrer not found:', referralCode);
       return;
     }
-    
+
     const data = await response.json();
     if (data.results.length === 0) {
       console.log('Referrer not found in gamification DB for referral code:', referralCode);
@@ -551,17 +549,17 @@ async function processReferralReward(referralCode, referredEmail) {
       console.log('They can create one by visiting the website and clicking their share link.');
       return;
     }
-    
+
     const referrerPage = data.results[0];
     const props = referrerPage.properties;
-    
+
     // Calculate points to award
     const currentTotalPoints = props['Total Points']?.number || 0;
     const currentReferralPoints = props['Referral Points']?.number || 0;
     const currentDirectReferrals = props['Direct Referrals Count']?.number || 0;
-    
+
     const pointsToAward = REFERRAL_POINTS;
-    
+
     // Update referrer's points
     const updateResponse = await fetch(`https://api.notion.com/v1/pages/${referrerPage.id}`, {
       method: 'PATCH',
@@ -579,7 +577,7 @@ async function processReferralReward(referralCode, referredEmail) {
         }
       })
     });
-    
+
     if (updateResponse.ok) {
       console.log(`Successfully awarded ${pointsToAward} referral points to ${referralCode}`);
       console.log(`Referrer now has ${currentTotalPoints + pointsToAward} total points`);
@@ -589,7 +587,7 @@ async function processReferralReward(referralCode, referredEmail) {
       const errorData = await updateResponse.json();
       console.error('Update error:', errorData);
     }
-    
+
   } catch (error) {
     console.error('Error processing referral reward:', error);
   }

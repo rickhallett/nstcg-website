@@ -16,19 +16,31 @@ const requestCounts = new Map();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 30; // 30 requests per minute per IP
 
-// Clean up old entries periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, data] of requestCounts.entries()) {
-    if (now - data.windowStart > RATE_LIMIT_WINDOW) {
-      requestCounts.delete(key);
+// Clean up old entries periodically - only in non-serverless environments
+// In serverless, cleanup happens on each request
+if (!process.env.VERCEL) {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, data] of requestCounts.entries()) {
+      if (now - data.windowStart > RATE_LIMIT_WINDOW) {
+        requestCounts.delete(key);
+      }
     }
-  }
-}, RATE_LIMIT_WINDOW);
+  }, RATE_LIMIT_WINDOW);
+}
 
 function checkRateLimit(ip) {
   const now = Date.now();
   const key = `visit-${ip}`;
+  
+  // Clean up old entries in serverless environment
+  if (process.env.VERCEL && requestCounts.size > 100) {
+    for (const [k, data] of requestCounts.entries()) {
+      if (now - data.windowStart > RATE_LIMIT_WINDOW) {
+        requestCounts.delete(k);
+      }
+    }
+  }
   
   if (!requestCounts.has(key)) {
     requestCounts.set(key, { count: 1, windowStart: now });
@@ -85,11 +97,20 @@ export default async function handler(req, res) {
     const timestamp = new Date().toISOString();
     const logEntry = `${timestamp} | ${url}\n`;
 
-    // Path to log file
-    const logPath = path.join(__dirname, '..', 'page-visits.log');
+    // Path to log file - use /tmp in Vercel environment
+    const logPath = process.env.VERCEL 
+      ? '/tmp/page-visits.log'
+      : path.join(__dirname, '..', 'page-visits.log');
 
-    // Append to log file
-    fs.appendFileSync(logPath, logEntry, 'utf8');
+    // Append to log file with error handling
+    try {
+      fs.appendFileSync(logPath, logEntry, 'utf8');
+    } catch (writeError) {
+      console.error('Failed to write log:', writeError);
+      // Log to console instead if file write fails
+      console.log('Page visit:', logEntry);
+      // Still return success to not break the frontend
+    }
 
     return res.status(200).json({ 
       logged: true, 

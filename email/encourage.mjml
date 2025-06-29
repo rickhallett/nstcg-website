@@ -1,0 +1,214 @@
+<mjml>
+  <mj-head>
+    <mj-title>Survey Closes Midnight Tonight - Share Now</mj-title>
+    <mj-preview>The closing of Shore Road will impact traffic for years. Survey closes tonight!</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" />
+      <mj-text font-size="16px" line-height="1.6" color="#ffffff" />
+      <mj-section padding="0" />
+      <mj-wrapper background-color="#0f1419" />
+    </mj-attributes>
+    <mj-style>
+      .countdown-text {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        padding: 12px 20px;
+        border-radius: 24px;
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      .progress-bar {
+        background-color: #2c3e50;
+        border-radius: 10px;
+        height: 10px;
+        overflow: hidden;
+        margin: 15px 0;
+      }
+      
+      .progress-fill {
+        background: linear-gradient(90deg, #3498db, #2980b9);
+        height: 100%;
+        width: 55.5%;
+        border-radius: 10px;
+      }
+      
+      .referral-box {
+        background-color: #1a2332;
+        border: 2px solid #3498db;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: center;
+      }
+      
+      .referral-link {
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        color: #ffffff;
+        word-break: break-all;
+        margin: 10px 0;
+      }
+      
+    </mj-style>
+  </mj-head>
+  
+  <mj-body background-color="#0f1419">
+    <mj-wrapper>
+      <!-- Header -->
+      <mj-section background-color="#1a2332" padding="30px 20px">
+        <mj-column>
+          <mj-text align="center" font-size="32px" font-weight="bold" color="#3498db" padding-bottom="10px">
+            NSTCG
+          </mj-text>
+          <mj-text align="center" padding="0">
+            <span class="countdown-text">🚨 SURVEY CLOSES MIDNIGHT TONIGHT</span>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      
+      <!-- Main Headline -->
+      <mj-section background-color="#0f1419" padding="30px 20px 20px">
+        <mj-column>
+          <mj-text align="center" font-size="24px" font-weight="bold" color="#ffffff" line-height="1.3">
+            YOUR NEIGHBOURS ARE TAKING ACTION<br/>RIGHT NOW
+          </mj-text>
+          <mj-text align="center" color="#a0a0a0" padding-top="10px">
+            The council closes our traffic survey at midnight tonight. Don't let others decide your future.
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      
+      <!-- Progress Section -->
+      <mj-section background-color="#1a2332" padding="25px 20px">
+        <mj-column>
+          <mj-text align="center" font-size="18px" color="#3498db" font-weight="bold">
+            {{response_count}} responses ✓ | Target: {{target_count}} | Needed: {{needed_count}} more
+          </mj-text>
+          <mj-text align="center" padding="0">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: {{progress_percentage}}%"></div>
+            </div>
+          </mj-text>
+          <mj-text align="center" font-size="14px" color="#a0a0a0">
+            {{progress_percentage}}% to victory
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      
+      <!-- Referral Link Section -->
+      <mj-section background-color="#0f1419" padding="20px">
+        <mj-column>
+          <mj-text align="center" font-size="16px" color="#fff" text-decoration="none" font-weight="bold" padding-bottom="0">
+            🔗 YOUR PERSONAL SHARING LINK:
+          </mj-text>
+          <mj-text align="center" padding="15px 0">
+            <div class="referral-box">
+              <div class="referral-link">https://nstcg.org/?ref={{user_referral_code}}</div>
+              <div style="font-size: 12px; color: #a0a0a0; margin-top: 10px;">
+                This tracks that people came through your share
+              </div>
+            </div>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      
+      <!-- CTA Section -->
+      <mj-section background-color="#e74c3c" padding="25px 20px">
+        <mj-column>
+          <mj-text align="center" font-size="18px" font-weight="bold" color="#ffffff">
+            📱 Share with 2 neighbours right now - every response counts!
+          </mj-text>
+          <mj-text align="center" font-size="14px" color="#ffffff" padding-top="5px">
+            The closing of Shore Road in Swanage will have impacts on traffic, tourists and residents for years to come.
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      
+      <!-- Share Buttons Section -->
+      <mj-section background-color="#0f1419" padding="30px 20px">
+        <mj-column>
+          <mj-text align="center" font-size="20px" color="#ffffff" font-weight="300" padding-bottom="20px">
+            Share Now – Every Voice Counts
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      
+      <!-- Share Buttons -->
+      <mj-section background-color="#0f1419" padding="0 20px 30px">
+        <mj-column>
+          <mj-button 
+            href="https://wa.me/?text={{share_text_encoded}}%20https%3A%2F%2Fnstcg.org%2F%3Fref%3D{{user_referral_code}}"
+            background-color="#25d366"
+            color="#ffffff"
+            font-size="16px"
+            font-weight="bold"
+            padding="15px 30px"
+            border-radius="8px"
+            width="300px"
+            inner-padding="15px 30px">
+            WhatsApp
+          </mj-button>
+          <mj-button 
+            href="https://twitter.com/intent/tweet?text={{share_text_encoded}}&url=https%3A%2F%2Fnstcg.org%2F%3Fref%3D{{user_referral_code}}"
+            background-color="#000000"
+            color="#ffffff"
+            font-size="16px"
+            font-weight="bold"
+            padding="15px 30px"
+            padding-top="10px"
+            border-radius="8px"
+            width="300px"
+            inner-padding="15px 30px">
+            X (Twitter)
+          </mj-button>
+          <mj-button 
+            href="mailto:?subject=Shore%20Road%20Closure%20-%20Have%20Your%20Say&body={{share_text_encoded}}%20https%3A%2F%2Fnstcg.org%2F%3Fref%3D{{user_referral_code}}"
+            background-color="#ea4335"
+            color="#ffffff"
+            font-size="16px"
+            font-weight="bold"
+            padding="15px 30px"
+            padding-top="10px"
+            border-radius="8px"
+            width="300px"
+            inner-padding="15px 30px">
+            Email
+          </mj-button>
+        </mj-column>
+      </mj-section>
+      
+      <!-- Alternative Share -->
+      <mj-section background-color="#0f1419" padding="0 20px 30px">
+        <mj-column>
+          <mj-text align="center" font-size="14px" color="#a0a0a0" font-style="italic">
+            Or simply forward this email to help spread the word
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      
+      <!-- Thank You Section -->
+      <mj-section background-color="#1a2332" padding="25px 20px">
+        <mj-column>
+          <mj-text align="center" color="#ffffff">
+            <strong>Thank you for being part of this effort.</strong><br/>
+            Together we're protecting our neighbourhood streets.
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      
+      <!-- Footer -->
+      <mj-section background-color="#0f1419" padding="20px">
+        <mj-column>
+          <mj-text align="center" font-size="12px" color="#666666">
+            North Swanage Traffic Concern Group<br/>
+            © 2025 NSTCG. All rights reserved.
+          </mj-text>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+  </mj-body>
+</mjml>
