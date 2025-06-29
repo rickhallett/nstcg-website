@@ -60,3 +60,6 @@ test-results/*
 # Service account credentials (sensitive)
 scripts/gmail-service-account*.json*
 *service-account*.json*
+
+# Gemini
+.gemini/settings.json

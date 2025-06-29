@@ -1,15 +1,9 @@
+[<- Back to README](../../README.md)
+
 # Principia.js: A Manifesto for Principled Software Development
 
 This document is the philosophical and architectural foundation of the NSTCG website rewrite. It is not merely a set of instructions, but a manifesto for a specific way of building software. It codifies the "why" behind our technical decisions, capturing the wisdom gained from past experiences and laying out a clear, intentional path forward. Its purpose is to ensure that every line of code is written with purpose, clarity, and a long-term vision for maintainability and growth.
 
----
-## Documentation Index
-
-*   **Architectural Deep Dive**
-    *   [**Principia.js Manifesto**](./docs/principia.js.md): The core philosophy, principles, and developer journey.
-    *   [**Module Breakdown**](./docs/principia_modules.md): A detailed exploration of each module's role, responsibilities, and interactions, complete with diagrams.
-*   **TDD Blueprints**
-    *   [**Master Blueprint**](./docs/blueprints/000_master_blueprint.md): The main index and build order for all Test-Driven Development blueprints.
 ---
 
 ## 1. The Ghost of V1: Lessons from the Past
