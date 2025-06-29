@@ -14,6 +14,10 @@
   <meta property="og:url" content="https://nstcg.org/donate">
   <meta property="og:type" content="website">
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+
   <!-- Animate.css CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 
@@ -218,7 +222,7 @@
     // Only load Vercel Speed Insights in production
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
       window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-      
+
       const script = document.createElement('script');
       script.defer = true;
       script.src = '/_vercel/speed-insights/script.js';
