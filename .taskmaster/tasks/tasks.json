@@ -1,0 +1,76 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Create EventBus Singleton Class Structure",
+        "description": "Implement the basic singleton pattern for the EventBus class with getInstance and _resetInstance methods.",
+        "details": "Create the EventBus.js file in the js/core directory with the following structure:\n\n```javascript\nexport class EventBus {\n  static _instance = null;\n  \n  // Private constructor to prevent direct instantiation\n  constructor() {\n    if (EventBus._instance) {\n      throw new Error('EventBus is a singleton. Use EventBus.getInstance() instead.');\n    }\n    this._events = {};\n  }\n  \n  // Public method to get the singleton instance\n  static getInstance() {\n    if (!EventBus._instance) {\n      EventBus._instance = new EventBus();\n    }\n    return EventBus._instance;\n  }\n  \n  // Method for testing purposes to reset the singleton instance\n  static _resetInstance() {\n    EventBus._instance = null;\n  }\n}\n```",
+        "testStrategy": "Verify that getInstance() always returns the same instance and that _resetInstance() properly resets the singleton for testing purposes. Use the test case 'should be a singleton, always returning the same instance'.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement Event Subscription Method",
+        "description": "Create the 'on' method to subscribe handlers to specific events and return an unsubscribe function.",
+        "details": "Add the 'on' method to the EventBus class that allows registering event handlers:\n\n```javascript\n/**\n * Subscribe to an event\n * @param {string} eventName - The name of the event to subscribe to\n * @param {Function} handler - The callback function to execute when the event is emitted\n * @returns {Function} - A function that when called will unsubscribe the handler\n */\non(eventName, handler) {\n  if (!this._events[eventName]) {\n    this._events[eventName] = [];\n  }\n  \n  this._events[eventName].push(handler);\n  \n  // Return an unsubscribe function\n  return () => this.off(eventName, handler);\n}\n```",
+        "testStrategy": "Test that a handler can be subscribed to an event using the 'on' method. Verify that the handler is called when the corresponding event is emitted. Use the test case 'should subscribe a single handler to an event and trigger it on emit'.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Implement Event Emission Method",
+        "description": "Create the 'emit' method to trigger all handlers subscribed to a specific event with optional payload data.",
+        "details": "Add the 'emit' method to the EventBus class that triggers all registered handlers for an event:\n\n```javascript\n/**\n * Emit an event with optional payload data\n * @param {string} eventName - The name of the event to emit\n * @param {*} [payload] - Optional data to pass to the event handlers\n */\nemit(eventName, payload) {\n  const handlers = this._events[eventName];\n  \n  if (!handlers || handlers.length === 0) {\n    return; // No handlers registered for this event\n  }\n  \n  // Call each handler with the payload\n  handlers.forEach(handler => {\n    try {\n      handler(payload);\n    } catch (error) {\n      console.error(`Error in event handler for ${eventName}:`, error);\n    }\n  });\n}\n```",
+        "testStrategy": "Test that the 'emit' method correctly triggers all subscribed handlers for an event. Verify that payload data is properly passed to the handlers. Use the test cases 'should pass payload data from emit to the subscribed handler' and 'should allow multiple handlers for the same event'.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement Event Unsubscription Method",
+        "description": "Create the 'off' method to unsubscribe specific handlers from events.",
+        "details": "Add the 'off' method to the EventBus class that removes a specific handler from an event:\n\n```javascript\n/**\n * Unsubscribe a handler from an event\n * @param {string} eventName - The name of the event to unsubscribe from\n * @param {Function} handler - The handler function to remove\n */\noff(eventName, handler) {\n  const handlers = this._events[eventName];\n  \n  if (!handlers || handlers.length === 0) {\n    return; // No handlers registered for this event\n  }\n  \n  // Find and remove the specific handler\n  const index = handlers.indexOf(handler);\n  if (index !== -1) {\n    handlers.splice(index, 1);\n  }\n  \n  // Clean up empty handler arrays\n  if (handlers.length === 0) {\n    delete this._events[eventName];\n  }\n}\n```",
+        "testStrategy": "Test that the 'off' method correctly removes a specific handler while leaving other handlers intact. Use the test case 'should unsubscribe a specific handler, leaving others intact'.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Implement Unsubscribe via Returned Function",
+        "description": "Ensure that the function returned by the 'on' method correctly unsubscribes the handler when called.",
+        "details": "The implementation of this feature is already included in the 'on' method from Task 2, which returns a function that calls 'off' with the correct parameters. Verify that this functionality works as expected:\n\n```javascript\n// Example usage:\nconst unsubscribe = eventBus.on('some-event', handler);\n// Later, to unsubscribe:\nunsubscribe();\n```\n\nMake sure the returned function correctly captures the eventName and handler reference to properly unsubscribe when called.",
+        "testStrategy": "Test that the unsubscribe function returned by the 'on' method correctly removes the handler when called. Use the test case 'should allow unsubscribing via a returned function'.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          4
+        ],
+        "status": "done",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-29T22:14:11.968Z",
+      "updated": "2025-06-29T22:18:45.938Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
