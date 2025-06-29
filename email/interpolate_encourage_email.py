@@ -55,8 +55,8 @@ class EmailLinkInterpolator:
         
         # Default share text if none provided
         if not share_text:
-            share_text = ("North Swanage traffic survey closes midnight tonight! "
-                         "Have your say before it's too late")
+            share_text = ("The closing of Shore Road in Swanage will have impacts on traffic, "
+                         "tourists and residents for years to come. The survey closes midnight tonight!")
             encoded_text = urllib.parse.quote(share_text, safe='')
         
         return {
