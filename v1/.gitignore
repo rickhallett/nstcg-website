@@ -1,0 +1,62 @@
+# Environment variables
+.env*
+.env.local
+.env*.local
+
+# Vercel
+.vercel
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Vite cache
+.vite/
+
+# Public directory (copied from source)
+public/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Added by Claude Task Master
+# Logs (but allow page-visits.log)
+logs
+*.log
+!page-visits.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev-debug.log
+# Dependency directories
+.env
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+# Task files
+tasks.json
+tasks/
+
+# OAuth tokens (sensitive)
+gmail-tokens.json
+scripts/gmail-tokens.json
+
+# Test campaign logs
+scripts/test-campaign-log.json sendgrid.env
+
+# Test results
+test-results/*
+
+# Service account credentials (sensitive)
+scripts/gmail-service-account*.json*
+*service-account*.json*
