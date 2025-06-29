@@ -50,6 +50,7 @@
     "google-auth-library": "^10.1.0",
     "googleapis": "^150.0.1",
     "micromodal": "^0.6.1",
+    "resend": "^4.6.0",
     "uuid": "^11.1.0"
   }
 }
