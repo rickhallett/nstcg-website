@@ -260,7 +260,14 @@ export default async function handler(req, res) {
             select: {
               name: visitorType === 'local' ? 'Local' : 'Tourist'
             }
-          } : undefined
+          } : undefined,
+          'Referral Code': {
+            rich_text: [{
+              text: {
+                content: generateUniqueReferralCode(firstName || email.split('@')[0])
+              }
+            }]
+          }
         }
       })
     });
@@ -276,22 +283,7 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     
-    // Create gamification profile and process referral if applicable
-    if (process.env.NOTION_GAMIFICATION_DB_ID) {
-      try {
-        await processGamificationRegistration({
-          email,
-          firstName,
-          lastName,
-          userId: user_id,
-          referrer,
-          submissionId: submission_id
-        });
-      } catch (gamError) {
-        // Log error but don't fail the main submission
-        console.error('Gamification processing error:', gamError);
-      }
-    }
+    // Gamification system removed - referral tracking now handled in leads database
 
     // Success response
     res.status(200).json({
@@ -316,7 +308,9 @@ export default async function handler(req, res) {
 /**
  * Process gamification registration
  * Creates user profile and awards points for registration and referrals
+ * DEPRECATED: Gamification system removed - referral codes now stored in leads database
  */
+/*
 async function processGamificationRegistration({ email, firstName, lastName, userId, referrer, submissionId }) {
   // Award 100 points if user was referred, 0 otherwise
   const isReferred = referrer && referrer !== 'None';
@@ -600,6 +594,7 @@ async function processReferralReward(referralCode, referredEmail) {
     console.error('Error processing referral reward:', error);
   }
 }
+*/
 
 /**
  * Generate unique referral code
