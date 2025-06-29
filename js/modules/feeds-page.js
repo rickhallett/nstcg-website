@@ -7,6 +7,22 @@ import eventBus, { Events } from '../core/eventBus.js';
 import stateManager from '../core/StateManager.js';
 
 /**
+ * Cache configuration for feeds data
+ */
+const CACHE_CONFIG = {
+  participants: {
+    key: 'nstcg_feeds_participants',
+    ttl: 5 * 60 * 1000, // 5 minutes
+    version: '1.0.0'
+  },
+  hotTopics: {
+    key: 'nstcg_feeds_hot_topics',
+    ttl: 6 * 60 * 60 * 1000, // 6 hours
+    version: '1.0.0'
+  }
+};
+
+/**
  * Feeds Page configuration
  */
 const FeedsConfig = {
@@ -46,12 +62,16 @@ class FeedsPageManager {
     this.chart = null;
     this.isLoading = false;
     this.hotTopics = null;
+    this.revalidationInProgress = new Set();
   }
 
   /**
    * Initialize the feeds page
    */
   async init() {
+    // Check and clear outdated cache if needed
+    this.checkCacheVersions();
+    
     // Load all participants
     await this.loadAllParticipants();
     
@@ -76,54 +96,137 @@ class FeedsPageManager {
   }
 
   /**
+   * Check cache versions and clear if outdated
+   */
+  checkCacheVersions() {
+    try {
+      // Check participants cache version
+      const participantsVersionKey = `${CACHE_CONFIG.participants.key}_version`;
+      const participantsVersion = localStorage.getItem(participantsVersionKey);
+      if (participantsVersion !== CACHE_CONFIG.participants.version) {
+        localStorage.removeItem(CACHE_CONFIG.participants.key);
+        localStorage.setItem(participantsVersionKey, CACHE_CONFIG.participants.version);
+        console.log('Cleared outdated participants cache');
+      }
+
+      // Check hot topics cache version
+      const hotTopicsVersionKey = `${CACHE_CONFIG.hotTopics.key}_version`;
+      const hotTopicsVersion = localStorage.getItem(hotTopicsVersionKey);
+      if (hotTopicsVersion !== CACHE_CONFIG.hotTopics.version) {
+        localStorage.removeItem(CACHE_CONFIG.hotTopics.key);
+        localStorage.setItem(hotTopicsVersionKey, CACHE_CONFIG.hotTopics.version);
+        console.log('Cleared outdated hot topics cache');
+      }
+    } catch (error) {
+      console.warn('Error checking cache versions:', error);
+    }
+  }
+
+  /**
+   * Get cached data with TTL validation
+   */
+  getCachedData(cacheType) {
+    try {
+      const config = CACHE_CONFIG[cacheType];
+      if (!config) return null;
+
+      const cached = localStorage.getItem(config.key);
+      if (!cached) return null;
+
+      const { data, timestamp } = JSON.parse(cached);
+      const age = Date.now() - timestamp;
+
+      // Check if cache is still valid
+      if (age < config.ttl) {
+        console.log(`Using cached ${cacheType} data (age: ${Math.round(age / 1000)}s)`);
+        return data;
+      }
+
+      // Cache is expired
+      console.log(`Cache expired for ${cacheType} (age: ${Math.round(age / 1000)}s)`);
+      return null;
+    } catch (error) {
+      console.warn(`Error reading ${cacheType} cache:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Save data to cache
+   */
+  setCachedData(cacheType, data) {
+    try {
+      const config = CACHE_CONFIG[cacheType];
+      if (!config) return;
+
+      const cacheData = {
+        data: data,
+        timestamp: Date.now()
+      };
+
+      localStorage.setItem(config.key, JSON.stringify(cacheData));
+      console.log(`Cached ${cacheType} data`);
+    } catch (error) {
+      console.warn(`Error caching ${cacheType} data:`, error);
+    }
+  }
+
+  /**
+   * Revalidate cached data in background
+   */
+  async revalidateInBackground(cacheType, fetchFunction) {
+    // Prevent duplicate revalidations
+    if (this.revalidationInProgress.has(cacheType)) {
+      return;
+    }
+
+    this.revalidationInProgress.add(cacheType);
+    console.log(`Starting background revalidation for ${cacheType}`);
+
+    try {
+      const freshData = await fetchFunction();
+      if (freshData) {
+        this.setCachedData(cacheType, freshData);
+        console.log(`Background revalidation completed for ${cacheType}`);
+      }
+    } catch (error) {
+      console.warn(`Background revalidation failed for ${cacheType}:`, error);
+    } finally {
+      this.revalidationInProgress.delete(cacheType);
+    }
+  }
+
+  /**
    * Load all participants from API
    */
   async loadAllParticipants() {
     if (this.isLoading) return;
     
+    // Check cache first
+    const cachedData = this.getCachedData('participants');
+    if (cachedData) {
+      // Use cached data immediately
+      this.handleParticipantsData(cachedData);
+      
+      // Revalidate in background for fresh data
+      this.revalidateInBackground('participants', () => this.fetchParticipants());
+      return;
+    }
+    
+    // No cache, fetch from API
     this.isLoading = true;
     this.showLoadingState();
 
     try {
-      const response = await fetch('/api/get-all-participants');
+      const data = await this.fetchParticipants();
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch participants');
+      if (data) {
+        // Cache the fresh data
+        this.setCachedData('participants', data);
+        
+        // Handle the data
+        this.handleParticipantsData(data);
       }
-
-      const data = await response.json();
-      
-      console.log('Feeds API Response:', {
-        participantCount: data.participants?.length || 0,
-        totalCount: data.totalCount,
-        todayCount: data.todayCount,
-        weekCount: data.weekCount,
-        hasError: !!data.error
-      });
-      
-      // Store participants
-      this.participants = data.participants || [];
-      
-      // Update statistics
-      this.updateStatistics(data);
-      
-      // Render participant grid
-      this.renderParticipants();
-      
-      // Create line graph
-      this.createLineGraph();
-      
-      // Load hot topics
-      await this.loadHotTopics();
-      
-      // Hide loading state
-      this.hideLoadingState();
-      
-      // Emit success event
-      eventBus.emit(Events.FEEDS_LOADED, {
-        count: this.participants.length,
-        total: data.totalCount
-      });
 
     } catch (error) {
       console.error('Error loading participants:', error);
@@ -133,6 +236,58 @@ class FeedsPageManager {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  /**
+   * Fetch participants from API
+   */
+  async fetchParticipants() {
+    const response = await fetch('/api/get-all-participants');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch participants');
+    }
+
+    const data = await response.json();
+    
+    console.log('Feeds API Response:', {
+      participantCount: data.participants?.length || 0,
+      totalCount: data.totalCount,
+      todayCount: data.todayCount,
+      weekCount: data.weekCount,
+      hasError: !!data.error
+    });
+    
+    return data;
+  }
+
+  /**
+   * Handle participants data (from cache or API)
+   */
+  async handleParticipantsData(data) {
+    // Store participants
+    this.participants = data.participants || [];
+    
+    // Update statistics
+    this.updateStatistics(data);
+    
+    // Render participant grid
+    this.renderParticipants();
+    
+    // Create line graph
+    this.createLineGraph();
+    
+    // Load hot topics
+    await this.loadHotTopics();
+    
+    // Hide loading state
+    this.hideLoadingState();
+    
+    // Emit success event
+    eventBus.emit(Events.FEEDS_LOADED, {
+      count: this.participants.length,
+      total: data.totalCount
+    });
   }
 
   /**
@@ -505,23 +660,34 @@ class FeedsPageManager {
    * Load hot topics analysis from API
    */
   async loadHotTopics() {
+    // Check cache first
+    const cachedData = this.getCachedData('hotTopics');
+    if (cachedData) {
+      // Use cached data immediately
+      this.hotTopics = cachedData;
+      this.renderHotTopics();
+      eventBus.emit('hot-topics-loaded', cachedData);
+      
+      // Revalidate in background for fresh data
+      this.revalidateInBackground('hotTopics', () => this.fetchHotTopics());
+      return;
+    }
+    
+    // No cache, fetch from API
     this.showHotTopicsLoading();
 
     try {
-      const response = await fetch('/api/analyze-concerns');
+      const data = await this.fetchHotTopics();
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch hot topics');
+      if (data) {
+        // Cache the fresh data
+        this.setCachedData('hotTopics', data);
+        
+        // Handle the data
+        this.hotTopics = data;
+        this.renderHotTopics();
+        eventBus.emit('hot-topics-loaded', data);
       }
-
-      const data = await response.json();
-      this.hotTopics = data;
-      
-      // Render hot topics
-      this.renderHotTopics();
-      
-      // Emit success event
-      eventBus.emit('hot-topics-loaded', data);
 
     } catch (error) {
       console.error('Error loading hot topics:', error);
@@ -529,6 +695,25 @@ class FeedsPageManager {
       
       eventBus.emit('hot-topics-error', error);
     }
+  }
+
+  /**
+   * Fetch hot topics from API
+   */
+  async fetchHotTopics() {
+    const response = await fetch('/api/analyze-concerns');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch hot topics');
+    }
+
+    const data = await response.json();
+    console.log('Hot topics API Response:', {
+      concernsCount: data.concerns?.length || 0,
+      totalComments: data.totalComments
+    });
+    
+    return data;
   }
 
   /**
@@ -654,6 +839,20 @@ class FeedsPageManager {
     if (error) error.style.display = 'none';
     if (empty) empty.style.display = 'flex';
     if (container) container.style.display = 'none';
+  }
+
+  /**
+   * Force refresh all cached data
+   */
+  async forceRefresh() {
+    console.log('Force refreshing all feeds data...');
+    
+    // Clear cache
+    localStorage.removeItem(CACHE_CONFIG.participants.key);
+    localStorage.removeItem(CACHE_CONFIG.hotTopics.key);
+    
+    // Reload all data
+    await this.loadAllParticipants();
   }
 }
 
