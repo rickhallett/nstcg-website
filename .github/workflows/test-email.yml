@@ -1,0 +1,224 @@
+name: Email Campaign Tests
+
+on:
+  push:
+    paths:
+      - 'email/**'
+      - '.github/workflows/test-email.yml'
+  pull_request:
+    paths:
+      - 'email/**'
+      - '.github/workflows/test-email.yml'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  lint:
+    name: Lint Python Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort
+      
+      - name: Run Black formatter check
+        run: black --check email/
+      
+      - name: Run isort import checker
+        run: isort --check-only email/
+      
+      - name: Run Flake8 linter
+        run: flake8 email/ --config=email/.flake8
+
+  test:
+    name: Run Tests - Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+      fail-fast: false
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('email/requirements-test.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+      
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install MJML
+        run: npm install -g mjml
+      
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r email/requirements-test.txt
+      
+      - name: Run unit tests
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN_TEST }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID_TEST }}
+        run: |
+          cd email
+          pytest tests/test_auto_smtp.py -v --cov=auto_smtp --cov-report=xml
+      
+      - name: Run integration tests
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN_TEST }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID_TEST }}
+        run: |
+          cd email
+          pytest tests/test_integration.py -v -m integration
+      
+      - name: Upload coverage reports
+        if: matrix.python-version == '3.9'  # Only upload once
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./email/coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+  performance:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r email/requirements-test.txt
+      
+      - name: Run performance tests
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN_TEST }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID_TEST }}
+        run: |
+          cd email
+          pytest tests/test_performance.py -v -m performance --durations=10
+      
+      - name: Store performance results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results
+          path: email/performance_results.txt
+          retention-days: 30
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install safety
+        run: pip install safety
+      
+      - name: Run safety check
+        run: |
+          cd email
+          safety check -r requirements.txt || true
+          safety check -r requirements-test.txt || true
+      
+      - name: Run Bandit security linter
+        run: |
+          pip install bandit
+          bandit -r email/ -f json -o bandit-report.json || true
+      
+      - name: Upload security report
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-report
+          path: bandit-report.json
+
+  validate-mjml:
+    name: Validate MJML Templates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install MJML
+        run: npm install -g mjml
+      
+      - name: Validate MJML templates
+        run: |
+          for template in email/*.mjml; do
+            echo "Validating $template..."
+            mjml -v "$template" > /dev/null
+          done
+
+  dry-run:
+    name: Test Dry Run Mode
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r email/requirements.txt
+          npm install -g mjml
+      
+      - name: Create test environment files
+        run: |
+          cd email
+          echo "[]" > scripts/sent-emails.json
+          echo "[]" > scripts/failed-emails.json
+      
+      - name: Run script in dry-run mode
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN_TEST }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID_TEST }}
+        run: |
+          cd email
+          python auto_smtp.py --dry-run --batch-size 10
+      
+      - name: Verify no emails were sent
+        run: |
+          cd email
+          if [ "$(cat scripts/sent-emails.json)" != "[]" ]; then
+            echo "ERROR: Dry run modified sent-emails.json!"
+            exit 1
+          fi

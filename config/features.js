@@ -51,10 +51,10 @@ const defaultFeatures = {
 
   // Leaderboard functionality
   leaderboard: {
-    enabled: true,
+    enabled: false,
     showPrizePool: false,
     showTopThree: false,
-    showFullLeaderboard: true
+    showFullLeaderboard: false
   },
 
   // Referral scheme
@@ -63,7 +63,7 @@ const defaultFeatures = {
     showShareButtons: true,
     trackReferrals: true,
     showReferralBanner: true,
-    awardReferralPoints: true
+    awardReferralPoints: false
   },
 
   // UI customization

@@ -1,0 +1,25 @@
+[flake8]
+max-line-length = 100
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    tests/fixtures,
+    .pytest_cache
+ignore = 
+    # Line too long (handled by Black)
+    E501,
+    # Module imported but unused (often used in __init__.py)
+    F401,
+    # Line break before binary operator (Black disagrees)
+    W503,
+    # Missing docstring in public module
+    D100,
+    # Missing docstring in public function
+    D103
+per-file-ignores = 
+    # Allow unused imports in __init__ files
+    __init__.py:F401
+    # Allow assert statements in tests
+    tests/*.py:S101

@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 
 <head>
   <meta charset="UTF-8">
@@ -172,56 +172,45 @@
       margin: 20px 0;
     }
 
-    .share-button {
-      background-color: #5dade2;
-      color: #1a2332;
-      padding: 12px 20px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 14px;
-      display: inline-block;
-      transition: background-color 0.3s;
+    .share-link-section {
+      background-color: #ffffff;
+      padding: 40px 20px;
+      margin: 30px 0;
+      border-top: 1px solid #e0e0e0;
+      border-bottom: 1px solid #e0e0e0;
     }
-
-    .share-button:hover {
-      background-color: #3498db;
-      color: #ffffff;
-    }
-
-    .social-share {
-      background-color: #34495e;
-      padding: 20px;
-      border-radius: 8px;
-      margin: 20px 0;
-    }
-
-    .social-share h3 {
-      color: #5dade2;
-      font-size: 16px;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    .social-icons {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-
-    .social-icon {
-      width: 45px;
-      height: 45px;
-      background-color: #5dade2;
-      border-radius: 50%;
+    
+    .share-link {
       display: flex;
       align-items: center;
       justify-content: center;
+      background-color: #ffffff;
+      color: #000000;
+      padding: 20px 24px;
+      margin: 16px 0;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
       text-decoration: none;
-      color: #1a2332;
-      font-weight: bold;
+      font-weight: 500;
       font-size: 16px;
+      min-height: 56px;
+      transition: all 0.2s ease;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .share-link:hover {
+      background-color: #f8f8f8;
+      border-color: #000000;
+    }
+
+    .share-section-title {
+      color: #000000;
+      font-size: 20px;
+      font-weight: 300;
+      text-align: center;
+      margin-bottom: 30px;
+      letter-spacing: 0.5px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     .footer {
@@ -325,37 +314,30 @@
         </div>
       </div>
 
-      <!-- CTA -->
-      <div class="cta-section">
-        <div class="cta-text">📱 Share with 2 neighbours right now - every response counts!</div>
-        <div style="font-size: 14px; color: #ecf0f1;">Text the link • Post to WhatsApp groups • Share on Facebook</div>
-      </div>
-
-      <!-- Quick Share Buttons -->
-      <div class="share-buttons">
-        <a href="https://wa.me/?text=I%20just%20joined%20597%20Neighbours%20fighting%20for%20safer%20streets%20in%20North%20Swanage!%20The%20proposed%20traffic%20changes%20could%20flood%20our%20residential%20streets%20with%20dangerous%20traffic.%20Take%20action%20before%20it%27s%20too%20late%3A&url=https%3A%2F%2Fnstcg.org%3Fref%3DRICBDMFQVAN%26src%3Dtw&hashtags=SaveNorthSwanage%2CTrafficSafety"
-          class="share-button">🐦 WhatsApp</a>
-        <a href="sms:?body=North%20Swanage%20traffic%20survey%20closes%20midnight%20tonight!%20Have%20your%20say:%20https://nstcg.org/survey?ref={{user_referral_code}}"
-          class="share-button">📱 Text Link</a>
-        <a href="mailto:?subject=Traffic%20Survey%20Closes%20Tonight&body=The%20North%20Swanage%20traffic%20survey%20closes%20at%20midnight%20tonight.%20Please%20add%20your%20voice:%20https://nstcg.org/survey?ref={{user_referral_code}}"
-          class="share-button">✉️ Email</a>
-      </div>
-
-      <!-- Social Share -->
-      <div class="social-share">
-        <h3>📢 SPREAD THE WORD - EVERY SHARE MATTERS!</h3>
-        <div class="social-icons">
-          <a href="https://www.facebook.com/sharer/sharer.php?u=https://nstcg.org/survey?ref={{user_referral_code}}"
-            class="social-icon" target="_blank">📘</a>
-          <a href="https://twitter.com/intent/tweet?text=North%20Swanage%20traffic%20survey%20closes%20midnight%20tonight!%20Have%20your%20say:&url=https://nstcg.org/survey?ref={{user_referral_code}}"
-            class="social-icon" target="_blank">✖️</a>
-          <a href="https://wa.me/?text=North%20Swanage%20traffic%20survey%20closes%20midnight%20tonight!%20Have%20your%20say:%20https://nstcg.org/survey?ref={{user_referral_code}}"
-            class="social-icon" target="_blank">💬</a>
-          <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://nstcg.org/survey?ref={{user_referral_code}}"
-            class="social-icon" target="_blank">💼</a>
-        </div>
-        <div style="text-align: center; font-size: 12px; color: #bdc3c7; margin-top: 15px;">
-          or just forward this email to someone who might want to help!
+      <!-- Share Links Section -->
+      <div class="share-link-section">
+        <div class="share-section-title">Share Now – Every Voice Counts</div>
+        
+        <a href="https://wa.me/?text=The%20closing%20of%20Shore%20Road%20in%20Swanage%20will%20have%20impacts%20on%20traffic%2C%20tourists%20and%20residents%20for%20years%20to%20come.%20The%20survey%20closes%20midnight%20tonight!%20https://nstcg.org/?ref={{user_referral_code}}"
+          class="share-link" target="_blank">WhatsApp →</a>
+          
+        <a href="https://www.facebook.com/sharer/sharer.php?u=https://nstcg.org/?ref={{user_referral_code}}"
+          class="share-link" target="_blank">Facebook →</a>
+          
+        <a href="https://twitter.com/intent/tweet?text=The%20closing%20of%20Shore%20Road%20in%20Swanage%20will%20have%20impacts%20on%20traffic%2C%20tourists%20and%20residents%20for%20years%20to%20come.%20The%20survey%20closes%20midnight%20tonight!&url=https://nstcg.org/?ref={{user_referral_code}}"
+          class="share-link" target="_blank">X (Twitter) →</a>
+          
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://nstcg.org/?ref={{user_referral_code}}"
+          class="share-link" target="_blank">LinkedIn →</a>
+          
+        <a href="mailto:?subject=Shore%20Road%20Closure%20-%20Have%20Your%20Say&body=The%20closing%20of%20Shore%20Road%20in%20Swanage%20will%20have%20impacts%20on%20traffic%2C%20tourists%20and%20residents%20for%20years%20to%20come.%20The%20survey%20closes%20midnight%20tonight!%20https://nstcg.org/?ref={{user_referral_code}}"
+          class="share-link">Email →</a>
+          
+        <a href="sms:?body=The%20closing%20of%20Shore%20Road%20in%20Swanage%20will%20have%20impacts%20on%20traffic%2C%20tourists%20and%20residents%20for%20years%20to%20come.%20The%20survey%20closes%20midnight%20tonight!%20https://nstcg.org/?ref={{user_referral_code}}"
+          class="share-link">Text Message →</a>
+          
+        <div style="text-align: center; font-size: 14px; color: #666666; margin-top: 30px; font-style: italic; font-weight: 300;">
+          Or simply forward this email to help spread the word
         </div>
       </div>
 

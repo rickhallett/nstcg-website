@@ -87,11 +87,7 @@ async function loadUserStats() {
 function updateStatsDisplay() {
   if (!userStats) return;
   
-  // Update points
-  const pointsEl = document.getElementById('user-points');
-  if (pointsEl) {
-    animateNumber(pointsEl, userStats.totalPoints);
-  }
+  // Points display removed - feature disabled
   
   // Update referrals
   const referralsEl = document.getElementById('user-referrals');
@@ -99,11 +95,7 @@ function updateStatsDisplay() {
     animateNumber(referralsEl, userStats.directReferrals);
   }
   
-  // Update rank
-  const rankEl = document.getElementById('user-rank');
-  if (rankEl) {
-    rankEl.textContent = userStats.rank > 0 ? `#${userStats.rank}` : '#-';
-  }
+  // Rank display removed - leaderboard feature disabled
 }
 
 /**
@@ -284,14 +276,7 @@ async function trackShare(platform) {
     });
     
     if (data.success) {
-      // Update points display
-      if (data.points_awarded > 0) {
-        const pointsEl = document.getElementById('user-points');
-        const currentPoints = parseInt(pointsEl.textContent) || 0;
-        animateNumber(pointsEl, currentPoints + data.points_awarded);
-        
-        showNotification(`+${data.points_awarded} points earned!`, 'success');
-      }
+      // Points system removed - no points awarded for shares
       
       // Store share action
       sessionStorage.setItem(`shared_${platform}`, 'true');

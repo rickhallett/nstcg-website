@@ -143,7 +143,7 @@
       <mj-column>
         <mj-raw>
           <div style="background: rgba(255, 107, 107, 0.2); padding: 8px 15px; border-radius: 20px; display: inline-block; margin-bottom: 15px;">
-            <span class="urgency-highlight">ONLY 2 DAYS LEFT</span>
+            <span class="urgency-highlight">ONLY 1 DAY LEFT!</span>
             <span style="color: #ffffff; font-size: 12px; margin-left: 10px;">555 people participating</span>
           </div>
         </mj-raw>
@@ -174,8 +174,8 @@
         </mj-text>
         <mj-raw>
           <div style="text-align: center; margin: 20px 0;">
+            <div class="timer-box">1</div>
             <div class="timer-box">2</div>
-            <div class="timer-box">3</div>
           </div>
           <div style="text-align: center;">
             <span style="color: #ffffff; font-size: 14px; margin: 0 35px;">DAYS</span>

@@ -123,7 +123,7 @@ export async function initNavigationFeatures() {
   // Add conditional navigation items
   // These will only be added if the features are enabled
   addNavigationItem('/leaderboard.html', 'Leaderboard', 'leaderboard', 'leaderboard.enabled');
-  addNavigationItem('/share.html', 'Share & Earn', 'share', { 
+  addNavigationItem('/share.html', 'Share', 'share', { 
     feature: 'referralScheme.enabled', 
     requiresAuth: true 
   });

@@ -6,7 +6,11 @@
   "scripts": {
     "create-gamification-db": "node create-gamification-database.js",
     "test-connection": "node test-notion-connection.js",
-    "example": "node example-gamification-usage.js"
+    "example": "node example-gamification-usage.js",
+    "generate-codes": "node migrate-referral-codes.js --gen",
+    "easy-generate": "node migrate-referral-codes.js --easy",
+    "generate-codes-fast": "node migrate-referral-codes-optimized.js --gen",
+    "easy-generate-fast": "node migrate-referral-codes-optimized.js --easy"
   },
   "dependencies": {
     "@google-cloud/recaptcha-enterprise": "^6.2.0",

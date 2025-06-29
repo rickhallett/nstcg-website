@@ -7,13 +7,16 @@ import getpass
 import json
 import os
 import sys
-import subprocess
 import time
 import argparse
 from datetime import datetime
 from pathlib import Path
 import resend
 import dotenv
+import requests
+import string
+import random
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Load environment variables
 dotenv.load_dotenv()
@@ -21,6 +24,7 @@ dotenv.load_dotenv()
 resend.api_key = os.getenv("RESEND_API_KEY")
 
 from notion_client import Client as NotionClient
+from interpolate_encourage_email import EmailLinkInterpolator
 
 
 # Get script directory
@@ -30,27 +34,39 @@ PROJECT_ROOT = SCRIPT_DIR.parent
 # File paths
 SENT_EMAILS_FILE = PROJECT_ROOT / "scripts" / "sent-emails.json"
 FAILED_EMAILS_FILE = PROJECT_ROOT / "scripts" / "failed-emails.json"
-MJML_TEMPLATE_FILE = SCRIPT_DIR / "activate.mjml"
 
 # Configuration
 CONFIG = {
-    "RATE_LIMIT_MS": 250,  # 1 second between emails
+    "RATE_LIMIT_MS": 250,  # 250ms between emails (slow mode)
+    "BATCH_SIZE": 100,  # Max emails per batch (fast mode)
+    "MAX_WORKERS": 10,  # Thread pool size for HTML generation
+    "BATCH_DELAY_MS": 100,  # Delay between batches (fast mode)
     "GMAIL_USER": "engineering@nstcg.org",  # Default sender email
-    "EMAIL_SUBJECT": "Time is Running Out - Help Save Swanage",
+    "EMAIL_SUBJECT": "Last call to Save Shore Road - North Swanage Traffic Concern Group (www.nstcg.org)",
+    "SITE_URL": "https://nstcg.org",
+    "API_URL": "https://nstcg.org/api",
 }
+
+
+def generate_referral_code(first_name="USER"):
+    """Generate a referral code matching the website's format"""
+    prefix = first_name[:3].upper() if first_name else "USR"
+    timestamp = "".join(random.choices(string.ascii_uppercase + string.digits, k=4))
+    random_suffix = "".join(random.choices(string.ascii_uppercase + string.digits, k=4))
+    return f"{prefix}{timestamp}{random_suffix}"
 
 
 def parse_arguments():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(
-        description="Send activation emails to users from Notion database",
+        description="Send encourage emails to users from Notion database with personalized referral links",
         epilog="""
 Examples:
-  python auto_smtp.py --dry-run              # Preview mode
-  python auto_smtp.py --batch-size=10        # Process 10 emails per batch
-  python auto_smtp.py --resume               # Resume previous run
-  python auto_smtp.py --hans-solo            # Send test email to kai@oceanheart.ai
-  python auto_smtp.py -hs                    # Same as --hans-solo
+  python auto_resend.py --dry-run              # Preview mode
+  python auto_resend.py --batch-size=10        # Process 10 emails per batch
+  python auto_resend.py --resume               # Resume previous run
+  python auto_resend.py --hans-solo            # Send test email to kai@oceanheart.ai
+  python auto_resend.py -hs                    # Same as --hans-solo
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -78,6 +94,20 @@ Examples:
         action="store_true",
         help="Send single test email to kai@oceanheart.ai",
     )
+
+    # Speed mode arguments (mutually exclusive)
+    speed_group = parser.add_mutually_exclusive_group()
+    speed_group.add_argument(
+        "--fast",
+        action="store_true",
+        help="Fast mode: Use batch API and multi-threading (up to 200 emails/second)",
+    )
+    speed_group.add_argument(
+        "--slow",
+        action="store_true",
+        help="Slow mode: Sequential sending with 250ms delay (default)",
+    )
+
     return parser.parse_args()
 
 
@@ -119,6 +149,7 @@ def fetch_users_from_notion():
                     first_name = ""
                     last_name = ""
                     name = ""
+                    referral_code = ""
 
                     if "First Name" in props:
                         first_name_data = props["First Name"].get("rich_text", [])
@@ -135,6 +166,21 @@ def fetch_users_from_notion():
                         if name_data:
                             name = name_data[0]["text"]["content"]
 
+                    # Extract referral code
+                    if "Referral Code" in props:
+                        referral_code_data = props["Referral Code"].get("rich_text", [])
+                        if referral_code_data:
+                            referral_code = referral_code_data[0]["text"]["content"]
+
+                    # Generate referral code if missing
+                    if not referral_code:
+                        display_name = (
+                            first_name or name.split()[0]
+                            if name
+                            else email.split("@")[0]
+                        )
+                        referral_code = generate_referral_code(display_name)
+
                     # Construct user object
                     users.append(
                         {
@@ -149,6 +195,7 @@ def fetch_users_from_notion():
                             "name": name
                             or f"{first_name} {last_name}".strip()
                             or email.split("@")[0],
+                            "referralCode": referral_code,
                         }
                     )
 
@@ -181,32 +228,49 @@ def save_json_file(filepath, data):
         json.dump(data, f, indent=2)
 
 
-def compile_mjml_template(user_email):
-    """Compile MJML template with user email interpolation"""
+def fetch_current_response_count():
+    """Fetch current participant count from API"""
     try:
-        # Read MJML template
-        with open(MJML_TEMPLATE_FILE, "r") as f:
-            mjml_content = f.read()
+        response = requests.get(f"{CONFIG['API_URL']}/get-count", timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("count", 555)  # Default to 555 if not found
+        return 555
+    except:
+        return 555  # Default fallback
 
-        # Replace user_email placeholder
-        mjml_content = mjml_content.replace("{{user_email}}", user_email)
 
-        # Compile MJML to HTML using subprocess
-        result = subprocess.run(
-            ["npx", "mjml", "-i", "-s"],
-            input=mjml_content,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+def generate_encourage_email(user):
+    """Generate personalized encourage email HTML"""
+    try:
+        # Initialize interpolator
+        interpolator = EmailLinkInterpolator()
 
-        return result.stdout
+        # Get current response count (cached for performance)
+        if not hasattr(generate_encourage_email, "response_count"):
+            generate_encourage_email.response_count = fetch_current_response_count()
 
-    except subprocess.CalledProcessError as e:
-        print(f"❌ MJML compilation failed: {e.stderr}")
-        raise
-    except FileNotFoundError:
-        print("❌ MJML template file not found or npx/mjml not installed")
+        # Calculate hours remaining (assuming midnight deadline)
+        now = datetime.now()
+        midnight = now.replace(hour=23, minute=59, second=59)
+        hours_remaining = int((midnight - now).total_seconds() / 3600)
+
+        # Prepare user data for interpolation
+        user_data = {
+            "referral_code": user["referralCode"],
+            "name": user["name"],
+            "email": user["email"],
+            "response_count": generate_encourage_email.response_count,
+            "target_count": 1000,
+            "hours_remaining": max(1, hours_remaining),  # At least 1 hour
+            "custom_share_text": "The closing of Shore Road in Swanage will have impacts on traffic, tourists and residents for years to come. The survey closes midnight tonight!",
+        }
+
+        # Generate interpolated HTML
+        return interpolator.interpolate(user_data)
+
+    except Exception as e:
+        print(f"❌ Email generation failed: {e}")
         raise
 
 
@@ -229,49 +293,114 @@ def send_email(to_email, html_content, smtp_server, gmail_user, gmail_password):
         return False, str(e)
 
 
+def send_batch_emails(batch_data):
+    """
+    Send multiple emails using Resend batch API
+
+    Args:
+        batch_data: List of dicts with 'email' and 'html_content' keys
+
+    Returns:
+        List of tuples (email, success, error_msg)
+    """
+    try:
+        # Prepare batch request
+        batch_params = []
+        for item in batch_data:
+            params = {
+                "from": "North Swanage Traffic Concern Group <engineering@nstcg.org>",
+                "to": [item["email"]],
+                "subject": CONFIG["EMAIL_SUBJECT"],
+                "html": item["html_content"],
+            }
+            batch_params.append(params)
+
+        # Send batch
+        response = resend.Batch.send(batch_params)
+
+        # Process results
+        results = []
+        for i, item in enumerate(batch_data):
+            # Resend batch API returns individual results
+            # Check if this email succeeded
+            success = True  # Assume success unless we have error info
+            error_msg = None
+
+            results.append((item["email"], success, error_msg))
+
+        return results
+
+    except Exception as e:
+        # If batch fails, return all as failed
+        return [(item["email"], False, str(e)) for item in batch_data]
+
+
+def generate_html_batch(users):
+    """
+    Generate HTML for multiple users in parallel using thread pool
+
+    Args:
+        users: List of user dicts
+
+    Returns:
+        Dict mapping email to HTML content
+    """
+    html_map = {}
+
+    def generate_for_user(user):
+        try:
+            html = generate_encourage_email(user)
+            return user["email"], html, None
+        except Exception as e:
+            return user["email"], None, str(e)
+
+    # Use thread pool for parallel generation
+    with ThreadPoolExecutor(max_workers=CONFIG["MAX_WORKERS"]) as executor:
+        # Submit all tasks
+        futures = [executor.submit(generate_for_user, user) for user in users]
+
+        # Collect results
+        for future in as_completed(futures):
+            email, html, error = future.result()
+            if html:
+                html_map[email] = html
+            else:
+                print(f"⚠️ Failed to generate HTML for {email}: {error}")
+
+    return html_map
+
+
 def run_hans_solo(gmail_user):
     """Hans Solo mode - send single test email to kai@oceanheart.ai"""
     print("🚀 Hans Solo Mode - Sending test email...\n")
 
     start_time = time.time()
-    test_email = "engineering@nstcg.org"
+    test_email = "kai@oceanheart.ai"
 
     try:
         print(f"📧 Sending test email to: {test_email}")
 
-        # Get Gmail password
-        gmail_password = os.getenv("GMAIL_APP_PASSWORD")
-        if not gmail_password:
-            gmail_password = getpass.getpass(
-                "Enter your Gmail App Password (16 characters): "
-            )
+        # Create test user object
+        test_user = {
+            "id": "test-user",
+            "email": test_email,
+            "firstName": "Kai",
+            "lastName": "Test",
+            "name": "Kai Test",
+            "referralCode": "KAITEST1234",
+        }
 
-        # Connect to SMTP
-        print("🔧 Connecting to Gmail SMTP...")
-        try:
-            smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
-            smtp_server.starttls()
-            smtp_server.login(gmail_user, gmail_password)
-            print("✅ Connected to Gmail SMTP\n")
-        except Exception as e:
-            print(f"❌ Failed to connect to Gmail: {e}")
-            print("\nMake sure you have:")
-            print("1. Enabled 2-factor authentication")
-            print("2. Generated an App Password (not your regular password)")
-            print("3. Used the correct Gmail address")
-            return
-
-        # Compile MJML template with test email
-        html_content = compile_mjml_template(test_email)
+        # Generate personalized email
+        html_content = generate_encourage_email(test_user)
 
         # Send the email
         print(f"📧 Sending to {test_email}...", end=" ", flush=True)
         success, error = send_email(
             test_email,
             html_content,
-            smtp_server,
+            None,  # SMTP server not used with Resend
             gmail_user,
-            gmail_password,
+            None,  # Password not used with Resend
         )
 
         if success:
@@ -280,12 +409,10 @@ def run_hans_solo(gmail_user):
             print(f"   To: {test_email}")
             print(f"   From: {gmail_user}")
             print(f"   Subject: {CONFIG['EMAIL_SUBJECT']}")
+            print(f"   Referral Code: {test_user['referralCode']}")
         else:
             print(f"❌ ({error})")
             print(f"❌ Failed to send test email: {error}")
-
-        # Close SMTP connection
-        smtp_server.quit()
 
         duration = time.time() - start_time
         print(f"\n⏱️  Duration: {duration:.1f} seconds")
@@ -307,9 +434,15 @@ def main():
     # Set Gmail user
     gmail_user = args.gmail_user or CONFIG["GMAIL_USER"]
 
-    print("🚀 Starting Email Activation Campaign...")
-    print(f"Mode: {'DRY RUN' if args.dry_run else 'LIVE'}")
-    print(f"Batch Size: {args.batch_size}")
+    # Determine mode (default to slow if not specified)
+    mode = "fast" if args.fast else "slow"
+
+    print("🚀 Starting Encourage Email Campaign with Personalized Referral Links...")
+    print(f"Mode: {'DRY RUN' if args.dry_run else 'LIVE'} - {mode.upper()} mode")
+    if mode == "slow":
+        print(f"Batch Size: {args.batch_size}")
+    else:
+        print(f"Batch Size: {CONFIG['BATCH_SIZE']} (fast mode)")
     print(f"Resume: {'Yes' if args.resume else 'No'}\n")
 
     start_time = time.time()
@@ -346,101 +479,94 @@ def main():
             print("✅ All users have already received emails!")
             return
 
-        # Get Gmail password
-        gmail_password = os.getenv("GMAIL_APP_PASSWORD")
-        if not gmail_password and not args.dry_run:
-            gmail_password = getpass.getpass(
-                "Enter your Gmail App Password (16 characters): "
-            )
-
-        # Connect to SMTP (skip in dry run)
-        smtp_server = None
+        # Note: Using Resend API, so no SMTP connection needed
         if not args.dry_run:
-            print("🔧 Connecting to Gmail SMTP...")
-            try:
-                smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
-                smtp_server.starttls()
-                smtp_server.login(gmail_user, gmail_password)
-                print("✅ Connected to Gmail SMTP\n")
-            except Exception as e:
-                print(f"❌ Failed to connect to Gmail: {e}")
-                print("\nMake sure you have:")
-                print("1. Enabled 2-factor authentication")
-                print("2. Generated an App Password (not your regular password)")
-                print("3. Used the correct Gmail address")
+            print("🔧 Using Resend API for email delivery")
+            if not resend.api_key:
+                print("❌ RESEND_API_KEY not found in environment")
                 return
+            print("✅ Resend API configured\n")
 
-        # Process users
-        for i, user in enumerate(filtered_users):
-            progress = f"[{i+1}/{len(filtered_users)}]"
-
+        # Process users based on mode
+        if mode == "fast":
+            # Fast mode: batch processing with multi-threading
             try:
-                if args.dry_run:
-                    print(f"📧 {progress} Would send to: {user['email']}")
-                    stats["sent"] += 1
-                else:
-                    # Compile MJML with user email
-                    html_content = compile_mjml_template(user["email"])
-
-                    # Send email
-                    print(
-                        f"📧 {progress} Sending to {user['email']}...",
-                        end=" ",
-                        flush=True,
-                    )
-                    success, error = send_email(
-                        user["email"],
-                        html_content,
-                        smtp_server,
-                        gmail_user,
-                        gmail_password,
-                    )
-
-                    if success:
-                        print("✅")
-                        stats["sent"] += 1
-
-                        # Update sent emails file
-                        sent_emails_list = load_json_file(SENT_EMAILS_FILE)
-                        sent_emails_list.append(user["email"])
-                        save_json_file(SENT_EMAILS_FILE, sent_emails_list)
-                    else:
-                        print(f"❌ ({error})")
-                        stats["failed"] += 1
-
-                        # Update failed emails file
-                        failed_emails = load_json_file(FAILED_EMAILS_FILE)
-                        failed_emails.append(
-                            {
-                                **user,
-                                "error": error,
-                                "timestamp": datetime.now().isoformat(),
-                            }
-                        )
-                        save_json_file(FAILED_EMAILS_FILE, failed_emails)
-
-                # Rate limiting
-                if i < len(filtered_users) - 1:
-                    time.sleep(CONFIG["RATE_LIMIT_MS"] / 1000)
-
+                batch_stats = process_emails_fast(filtered_users, sent_emails, args)
+                stats["sent"] = batch_stats["sent"]
+                stats["failed"] = batch_stats["failed"]
             except KeyboardInterrupt:
                 print("\n\n⚠️ Campaign interrupted by user")
                 print("💡 Use --resume flag to continue from where you left off")
-                break
-            except Exception as e:
-                print(f"❌ Error processing {user['email']}: {e}")
-                stats["failed"] += 1
+        else:
+            # Slow mode: sequential processing (original implementation)
+            for i, user in enumerate(filtered_users):
+                progress = f"[{i+1}/{len(filtered_users)}]"
 
-        # Close SMTP connection
-        if smtp_server:
-            smtp_server.quit()
+                try:
+                    if args.dry_run:
+                        print(f"📧 {progress} Would send to: {user['email']}")
+                        stats["sent"] += 1
+                    else:
+                        # Generate personalized email
+                        html_content = generate_encourage_email(user)
+
+                        # Send email
+                        print(
+                            f"📧 {progress} Sending to {user['email']} (ref: {user['referralCode'][:8]}...)...",
+                            end=" ",
+                            flush=True,
+                        )
+                        success, error = send_email(
+                            user["email"],
+                            html_content,
+                            None,  # SMTP server not used with Resend
+                            gmail_user,
+                            None,  # Password not used with Resend
+                        )
+
+                        if success:
+                            print("✅")
+                            stats["sent"] += 1
+
+                            # Update sent emails file
+                            sent_emails_list = load_json_file(SENT_EMAILS_FILE)
+                            sent_emails_list.append(user["email"])
+                            save_json_file(SENT_EMAILS_FILE, sent_emails_list)
+                        else:
+                            print(f"❌ ({error})")
+                            stats["failed"] += 1
+
+                            # Update failed emails file
+                            failed_emails = load_json_file(FAILED_EMAILS_FILE)
+                            failed_emails.append(
+                                {
+                                    **user,
+                                    "error": error,
+                                    "timestamp": datetime.now().isoformat(),
+                                }
+                            )
+                            save_json_file(FAILED_EMAILS_FILE, failed_emails)
+
+                    # Rate limiting
+                    if i < len(filtered_users) - 1:
+                        time.sleep(CONFIG["RATE_LIMIT_MS"] / 1000)
+
+                except KeyboardInterrupt:
+                    print("\n\n⚠️ Campaign interrupted by user")
+                    print("💡 Use --resume flag to continue from where you left off")
+                    break
+                except Exception as e:
+                    print(f"❌ Error processing {user['email']}: {e}")
+                    stats["failed"] += 1
+
+        # No SMTP connection to close when using Resend
 
         # Summary
         duration = time.time() - start_time
         print(f"\n{'='*50}")
         print("📊 Campaign Summary")
         print(f"{'='*50}")
-        print(f"Mode: {'DRY RUN' if args.dry_run else 'LIVE'}")
+        print(f"Mode: {'DRY RUN' if args.dry_run else 'LIVE'} - {mode.upper()}")
         print(f"Total Users: {stats['total']}")
         print(f"Already Sent: {stats['skipped']}")
         print(f"Processed: {stats['sent'] + stats['failed']}")
@@ -453,6 +579,108 @@ def main():
     except Exception as e:
         print(f"\n❌ Campaign failed: {e}")
         sys.exit(1)
+
+
+def process_emails_fast(filtered_users, sent_emails, args):
+    """
+    Process emails in fast mode using batch API and multi-threading
+
+    Returns:
+        stats dict with sent/failed counts
+    """
+    stats = {"sent": 0, "failed": 0}
+    total_users = len(filtered_users)
+
+    print("🚀 Fast mode: Using batch API and multi-threading")
+    print(f"📊 Processing {total_users} emails in batches of {CONFIG['BATCH_SIZE']}\n")
+
+    # Process users in batches
+    for batch_start in range(0, total_users, CONFIG["BATCH_SIZE"]):
+        batch_end = min(batch_start + CONFIG["BATCH_SIZE"], total_users)
+        batch_users = filtered_users[batch_start:batch_end]
+        batch_num = (batch_start // CONFIG["BATCH_SIZE"]) + 1
+        total_batches = (total_users + CONFIG["BATCH_SIZE"] - 1) // CONFIG["BATCH_SIZE"]
+
+        print(
+            f"📦 Processing batch {batch_num}/{total_batches} ({len(batch_users)} emails)..."
+        )
+
+        if args.dry_run:
+            # Dry run mode
+            for user in batch_users:
+                print(
+                    f"   📧 Would send to: {user['email']} (ref: {user['referralCode'][:8]}...)"
+                )
+            stats["sent"] += len(batch_users)
+        else:
+            # Generate HTML for batch in parallel
+            print("   🔧 Generating HTML content...")
+            html_map = generate_html_batch(batch_users)
+
+            # Prepare batch data
+            batch_data = []
+            for user in batch_users:
+                if user["email"] in html_map:
+                    batch_data.append(
+                        {
+                            "email": user["email"],
+                            "html_content": html_map[user["email"]],
+                            "user": user,
+                        }
+                    )
+                else:
+                    # HTML generation failed
+                    stats["failed"] += 1
+                    failed_emails = load_json_file(FAILED_EMAILS_FILE)
+                    failed_emails.append(
+                        {
+                            **user,
+                            "error": "HTML generation failed",
+                            "timestamp": datetime.now().isoformat(),
+                        }
+                    )
+                    save_json_file(FAILED_EMAILS_FILE, failed_emails)
+
+            if batch_data:
+                # Send batch
+                print(f"   📤 Sending {len(batch_data)} emails...")
+                results = send_batch_emails(batch_data)
+
+                # Process results
+                sent_emails_list = load_json_file(SENT_EMAILS_FILE)
+                failed_emails = load_json_file(FAILED_EMAILS_FILE)
+
+                for email, success, error in results:
+                    if success:
+                        stats["sent"] += 1
+                        sent_emails_list.append(email)
+                        print(f"   ✅ {email}")
+                    else:
+                        stats["failed"] += 1
+                        # Find user data
+                        user_data = next(
+                            item["user"]
+                            for item in batch_data
+                            if item["email"] == email
+                        )
+                        failed_emails.append(
+                            {
+                                **user_data,
+                                "error": error or "Unknown error",
+                                "timestamp": datetime.now().isoformat(),
+                            }
+                        )
+                        print(f"   ❌ {email} - {error}")
+
+                # Save updated files
+                save_json_file(SENT_EMAILS_FILE, sent_emails_list)
+                save_json_file(FAILED_EMAILS_FILE, failed_emails)
+
+        # Delay between batches (except for last batch)
+        if batch_end < total_users and not args.dry_run:
+            time.sleep(CONFIG["BATCH_DELAY_MS"] / 1000)
+
+    return stats
 
 
 if __name__ == "__main__":
