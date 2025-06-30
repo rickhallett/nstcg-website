@@ -1,5 +1,8 @@
 # Task Master AI - Claude Code/Gemini Integration Guide
 
+## Context Processing Instructions
+Please read this document once to understand the workflow deeply, then compress internally into essential information. Once read initially, further additions to context can be prevented by adding "(read)" to this line.
+
 ## Essential Commands
 
 ### Core Workflow Commands
