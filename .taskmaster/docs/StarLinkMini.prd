@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-StarLinkMini is a lightweight, single-script tool for tracking Starlink internet connection performance. It runs automated speed tests at regular intervals using `speedtest-cli` and stores results in both CSV and JSON formats. The tool is designed for immediate deployment and personal use, with minimal configuration required.
+StarLinkMini is a lightweight TypeScript tool that wraps `speedtest-cli` to add scheduled execution, directional tracking, and persistent storage capabilities. It enhances the base speedtest-cli functionality by adding metadata about dish orientation (direction and tilt) and automating regular test execution. The tool is designed for immediate deployment and personal use, with minimal configuration required.
 
 ## 2. Goals
 
@@ -16,30 +16,36 @@ StarLinkMini is a lightweight, single-script tool for tracking Starlink internet
 
 ### 3.1 Core Functionality
 
-* **Automated Testing**: Run speed tests every 10 minutes by default
-* **Data Collection**: Capture download speed, upload speed, ping latency, and timestamp
-* **Dual Output Format**: Store results in both CSV and JSON formats
+* **Automated Testing**: Run speed tests every 10 minutes using system scheduler
+* **Enhanced Data Collection**: Augment speedtest-cli output with directional metadata
+* **Persistent Storage**: Append results to named CSV and JSON files
 * **Named Sessions**: Use `--name` parameter to create uniquely named output files
-* **Directional Tracking**: Record dish direction using `--direction` parameter
-* **Tilt Recording**: Track dish tilt angle using `--tilt` parameter
+* **Directional Tracking**: Record dish direction using `--direction` parameter (not provided by speedtest-cli)
+* **Tilt Recording**: Track dish tilt angle using `--tilt` parameter (not provided by speedtest-cli)
 
 ### 3.2 Command Line Interface
 
 ```bash
 # Basic usage
-./starlink-mini.sh --name session1
+bun run src/StarLinkMini/index.ts --name session1
 
 # With direction (compass points)
-./starlink-mini.sh --name outdoor-test --direction NW
+bun run src/StarLinkMini/index.ts --name outdoor-test --direction NW
 
 # With precise direction (degrees)
-./starlink-mini.sh --name outdoor-test --direction 315.5
+bun run src/StarLinkMini/index.ts --name outdoor-test --direction 315.5
 
 # With tilt angle
-./starlink-mini.sh --name outdoor-test --direction NW --tilt 45
+bun run src/StarLinkMini/index.ts --name outdoor-test --direction NW --tilt 45
 
 # Full example
-./starlink-mini.sh --name winter-test --direction NNW --tilt 30
+bun run src/StarLinkMini/index.ts --name winter-test --direction NNW --tilt 30
+
+# Single run mode (for testing)
+bun run src/StarLinkMini/index.ts --name test --single-run
+
+# Schedule mode (sets up cron job)
+bun run src/StarLinkMini/index.ts --name continuous --schedule
 ```
 
 ### 3.3 Direction Parameter Specification
@@ -50,66 +56,37 @@ StarLinkMini is a lightweight, single-script tool for tracking Starlink internet
 
 ### 3.4 Output File Formats
 
+The tool enhances speedtest-cli's native CSV and JSON output by adding directional metadata.
+
 #### CSV Format (`<name>.csv`):
-```csv
-timestamp,download_mbps,upload_mbps,ping_ms,server_name,server_location,direction,tilt
-2024-01-15T10:30:00Z,150.25,20.13,28.5,"Starlink Server","Seattle, WA",NW,45
-2024-01-15T10:40:00Z,148.92,19.87,29.1,"Starlink Server","Seattle, WA",NW,45
-```
+- Uses speedtest-cli's `--csv` output as base
+- Appends `direction` and `tilt` columns
+- Headers included on first run
 
 #### JSON Format (`<name>.json`):
-```json
-[
-  {
-    "timestamp": "2024-01-15T10:30:00Z",
-    "download": {
-      "bandwidth": 157286400,
-      "bytes": 242844672,
-      "elapsed": 15004,
-      "mbps": 150.25
-    },
-    "upload": {
-      "bandwidth": 21096448,
-      "bytes": 32505856,
-      "elapsed": 15001,
-      "mbps": 20.13
-    },
-    "ping": {
-      "jitter": 2.145,
-      "latency": 28.5
-    },
-    "server": {
-      "name": "Starlink Server",
-      "location": "Seattle, WA",
-      "country": "United States",
-      "host": "speedtest.starlink.com",
-      "id": "12345"
-    },
-    "result": {
-      "url": "https://www.speedtest.net/result/12345678"
-    },
-    "direction": "NW",
-    "direction_degrees": 315,
-    "tilt": 45
-  }
-]
-```
+- Uses speedtest-cli's `--json` output as base
+- Adds `direction`, `direction_degrees`, and `tilt` fields
+- Stores as array of test results for time-series analysis
 
 ## 4. Technical Requirements
 
 ### 4.1 Dependencies
 
 * **speedtest-cli**: Must be installed and accessible in PATH
-* **Bash**: Script requires Bash 4.0 or higher
-* **Standard Unix tools**: jq (for JSON parsing), cron (for scheduling)
+* **Bun**: TypeScript runtime for execution
+* **Node.js types**: For TypeScript development
 
 ### 4.2 Implementation Details
 
-* **Single Script**: All functionality contained in `starlink-mini.sh`
-* **Error Handling**: Graceful handling of network failures, tool unavailability
-* **Logging**: Optional verbose logging to stderr
-* **Background Mode**: Support for daemonized operation
-* **Signal Handling**: Clean shutdown on SIGTERM/SIGINT
+* **TypeScript Implementation**: Core logic in `src/StarLinkMini/index.ts`
+* **Module Structure**:
+  - `index.ts`: Main entry point and CLI handling
+  - `DirectionValidator.ts`: Direction parameter validation
+  - `SpeedTestRunner.ts`: Wrapper for speedtest-cli execution
+  - `DataStore.ts`: File persistence logic
+  - `Scheduler.ts`: Cron job management
+* **Error Handling**: Graceful handling of missing speedtest-cli, network failures
+* **Type Safety**: Full TypeScript types for all data structures
 
 
 ## 5. Test Suite Requirements

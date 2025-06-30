@@ -1,9 +1,10 @@
 // StarLinkOptimiser/src/WebServer.ts
 import { Config } from './ConfigParser';
 import { StateManager } from '../../src/StateManager';
+import { IService } from '../../src/IService';
 import { Server } from 'bun';
 
-export class WebServer {
+export class WebServer implements IService {
     private config: Config;
     private stateManager: StateManager;
     private server: Server | null = null;
@@ -13,7 +14,7 @@ export class WebServer {
         this.stateManager = StateManager.getInstance();
     }
 
-    start() {
+    async start() {
         this.server = Bun.serve({
             port: this.config.port,
             fetch: (req) => {

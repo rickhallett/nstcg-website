@@ -4,6 +4,7 @@ import { SpeedTestRunner } from './SpeedTestRunner';
 import { DataStore, SpeedTestResult } from './DataStore';
 import { Logger } from './Logger';
 import { StateManager } from '../../src/StateManager';
+import { IService } from '../../src/IService';
 import { writeFileSync, readFileSync, existsSync, rmSync } from 'fs';
 
 export enum ServiceState {
@@ -15,7 +16,7 @@ export enum ServiceState {
     FAILED,
 }
 
-export class StarLinkOptimiser {
+export class StarLinkOptimiser implements IService {
     private config: Config;
     public dataStore: DataStore;
     private timer: Timer | null = null;
@@ -66,14 +67,14 @@ export class StarLinkOptimiser {
             } catch (error) {
                 Logger.log(this.config, `Error running speedtest: ${error.message}`);
                 this.stateManager.set('serviceState', ServiceState.FAILED);
-                this.stop();
+                await this.stop();
             } finally {
                 this.runTest();
             }
         }, this.config.frequency);
     }
 
-    stop() {
+    async stop() {
         if (this.stateManager.get('serviceState') !== ServiceState.FAILED) {
             this.stateManager.set('serviceState', ServiceState.STOPPING);
         }

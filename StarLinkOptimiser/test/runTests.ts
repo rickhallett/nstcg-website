@@ -9,6 +9,7 @@ import './StarLinkOptimiser.test';
 import './JqWrapper.test';
 import './WebServer.test';
 import '../../test/StateManager.test';
+import '../../test/ServiceRegistry.test';
 // Import other test files here
 
 run();
