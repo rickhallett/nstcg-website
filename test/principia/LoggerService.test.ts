@@ -17,4 +17,19 @@ describe('LoggerService', () => {
     const instance2 = LoggerService.getInstance();
     expect(instance1).toBe(instance2);
   });
+
+  it('should have log level constants (DEBUG, INFO, WARN, ERROR)', () => {
+    expect(LoggerService.LOG_LEVELS.DEBUG).toBe(0);
+    expect(LoggerService.LOG_LEVELS.INFO).toBe(1);
+    expect(LoggerService.LOG_LEVELS.WARN).toBe(2);
+    expect(LoggerService.LOG_LEVELS.ERROR).toBe(3);
+  });
+
+  it('should accept setLevel with string values', () => {
+    loggerService.setLevel('DEBUG');
+    expect(loggerService.getCurrentLevel()).toBe(LoggerService.LOG_LEVELS.DEBUG);
+    
+    loggerService.setLevel('ERROR');
+    expect(loggerService.getCurrentLevel()).toBe(LoggerService.LOG_LEVELS.ERROR);
+  });
 });
