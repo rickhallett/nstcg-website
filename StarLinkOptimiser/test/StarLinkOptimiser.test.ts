@@ -68,6 +68,19 @@ port: 3000
         optimiser.stop();
     });
 
+    it('should change frequency', async () => {
+        const csv = `Server ID,Sponsor,Server Name,Timestamp,Distance,Ping,Download,Upload,Share,IP Address
+11547,"KamaTera, Inc.","London","2025-06-30T10:23:34.290577Z",2131.952554256924,33.043,164663739.40317908,26290481.884721164,"",209.198.129.225`;
+        mockSpeedTestRunner.run.mockImplementation(() => Promise.resolve(csv));
+        await optimiser.start();
+        await new Promise(resolve => setTimeout(resolve, 150));
+        optimiser.setFrequency(50);
+        await new Promise(resolve => setTimeout(resolve, 150));
+        const results = optimiser.dataStore.getAll();
+        expect(results.length >= 3).toBe(true);
+        optimiser.stop();
+    });
+
     it('should stop on SIGINT', async () => {
         const proc = Bun.spawn(['bun', 'src/index.ts'], {
             cwd: './',

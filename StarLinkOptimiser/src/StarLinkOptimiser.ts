@@ -35,7 +35,17 @@ export class StarLinkOptimiser {
         this.state = ServiceState.INITIALIZING;
         Logger.log(this.config, 'Starting StarLinkOptimiser');
         this.state = ServiceState.RUNNING;
-        this.timer = setInterval(async () => {
+        this.runTest();
+
+        process.on('SIGINT', () => this.stop());
+        process.on('SIGTERM', () => this.stop());
+    }
+
+    private runTest() {
+        if (this.state !== ServiceState.RUNNING) {
+            return;
+        }
+        this.timer = setTimeout(async () => {
             try {
                 const output = await this.speedTestRunner.run(this.config);
                 Logger.log(this.config, `Speedtest output: ${output}`);
@@ -47,11 +57,10 @@ export class StarLinkOptimiser {
                 Logger.log(this.config, `Error running speedtest: ${error.message}`);
                 this.state = ServiceState.FAILED;
                 this.stop();
+            } finally {
+                this.runTest();
             }
         }, this.config.frequency);
-
-        process.on('SIGINT', () => this.stop());
-        process.on('SIGTERM', () => this.stop());
     }
 
     stop() {
@@ -60,11 +69,15 @@ export class StarLinkOptimiser {
         }
         Logger.log(this.config, 'Stopping StarLinkOptimiser');
         if (this.timer) {
-            clearInterval(this.timer);
+            clearTimeout(this.timer);
         }
         if (this.state !== ServiceState.FAILED) {
             this.state = ServiceState.STOPPED;
         }
+    }
+
+    setFrequency(frequency: number) {
+        this.config.frequency = frequency;
     }
 
     getState(): ServiceState {
