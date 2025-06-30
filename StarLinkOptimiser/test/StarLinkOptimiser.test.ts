@@ -50,5 +50,27 @@ port: 3000
         expect(results[0].upload).toBe(26290481.884721164);
         expect(results[0].ping).toBe(33.043);
     });
+
+    it('should stop on SIGINT', async () => {
+        const proc = Bun.spawn(['bun', 'src/index.ts'], {
+            cwd: './',
+            stdio: ['inherit', 'inherit', 'inherit'],
+        });
+        await new Promise(resolve => setTimeout(resolve, 200));
+        proc.kill('SIGINT');
+        const exitCode = await proc.exited;
+        expect(exitCode).toBe(0);
+    });
+
+    it('should stop on SIGTERM', async () => {
+        const proc = Bun.spawn(['bun', 'src/index.ts'], {
+            cwd: './',
+            stdio: ['inherit', 'inherit', 'inherit'],
+        });
+        await new Promise(resolve => setTimeout(resolve, 200));
+        proc.kill('SIGTERM');
+        const exitCode = await proc.exited;
+        expect(exitCode).toBe(0);
+    });
 });
 

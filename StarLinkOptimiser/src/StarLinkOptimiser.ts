@@ -34,6 +34,9 @@ export class StarLinkOptimiser {
                 this.dataStore.add(result);
             }
         }, this.config.frequency);
+
+        process.on('SIGINT', () => this.stop());
+        process.on('SIGTERM', () => this.stop());
     }
 
     stop() {

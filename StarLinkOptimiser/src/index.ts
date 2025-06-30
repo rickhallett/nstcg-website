@@ -1,2 +1,5 @@
 // StarLinkOptimiser/src/index.ts
-console.log("Hello from StarLinkOptimiser");
+import { StarLinkOptimiser } from './StarLinkOptimiser';
+
+const optimiser = await StarLinkOptimiser.create('config.development.yaml');
+optimiser.start();
