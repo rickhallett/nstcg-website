@@ -30,6 +30,12 @@ export class DataStore {
         return this.results;
     }
 
+    getState(): Db {
+        return {
+            results: this.results,
+        };
+    }
+
     private load() {
         if (existsSync(this.dbPath)) {
             const data = readFileSync(this.dbPath, 'utf-8');

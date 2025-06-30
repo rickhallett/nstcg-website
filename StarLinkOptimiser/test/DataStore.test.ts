@@ -41,4 +41,18 @@ describe('DataStore', () => {
         expect(results.length).toBe(1);
         expect(results[0]).toEqual(result);
     });
+
+    it('should return the current state', () => {
+        const dataStore = new DataStore(testDbPath);
+        const result: SpeedTestResult = {
+            timestamp: new Date().toISOString(),
+            download: 100,
+            upload: 50,
+            ping: 20
+        };
+        dataStore.add(result);
+        const state = dataStore.getState();
+        expect(state.results.length).toBe(1);
+        expect(state.results[0]).toEqual(result);
+    });
 });

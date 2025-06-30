@@ -8,6 +8,7 @@ import './Logger.test';
 import './StarLinkOptimiser.test';
 import './JqWrapper.test';
 import './WebServer.test';
+import '../../test/StateManager.test';
 // Import other test files here
 
 run();

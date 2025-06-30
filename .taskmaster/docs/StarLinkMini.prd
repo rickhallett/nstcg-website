@@ -111,11 +111,6 @@ timestamp,download_mbps,upload_mbps,ping_ms,server_name,server_location,directio
 * **Background Mode**: Support for daemonized operation
 * **Signal Handling**: Clean shutdown on SIGTERM/SIGINT
 
-### 4.3 Performance Requirements
-
-* **Memory Usage**: Less than 50MB resident memory
-* **CPU Usage**: Minimal, spike only during test execution
-* **Storage**: Approximately 1KB per test result
 
 ## 5. Test Suite Requirements
 
