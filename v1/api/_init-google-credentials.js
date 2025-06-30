@@ -1,10 +1,10 @@
 // Initialize Google Application Credentials from environment variable
 // This runs at server startup in Vercel
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-function initializeGoogleCredentials() {
+export function initializeGoogleCredentials() {
   // Check if running in Vercel
   if (process.env.VERCEL && process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
     try {
@@ -28,4 +28,3 @@ function initializeGoogleCredentials() {
 // Run initialization
 initializeGoogleCredentials();
 
-module.exports = { initializeGoogleCredentials };

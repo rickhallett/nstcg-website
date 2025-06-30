@@ -333,7 +333,4 @@ window.ReferralUtils.initializeShareButtons = function(options) {
 }
 
 // Make utilities available globally
-if (typeof module !== 'undefined' && module.exports) {
-  // Node.js/CommonJS
-  module.exports = window.ReferralUtils;
-}
+export default window.ReferralUtils;

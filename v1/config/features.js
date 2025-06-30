@@ -158,16 +158,6 @@ if (typeof process !== 'undefined' && process.env) {
 // Export functions to check features
 export { loadFeatures };
 
-// Export for Node.js (API endpoints)
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    features,
-    loadFeatures,
-    // Provide synchronous access for backward compatibility
-    get current() { return features; }
-  };
-}
-
 // Export for browser (ES6 modules)
 export default {
   features,
