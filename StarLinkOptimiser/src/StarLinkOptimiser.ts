@@ -47,6 +47,15 @@ export class StarLinkOptimiser {
         }
     }
 
+    runInBackground() {
+        const proc = Bun.spawn(['bun', 'src/index.ts'], {
+            cwd: './',
+            stdio: ['ignore', 'ignore', 'ignore'],
+            detached: true,
+        });
+        proc.unref();
+    }
+
     private parseCsv(csv: string): SpeedTestResult | null {
         const lines = csv.split('\n');
         if (lines.length < 2) {

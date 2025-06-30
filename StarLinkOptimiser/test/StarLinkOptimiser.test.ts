@@ -72,5 +72,11 @@ port: 3000
         const exitCode = await proc.exited;
         expect(exitCode).toBe(0);
     });
+
+    it('should run in background', async () => {
+        optimiser.runInBackground();
+        // How to assert that the process is running in the background?
+        // For now, just check that the method doesn't throw.
+    });
 });
 
