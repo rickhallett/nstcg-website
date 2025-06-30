@@ -2,16 +2,21 @@
   "name": "starlink-optimiser",
   "version": "0.0.1",
   "private": true,
+  "bin": {
+    "starlink-optimiser": "src/cli.ts"
+  },
   "scripts": {
     "start": "bun src/index.ts",
     "test": "/Users/oceanheart/.bun/bin/bun test/runTests.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/js-yaml": "^4.0.9"
+    "@types/js-yaml": "^4.0.9",
+    "@types/yargs": "^17.0.33"
   },
   "dependencies": {
     "chart.js": "^4.5.0",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "yargs": "^18.0.0"
   }
 }
