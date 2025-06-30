@@ -4,6 +4,7 @@ import { EventBus } from './EventBus';
 export class StateManager {
   private static instance: StateManager;
   private state: any = {};
+  private subscribers: Map<string, Set<Function>> = new Map();
   
   static getInstance(): StateManager {
     if (!StateManager.instance) {
@@ -64,6 +65,9 @@ export class StateManager {
       path: path,
       value: value
     });
+    
+    // Notify subscribers
+    this.notifySubscribers(path, value);
   }
   
   update(updates: Record<string, any>): void {
@@ -86,5 +90,30 @@ export class StateManager {
     
     // Emit single batch change event
     EventBus.getInstance().emit('state:batch-changed', updates);
+  }
+  
+  subscribe(path: string, handler: Function): Function {
+    if (!this.subscribers.has(path)) {
+      this.subscribers.set(path, new Set());
+    }
+    this.subscribers.get(path)!.add(handler);
+    
+    // Return unsubscribe function
+    return () => {
+      const handlers = this.subscribers.get(path);
+      if (handlers) {
+        handlers.delete(handler);
+        if (handlers.size === 0) {
+          this.subscribers.delete(path);
+        }
+      }
+    };
+  }
+  
+  private notifySubscribers(path: string, value: any): void {
+    const handlers = this.subscribers.get(path);
+    if (handlers) {
+      handlers.forEach(handler => handler(value));
+    }
   }
 }

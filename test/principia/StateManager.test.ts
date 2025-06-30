@@ -1,4 +1,4 @@
-import { describe, it, beforeEach, expect, spyOn } from 'bun:test';
+import { describe, it, beforeEach, expect, spyOn, mock } from 'bun:test';
 import { StateManager } from '../../src/principia/StateManager';
 import { EventBus } from '../../src/principia/EventBus';
 
@@ -74,5 +74,27 @@ describe('StateManager', () => {
       'user.name': 'Jane',
       'theme': 'dark'
     });
+  });
+
+  it('should subscribe a listener to a specific state path', () => {
+    const stateManager = StateManager.getInstance();
+    const listener = mock(() => {});
+    
+    stateManager.initialize({ user: { name: 'John' } });
+    stateManager.subscribe('user.name', listener);
+    stateManager.set('user.name', 'Jane');
+    
+    expect(listener).toHaveBeenCalledWith('Jane');
+  });
+
+  it('should not call a listener if a different part of the state changes', () => {
+    const stateManager = StateManager.getInstance();
+    const listener = mock(() => {});
+    
+    stateManager.initialize({ user: { name: 'John' } });
+    stateManager.subscribe('user.name', listener);
+    stateManager.set('user.age', 30);
+    
+    expect(listener).not.toHaveBeenCalled();
   });
 });
