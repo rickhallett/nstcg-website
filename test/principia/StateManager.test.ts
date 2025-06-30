@@ -56,4 +56,23 @@ describe('StateManager', () => {
       value: 'Jane'
     });
   });
+
+  it('should update multiple values and emit a single batch event', () => {
+    const stateManager = StateManager.getInstance();
+    const eventBus = EventBus.getInstance();
+    const emitSpy = spyOn(eventBus, 'emit');
+    
+    stateManager.initialize({ user: { name: 'John' }, theme: 'light' });
+    stateManager.update({
+      'user.name': 'Jane',
+      'theme': 'dark'
+    });
+    
+    expect(stateManager.get('user.name')).toBe('Jane');
+    expect(stateManager.get('theme')).toBe('dark');
+    expect(emitSpy).toHaveBeenCalledWith('state:batch-changed', {
+      'user.name': 'Jane',
+      'theme': 'dark'
+    });
+  });
 });

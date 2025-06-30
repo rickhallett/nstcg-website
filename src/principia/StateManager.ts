@@ -65,4 +65,26 @@ export class StateManager {
       value: value
     });
   }
+  
+  update(updates: Record<string, any>): void {
+    // Apply all updates without emitting individual events
+    for (const [path, value] of Object.entries(updates)) {
+      const keys = path.split('.');
+      let current = this.state;
+      
+      for (let i = 0; i < keys.length - 1; i++) {
+        const key = keys[i];
+        if (!(key in current) || typeof current[key] !== 'object') {
+          current[key] = {};
+        }
+        current = current[key];
+      }
+      
+      const lastKey = keys[keys.length - 1];
+      current[lastKey] = this.deepClone(value);
+    }
+    
+    // Emit single batch change event
+    EventBus.getInstance().emit('state:batch-changed', updates);
+  }
 }
