@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "test": "bun test/runTests.ts"
+  },
   "devDependencies": {
     "@babel/core": "^7.27.7",
     "@babel/preset-env": "^7.27.2",

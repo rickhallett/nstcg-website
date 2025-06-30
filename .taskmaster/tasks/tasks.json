@@ -3,248 +3,253 @@
     "tasks": [
       {
         "id": 1,
-        "title": "Create ErrorHandlerService Singleton Class",
-        "description": "Implement the ErrorHandlerService as a singleton class that will serve as a centralized service for catching and handling all unhandled exceptions.",
-        "details": "Create the ErrorHandlerService.js file in the js/core directory with the following implementation:\n\n```javascript\n/**\n * ErrorHandlerService - A centralized service for catching and handling all unhandled exceptions\n */\nexport class ErrorHandlerService {\n  static _instance;\n  \n  /**\n   * Get the singleton instance\n   * @returns {ErrorHandlerService}\n   */\n  static getInstance() {\n    if (!ErrorHandlerService._instance) {\n      ErrorHandlerService._instance = new ErrorHandlerService();\n    }\n    return ErrorHandlerService._instance;\n  }\n  \n  /**\n   * Reset the singleton instance (for testing purposes)\n   */\n  static _resetInstance() {\n    ErrorHandlerService._instance = null;\n  }\n  \n  constructor() {\n    // Private constructor to enforce singleton pattern\n    if (ErrorHandlerService._instance) {\n      throw new Error('ErrorHandlerService is a singleton. Use getInstance() instead.');\n    }\n    \n    // Dependencies will be initialized in init()\n    this._logger = null;\n    this._eventBus = null;\n  }\n}\n```",
-        "testStrategy": "Test that the ErrorHandlerService is properly implemented as a singleton by verifying that getInstance() returns the same instance when called multiple times. Also test that _resetInstance() properly resets the singleton instance.",
+        "title": "Setup Project Structure and Configuration",
+        "description": "Initialize the project with Bun, TypeScript configuration, and create the basic directory structure for the StarLinkOptimiser service",
+        "details": "Create package.json with Bun runtime, setup tsconfig.json for TypeScript compilation, create src/ directory structure with config/, service/, and observer/ folders. Initialize git repository and create .gitignore. Setup basic project structure: src/config/, src/service/, src/observer/, src/types/, tests/",
+        "testStrategy": "Verify project structure exists, TypeScript compiles without errors, and Bun can execute basic TypeScript files",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
         "id": 2,
-        "title": "Implement Initialization Method",
-        "description": "Create an init() method that initializes the service by setting up dependencies and attaching global error event listeners.",
-        "details": "Add the init() method to the ErrorHandlerService class:\n\n```javascript\n/**\n * Initialize the error handler service\n */\ninit() {\n  // Get dependencies\n  const { LoggerService } = require('./LoggerService.js');\n  const { EventBus } = require('./EventBus.js');\n  \n  this._logger = LoggerService.getInstance();\n  this._eventBus = EventBus.getInstance();\n  \n  // Attach global error listeners\n  window.addEventListener('error', this._handleGlobalError.bind(this));\n  window.addEventListener('unhandledrejection', this._handleUnhandledRejection.bind(this));\n  \n  this._logger.info('ErrorHandlerService initialized');\n}\n\n/**\n * Handle global error events\n * @param {ErrorEvent} event - The error event\n * @private\n */\n_handleGlobalError(event) {\n  this.handleError(event.error || new Error(event.message), {\n    source: event.filename,\n    line: event.lineno,\n    column: event.colno\n  });\n  \n  // Prevent the default browser error handling\n  event.preventDefault();\n}\n\n/**\n * Handle unhandled promise rejections\n * @param {PromiseRejectionEvent} event - The rejection event\n * @private\n */\n_handleUnhandledRejection(event) {\n  const error = event.reason instanceof Error ? event.reason : new Error(String(event.reason));\n  this.handleError(error, { source: 'unhandled promise rejection' });\n  \n  // Prevent the default browser error handling\n  event.preventDefault();\n}\n```",
-        "testStrategy": "Test that the init() method properly attaches event listeners to the window object for 'error' and 'unhandledrejection' events. Use mock spies to verify that window.addEventListener is called with the correct parameters.",
+        "title": "Implement YAML Configuration Parser",
+        "description": "Create a configuration parser that reads YAML files with the format config.<testName>.yaml and validates the required fields",
+        "details": "Implement ConfigParser class that reads YAML files using Bun's built-in capabilities. Define TypeScript interfaces for configuration: testName (string), frequency (number in ms), output (string, default 'csv'), logging (boolean), logFile (string), port (number). Validate all required fields and provide sensible defaults. Handle file not found and parsing errors gracefully.",
+        "testStrategy": "Unit tests for valid YAML parsing, invalid YAML handling, missing file scenarios, and default value assignment",
         "priority": "high",
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
         "id": 3,
-        "title": "Implement Error Handling Logic",
-        "description": "Create the handleError method that processes errors, logs them, and emits appropriate events.",
-        "details": "Add the handleError method to the ErrorHandlerService class:\n\n```javascript\n/**\n * Handle an error\n * @param {Error} error - The error object\n * @param {Object} [context={}] - Additional context information\n */\nhandleError(error, context = {}) {\n  // Ensure we have an Error object\n  if (!(error instanceof Error)) {\n    error = new Error(String(error));\n  }\n  \n  // Log the error with additional context\n  const logContext = {\n    ...context,\n    stack: error.stack\n  };\n  \n  this._logger.error(error.message, logContext);\n  \n  // Don't show UI notification for silent errors\n  if (error.silent) {\n    return;\n  }\n  \n  // Determine user-friendly message\n  let userMessage = 'An unexpected error occurred. Please try again later.';\n  \n  // Check if this is a custom application error with a user message\n  if (error.userMessage) {\n    userMessage = error.userMessage;\n  }\n  \n  // Emit event for UI to show error message\n  this._eventBus.emit('ui:show:error', {\n    message: userMessage\n  });\n}\n```",
-        "testStrategy": "Test that the handleError method properly logs errors using the LoggerService and emits the correct events via the EventBus. Verify that it handles different types of errors correctly, including custom application errors with user messages and silent errors.",
+        "title": "Create SpeedTest CLI Wrapper",
+        "description": "Implement a wrapper around speedtest-cli that executes the command with configurable options and captures output",
+        "details": "Create SpeedTestRunner class that spawns speedtest-cli process using Bun's subprocess API. Support all speedtest-cli options through configuration. Handle both CSV and JSON output formats. Implement error handling for network failures, command not found, and timeout scenarios. Parse CSV/JSON output into structured TypeScript objects with fields: download_speed, upload_speed, latency, timestamp, server_info.",
+        "testStrategy": "Mock speedtest-cli command execution, test CSV and JSON parsing, verify error handling for various failure scenarios",
         "priority": "high",
         "dependencies": [
-          1,
           2
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
         "id": 4,
-        "title": "Create Custom Application Error Classes",
-        "description": "Implement custom error classes that extend the base Error class to provide additional functionality like user-friendly messages.",
-        "details": "Create a new file js/core/ApplicationErrors.js with the following implementation:\n\n```javascript\n/**\n * Base class for application-specific errors\n */\nexport class ApplicationError extends Error {\n  /**\n   * Create a new ApplicationError\n   * @param {string} message - Technical error message\n   * @param {string} userMessage - User-friendly error message\n   * @param {Object} [options={}] - Additional options\n   */\n  constructor(message, userMessage, options = {}) {\n    super(message);\n    this.name = this.constructor.name;\n    this.userMessage = userMessage || message;\n    this.silent = options.silent || false;\n    \n    // Ensure proper stack trace in modern environments\n    if (Error.captureStackTrace) {\n      Error.captureStackTrace(this, this.constructor);\n    }\n  }\n}\n\n/**\n * Error for API-related issues\n */\nexport class APIError extends ApplicationError {\n  /**\n   * Create a new APIError\n   * @param {string} message - Technical error message\n   * @param {string} userMessage - User-friendly error message\n   * @param {Object} [options={}] - Additional options\n   */\n  constructor(message, userMessage, options = {}) {\n    super(message, userMessage || 'There was a problem communicating with the server.', options);\n    this.statusCode = options.statusCode;\n    this.endpoint = options.endpoint;\n  }\n}\n\n/**\n * Error for validation issues\n */\nexport class ValidationError extends ApplicationError {\n  /**\n   * Create a new ValidationError\n   * @param {string} message - Technical error message\n   * @param {string} userMessage - User-friendly error message\n   * @param {Object} [options={}] - Additional options\n   */\n  constructor(message, userMessage, options = {}) {\n    super(message, userMessage || 'The provided data is invalid.', options);\n    this.field = options.field;\n    this.value = options.value;\n  }\n}\n```",
-        "testStrategy": "Create unit tests for each custom error class to verify they properly extend the base Error class and set the appropriate properties. Test that the stack trace is properly captured and that default user messages are provided when not specified.",
-        "priority": "medium",
-        "dependencies": [
-          1
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 5,
-        "title": "Implement Error Reporting Functionality",
-        "description": "Add functionality to report errors to a monitoring service or backend API for tracking and analysis.",
-        "details": "Extend the ErrorHandlerService with error reporting capabilities:\n\n```javascript\n/**\n * Report an error to a monitoring service\n * @param {Error} error - The error to report\n * @param {Object} context - Additional context information\n * @private\n */\n_reportError(error, context) {\n  // Skip reporting for certain types of errors or in development mode\n  if (error.doNotReport || (process.env.NODE_ENV === 'development' && !error.reportInDev)) {\n    return;\n  }\n  \n  // Prepare error data for reporting\n  const reportData = {\n    message: error.message,\n    stack: error.stack,\n    timestamp: new Date().toISOString(),\n    userAgent: navigator.userAgent,\n    url: window.location.href,\n    ...context\n  };\n  \n  // In a real implementation, this would send the data to a service like Sentry, LogRocket, etc.\n  // For now, we'll just log that we would report this\n  this._logger.debug('Would report error to monitoring service:', reportData);\n  \n  // Example implementation for sending to a backend API:\n  /*\n  fetch('/api/error-reporting', {\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json'\n    },\n    body: JSON.stringify(reportData),\n    // Use keepalive to ensure the request completes even if the page is unloading\n    keepalive: true\n  }).catch(reportError => {\n    // Don't use handleError here to avoid infinite loops\n    this._logger.error('Failed to report error:', reportError);\n  });\n  */\n}\n```\n\nThen update the handleError method to include error reporting:\n\n```javascript\nhandleError(error, context = {}) {\n  // ... existing code ...\n  \n  // Report the error to monitoring service\n  this._reportError(error, logContext);\n  \n  // ... rest of existing code ...\n}\n```",
-        "testStrategy": "Test that the _reportError method is called when handleError is invoked. Verify that it respects the doNotReport flag and environment settings. Mock any external API calls to ensure they are made with the correct parameters.",
+        "title": "Implement Data Storage and Logging",
+        "description": "Create a data storage system to persist speed test results and implement configurable logging functionality",
+        "details": "Implement DataStore class using JSON files for persistence (no external dependencies). Store results in structured format with timestamps. Create Logger class that writes verbose speedtest-cli output to configurable log files when logging is enabled. Implement log rotation to prevent disk space issues. Data structure: { testName: string, results: Array<{timestamp: Date, download: number, upload: number, latency: number, raw_output?: string}> }",
+        "testStrategy": "Test data persistence across service restarts, verify log file creation and rotation, validate JSON serialization/deserialization",
         "priority": "medium",
         "dependencies": [
           3
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
-        "id": 6,
-        "title": "Add Error Recovery Mechanisms",
-        "description": "Implement functionality to attempt recovery from certain types of errors, such as retrying failed network requests or clearing corrupted state.",
-        "details": "Extend the ErrorHandlerService with recovery capabilities:\n\n```javascript\n/**\n * Attempt to recover from an error\n * @param {Error} error - The error to recover from\n * @param {Object} context - Additional context information\n * @returns {boolean} - Whether recovery was attempted\n * @private\n */\n_attemptRecovery(error, context) {\n  // Check if the error is recoverable\n  if (!error.recoverable) {\n    return false;\n  }\n  \n  this._logger.info('Attempting to recover from error:', error.message);\n  \n  // Different recovery strategies based on error type\n  if (error instanceof APIError && context.retryCount < 3) {\n    // For API errors, we might retry the request\n    this._logger.info('Retrying failed API request...');\n    \n    // In a real implementation, this would actually retry the request\n    // For now, we'll just emit an event that would trigger a retry\n    this._eventBus.emit('api:retry', {\n      endpoint: error.endpoint,\n      retryCount: (context.retryCount || 0) + 1\n    });\n    \n    return true;\n  }\n  \n  if (error.name === 'StorageError') {\n    // For storage errors, we might clear corrupted data\n    this._logger.info('Clearing potentially corrupted storage...');\n    \n    // Clear relevant storage\n    try {\n      localStorage.removeItem(context.storageKey || 'app-state');\n      this._eventBus.emit('storage:cleared', { reason: 'error-recovery' });\n      return true;\n    } catch (recoveryError) {\n      this._logger.error('Failed to clear storage during recovery:', recoveryError);\n      return false;\n    }\n  }\n  \n  return false;\n}\n```\n\nThen update the handleError method to attempt recovery before showing errors:\n\n```javascript\nhandleError(error, context = {}) {\n  // ... existing logging code ...\n  \n  // Attempt recovery before showing error to user\n  const recoveryAttempted = this._attemptRecovery(error, context);\n  \n  // Don't show UI notification for silent errors or if recovery was successful\n  if (error.silent || (recoveryAttempted && !error.alwaysNotify)) {\n    return;\n  }\n  \n  // ... rest of existing code for showing error ...\n}\n```",
-        "testStrategy": "Test that the _attemptRecovery method correctly identifies recoverable errors and applies the appropriate recovery strategy. Verify that it returns the correct boolean value indicating whether recovery was attempted. Test the integration with handleError to ensure errors are not displayed to the user when recovery is successful.",
-        "priority": "low",
+        "id": 5,
+        "title": "Build Core Service Engine",
+        "description": "Implement the main service class with start(), stop(), and runInBackground() methods that orchestrate speed tests at configured intervals",
+        "details": "Create StarLinkOptimiser class with process management methods. Implement interval-based execution using setTimeout/setInterval. Handle graceful shutdown with SIGINT/SIGTERM handlers. Implement runInBackground() using Bun's process spawning. Track service state (running/stopped) and prevent multiple instances. Integrate ConfigParser, SpeedTestRunner, DataStore, and Logger components.",
+        "testStrategy": "Test service lifecycle (start/stop), verify interval execution, test background process creation, validate graceful shutdown",
+        "priority": "high",
         "dependencies": [
-          3,
           4
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
-            "title": "Implement recovery eligibility determination",
-            "description": "Create a mechanism to determine if an error is eligible for recovery based on error type, context, and system state",
+            "title": "Service lifecycle management",
+            "description": "Implement comprehensive service lifecycle management including service registration, initialization, startup, shutdown, and cleanup procedures with proper state transitions",
             "dependencies": [],
-            "details": "Develop a function that analyzes error objects to determine if recovery should be attempted. This should include: categorizing errors (network, timeout, storage, etc.), checking if the operation is idempotent, evaluating the current system state, and implementing a configuration system for recovery policies. The function should return a boolean and optional recovery strategy metadata.",
-            "status": "pending",
+            "details": "Design and implement service lifecycle states (registered, initializing, running, stopping, stopped, failed), create service registry for tracking active services, implement graceful startup and shutdown sequences, handle service dependencies and ordering, provide lifecycle event hooks and callbacks",
+            "status": "done",
             "testStrategy": ""
           },
           {
             "id": 2,
-            "title": "Implement API error retry logic",
-            "description": "Create a robust retry mechanism for API errors with exponential backoff and circuit breaking capabilities",
+            "title": "Interval-based execution system",
+            "description": "Develop a robust interval-based execution system for scheduling and running services at specified intervals with timing precision and error handling",
             "dependencies": [
               1
             ],
-            "details": "Implement a retry mechanism specifically for API errors that includes: configurable retry counts, exponential backoff with jitter, circuit breaking to prevent cascading failures, timeout handling, and proper logging of retry attempts. This should integrate with the eligibility determination from subtask 1.",
-            "status": "pending",
+            "details": "Create timer management system with configurable intervals, implement precise scheduling mechanisms, handle timer drift and correction, provide interval adjustment capabilities, support one-time and recurring executions, implement execution queue management",
+            "status": "done",
             "testStrategy": ""
           },
           {
             "id": 3,
-            "title": "Implement storage error recovery",
-            "description": "Create recovery mechanisms for storage-related errors including data consistency checks and repair strategies",
+            "title": "Process signal handling",
+            "description": "Implement comprehensive process signal handling for graceful shutdown, restart, and runtime control of the service orchestrator and managed services",
             "dependencies": [
               1
             ],
-            "details": "Develop specialized recovery logic for storage errors including: data consistency validation, automatic repair strategies for common corruption scenarios, fallback to backup storage when available, transaction rollback mechanisms, and proper error state logging. This should leverage the eligibility determination from subtask 1.",
-            "status": "pending",
+            "details": "Handle SIGTERM, SIGINT, SIGHUP, and other relevant signals, implement graceful shutdown procedures, provide signal propagation to child processes, create signal-based service control mechanisms, implement restart and reload functionality",
+            "status": "done",
             "testStrategy": ""
           },
           {
             "id": 4,
-            "title": "Integrate recovery mechanisms with handleError method",
-            "description": "Modify the existing handleError method to incorporate the new recovery mechanisms",
+            "title": "Background process spawning",
+            "description": "Create a robust background process spawning system for launching and managing child processes with proper isolation and resource management",
             "dependencies": [
               1,
-              2,
               3
             ],
-            "details": "Update the handleError method to: detect recovery-eligible errors using subtask 1's logic, apply appropriate recovery strategies from subtasks 2 and 3, handle recovery failures gracefully, maintain error context throughout recovery attempts, and ensure proper error propagation when recovery fails.",
-            "status": "pending",
+            "details": "Implement process spawning with proper environment setup, handle process isolation and security, manage process resources and limits, implement process monitoring and health checks, handle process cleanup and zombie prevention, provide inter-process communication mechanisms",
+            "status": "done",
             "testStrategy": ""
           },
           {
             "id": 5,
-            "title": "Implement recovery event emission",
-            "description": "Create an event system to notify about recovery attempts, successes, and failures",
+            "title": "State management",
+            "description": "Develop comprehensive state management system for tracking service states, execution history, and runtime information with persistence and recovery capabilities",
             "dependencies": [
-              4
+              1,
+              2
             ],
-            "details": "Implement an event emission system that: publishes detailed events for recovery attempts, successes and failures; includes relevant context data in events; allows subscribers to monitor recovery operations; provides metrics for recovery effectiveness; and integrates with any existing monitoring systems.",
-            "status": "pending",
+            "details": "Design state data structures and storage mechanisms, implement state persistence and recovery, create state synchronization across components, handle state transitions and validation, provide state querying and reporting interfaces, implement state backup and restoration",
+            "status": "done",
             "testStrategy": ""
           },
           {
             "id": 6,
-            "title": "Create unit tests for recovery scenarios",
-            "description": "Develop comprehensive test suite covering various error recovery scenarios",
+            "title": "Component integration",
+            "description": "Integrate all orchestrator components including lifecycle management, execution system, signal handling, and state management into a cohesive system",
             "dependencies": [
+              1,
+              2,
+              3,
               4,
               5
             ],
-            "details": "Create unit tests that verify: correct identification of recoverable errors, proper execution of recovery strategies, appropriate handling of recovery failures, correct event emissions during recovery processes, integration with the error handling system, and edge cases like cascading errors or partial recoveries.",
-            "status": "pending",
+            "details": "Create unified component interfaces and APIs, implement component communication and coordination, handle component initialization and dependency resolution, provide error handling and recovery across components, implement configuration management and validation",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Service orchestration logic",
+            "description": "Implement the core orchestration logic that coordinates all components to provide comprehensive service management, scheduling, and monitoring capabilities",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "details": "Create main orchestration engine and control flow, implement service dependency resolution and ordering, handle complex scheduling scenarios and conflicts, provide monitoring and alerting capabilities, implement performance optimization and resource management, create comprehensive logging and debugging features",
+            "status": "done",
             "testStrategy": ""
           }
         ]
       },
       {
-        "id": 7,
-        "title": "Document and Export the ErrorHandlerService",
-        "description": "Add comprehensive JSDoc documentation to the ErrorHandlerService and ensure it is properly exported for use throughout the application.",
-        "details": "Update the ErrorHandlerService.js file with complete documentation and exports:\n\n```javascript\n/**\n * @fileoverview A centralized service for catching and handling all unhandled exceptions.\n * \n * This service provides:\n * - Global error catching for uncaught exceptions and unhandled promise rejections\n * - Consistent error logging and reporting\n * - User-friendly error messages\n * - Error recovery mechanisms\n * \n * @module core/ErrorHandlerService\n */\n\nimport { LoggerService } from './LoggerService.js';\nimport { EventBus } from './EventBus.js';\n\n/**\n * A centralized service for catching and handling all unhandled exceptions\n */\nexport class ErrorHandlerService {\n  // ... all previously implemented methods ...\n}\n\n// Export custom error classes from this module as well for convenience\nexport * from './ApplicationErrors.js';\n\n// Create and export a default instance for easy importing\nconst errorHandler = ErrorHandlerService.getInstance();\nexport default errorHandler;\n```\n\nAlso create an index.js file in the js/core directory to simplify imports:\n\n```javascript\n/**\n * Core services index file\n * @module core\n */\n\nexport { default as errorHandler, ErrorHandlerService } from './ErrorHandlerService.js';\nexport { LoggerService } from './LoggerService.js';\nexport { EventBus } from './EventBus.js';\nexport * from './ApplicationErrors.js';\n```",
-        "testStrategy": "Verify that the ErrorHandlerService and its related classes are properly exported and can be imported in other modules. Test that the default instance works correctly when imported. Review the documentation for completeness and accuracy.",
+        "id": 6,
+        "title": "Create JSON Output Processor with jq Wrapper",
+        "description": "Implement a jq wrapper for processing JSON output from speedtest-cli when JSON format is configured",
+        "details": "Create JQProcessor class that wraps jq command execution using Bun's subprocess. Implement common jq queries for extracting speed test metrics from JSON output. Handle jq command not found errors gracefully. Provide utility methods for common data transformations: extractMetrics(), formatForGraphs(), calculateAverages(). Support custom jq queries through configuration.",
+        "testStrategy": "Mock jq command execution, test JSON parsing and transformation, verify error handling when jq is not available",
         "priority": "medium",
         "dependencies": [
-          1,
-          2,
-          3,
+          3
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Build Web Server for Dashboard",
+        "description": "Implement a lightweight HTTP server using Bun's built-in server to serve the observer dashboard and reports",
+        "details": "Create WebServer class using Bun.serve() API. Serve static files from observer/ directory. Implement routes: GET / (dashboard), GET /reports/:testName (individual reports), GET /api/data/:testName (JSON data for graphs). Handle CORS for local development. Implement proper HTTP status codes and error handling. Support configurable port from config file.",
+        "testStrategy": "Test HTTP server startup, verify static file serving, test API endpoints, validate CORS headers",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Create Observer Dashboard HTML Template",
+        "description": "Build the main dashboard HTML page with left navigation panel and responsive layout",
+        "details": "Create observer/index.html with modern, minimal design. Implement left navigation panel that dynamically lists available test configurations. Display average download, upload, and latency for each test in navigation. Use vanilla JavaScript for dynamic content loading. Implement responsive CSS grid layout. Auto-refresh functionality to detect new reports. No external CSS/JS dependencies - all inline or local files.",
+        "testStrategy": "Test responsive layout across devices, verify dynamic content loading, validate auto-refresh functionality",
+        "priority": "medium",
+        "dependencies": [
+          7
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Graph Generation System",
+        "description": "Create a system to generate interactive graphs for download speed, upload speed, and latency over time",
+        "details": "Implement GraphGenerator class that creates HTML/CSS/JS for three vertically stacked graphs. Use HTML5 Canvas or SVG for rendering (no external libraries). Implement smooth animations and modern styling. Generate time-series graphs with configurable time intervals. Include hover tooltips, zoom functionality, and responsive design. Export graphs as standalone HTML files that can be embedded in reports.",
+        "testStrategy": "Test graph rendering with various data sets, verify animations and interactions, validate responsive behavior",
+        "priority": "medium",
+        "dependencies": [
           4,
-          5,
           6
         ],
-        "status": "pending",
-        "subtasks": []
-      }
-    ],
-    "metadata": {
-      "created": "2025-06-30T08:03:44.475Z",
-      "updated": "2025-06-30T08:04:59.341Z",
-      "description": "Tasks for error-handler context"
-    }
-  },
-  "error-handler": {
-    "tasks": [
-      {
-        "id": 1,
-        "title": "Create ErrorHandlerService Singleton Class",
-        "description": "Implement the ErrorHandlerService as a singleton class that will serve as a centralized service for catching and handling all unhandled exceptions.",
-        "details": "Create the ErrorHandlerService.js file in the js/core directory with the following implementation:\n\n```javascript\n/**\n * ErrorHandlerService - Centralized service for catching and handling all unhandled exceptions\n */\nexport class ErrorHandlerService {\n  static _instance;\n  \n  /**\n   * Get the singleton instance\n   * @returns {ErrorHandlerService}\n   */\n  static getInstance() {\n    if (!ErrorHandlerService._instance) {\n      ErrorHandlerService._instance = new ErrorHandlerService();\n    }\n    return ErrorHandlerService._instance;\n  }\n  \n  /**\n   * Reset the singleton instance (for testing purposes)\n   */\n  static _resetInstance() {\n    ErrorHandlerService._instance = null;\n  }\n  \n  constructor() {\n    // Private constructor to enforce singleton pattern\n    if (ErrorHandlerService._instance) {\n      throw new Error('ErrorHandlerService is a singleton. Use getInstance() instead.');\n    }\n    \n    // Dependencies will be initialized in init()\n    this._logger = null;\n    this._eventBus = null;\n  }\n}\n```",
-        "testStrategy": "Test that the class follows the singleton pattern by verifying that getInstance() returns the same instance when called multiple times. Also test that _resetInstance() properly resets the singleton instance for testing purposes.",
-        "priority": "high",
-        "dependencies": [],
         "status": "done",
         "subtasks": []
       },
       {
-        "id": 2,
-        "title": "Implement Initialization Method",
-        "description": "Create an init() method that attaches global error listeners to window.onerror and window.onunhandledrejection events.",
-        "details": "Add the init() method to the ErrorHandlerService class:\n\n```javascript\n/**\n * Initialize the error handler service\n */\ninit() {\n  // Get dependencies\n  const { LoggerService } = require('./LoggerService.js');\n  const { EventBus } = require('./EventBus.js');\n  \n  this._logger = LoggerService.getInstance();\n  this._eventBus = EventBus.getInstance();\n  \n  // Attach global error listeners\n  window.addEventListener('error', (event) => {\n    this.handleError(event.error || new Error(event.message), {\n      source: event.filename,\n      lineno: event.lineno,\n      colno: event.colno\n    });\n    return true; // Prevent default browser error handling\n  });\n  \n  window.addEventListener('unhandledrejection', (event) => {\n    this.handleError(event.reason, { source: 'Promise rejection' });\n    return true; // Prevent default browser error handling\n  });\n}\n```",
-        "testStrategy": "Test that the init() method properly attaches event listeners to the window object for 'error' and 'unhandledrejection' events. Use mock spies to verify that window.addEventListener is called with the correct parameters.",
-        "priority": "high",
-        "dependencies": [
-          1
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 3,
-        "title": "Implement Error Handling Method",
-        "description": "Create a handleError() method that logs errors and emits UI events for displaying user-friendly error messages.",
-        "details": "Add the handleError() method to the ErrorHandlerService class:\n\n```javascript\n/**\n * Handle an error\n * @param {Error} error - The error object\n * @param {Object} [context={}] - Additional context information\n */\nhandleError(error, context = {}) {\n  // Ensure we have a proper Error object\n  if (!(error instanceof Error)) {\n    error = new Error(String(error));\n  }\n  \n  // Log the error with additional context\n  this._logger.error(error.message, {\n    ...context,\n    stack: error.stack\n  });\n  \n  // Don't show UI notification for silent errors\n  if (error.silent) {\n    return;\n  }\n  \n  // Determine user-friendly message\n  let userMessage = 'An unexpected error occurred. Please try again later.';\n  \n  // Check if it's a custom application error with a user message\n  if (error.userMessage) {\n    userMessage = error.userMessage;\n  }\n  \n  // Emit event for UI to display the error\n  this._eventBus.emit('ui:show:error', {\n    message: userMessage\n  });\n}\n```",
-        "testStrategy": "Test that the handleError() method logs errors with the LoggerService and emits appropriate events via the EventBus. Verify that it handles different types of errors correctly, including custom application errors with user messages and silent errors.",
-        "priority": "high",
-        "dependencies": [
-          1,
-          2
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 4,
-        "title": "Create Custom Application Error Classes",
-        "description": "Implement custom error classes that extend the native Error class to provide additional context and user-friendly messages.",
-        "details": "Create a new file js/core/ApplicationErrors.js with the following implementation:\n\n```javascript\n/**\n * Base class for application-specific errors\n */\nexport class ApplicationError extends Error {\n  /**\n   * @param {string} message - Technical error message\n   * @param {string} userMessage - User-friendly error message\n   * @param {Object} [context={}] - Additional error context\n   */\n  constructor(message, userMessage, context = {}) {\n    super(message);\n    this.name = this.constructor.name;\n    this.userMessage = userMessage;\n    this.context = context;\n    \n    // Maintains proper stack trace (only available on V8)\n    if (Error.captureStackTrace) {\n      Error.captureStackTrace(this, this.constructor);\n    }\n  }\n}\n\n/**\n * Error for API-related failures\n */\nexport class APIError extends ApplicationError {\n  /**\n   * @param {string} message - Technical error message\n   * @param {string} userMessage - User-friendly error message\n   * @param {Object} [apiDetails={}] - API-specific details like status code\n   */\n  constructor(message, userMessage, apiDetails = {}) {\n    super(message, userMessage, { api: apiDetails });\n    this.statusCode = apiDetails.statusCode;\n  }\n}\n\n/**\n * Error for validation failures\n */\nexport class ValidationError extends ApplicationError {\n  /**\n   * @param {string} message - Technical error message\n   * @param {string} userMessage - User-friendly error message\n   * @param {Array} [validationErrors=[]] - List of validation errors\n   */\n  constructor(message, userMessage, validationErrors = []) {\n    super(message, userMessage, { validationErrors });\n    this.validationErrors = validationErrors;\n  }\n}\n```",
-        "testStrategy": "Test that the custom error classes properly extend the native Error class and maintain the correct prototype chain. Verify that they correctly store and provide access to additional properties like userMessage and context.",
+        "id": 10,
+        "title": "Build Report Generation Engine",
+        "description": "Create a system that generates individual HTML report files for each test configuration with embedded graphs",
+        "details": "Implement ReportGenerator class that creates individual HTML reports. Each report contains three graphs (download, upload, latency) with consistent styling. Generate reports after each speed test completion. Implement template system for consistent report layout. Include metadata: test name, date range, total tests, averages. Store reports in observer/reports/ directory with naming convention: {testName}-{timestamp}.html",
+        "testStrategy": "Test report generation with mock data, verify HTML structure and styling, validate file naming and storage",
         "priority": "medium",
         "dependencies": [
-          3
+          9
         ],
         "status": "done",
         "subtasks": []
       },
       {
-        "id": 5,
-        "title": "Integrate ErrorHandlerService with Application Bootstrap",
-        "description": "Ensure the ErrorHandlerService is initialized during application startup to catch all unhandled exceptions from the beginning.",
-        "details": "Modify the application's main entry point (e.g., js/app.js) to initialize the ErrorHandlerService:\n\n```javascript\nimport { ErrorHandlerService } from './core/ErrorHandlerService.js';\n\n// Initialize core services\nfunction initializeServices() {\n  // Initialize error handler first to catch any errors during initialization of other services\n  const errorHandler = ErrorHandlerService.getInstance();\n  errorHandler.init();\n  \n  // Initialize other services...\n}\n\n// Bootstrap the application\ndocument.addEventListener('DOMContentLoaded', () => {\n  try {\n    initializeServices();\n    // Continue with application initialization...\n  } catch (error) {\n    // Manually handle any errors during initialization\n    ErrorHandlerService.getInstance().handleError(error, { source: 'application-bootstrap' });\n  }\n});\n```",
-        "testStrategy": "Test that the ErrorHandlerService is properly initialized during application bootstrap. Verify that it catches errors thrown during the initialization of other services and during general application execution.",
+        "id": 11,
+        "title": "Implement Dashboard Auto-Update System",
+        "description": "Create a system that automatically updates the dashboard with new reports as they are generated",
+        "details": "Implement file system watching or polling mechanism to detect new reports. Update navigation panel with new test results and averages. Implement WebSocket or Server-Sent Events for real-time updates (optional enhancement). Create API endpoints for fetching latest data: /api/tests (list all tests), /api/latest/:testName (latest results). Implement client-side JavaScript to poll for updates and refresh navigation.",
+        "testStrategy": "Test file system monitoring, verify navigation updates, validate API endpoint responses",
+        "priority": "low",
+        "dependencies": [
+          8,
+          10
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Create CLI Interface and Documentation",
+        "description": "Build command-line interface for service management and create comprehensive documentation",
+        "details": "Create CLI using Bun's argument parsing. Implement commands: start <configFile>, stop, status, generate-config <testName>. Add help system and version information. Create README.md with installation instructions, configuration examples, and usage guide. Document YAML configuration schema. Add example configuration files. Implement proper exit codes and error messages.",
+        "testStrategy": "Test all CLI commands, verify help system, validate configuration generation, test error scenarios",
         "priority": "medium",
         "dependencies": [
-          1,
-          2,
-          3
+          5,
+          11
         ],
         "status": "done",
         "subtasks": []
       }
     ],
     "metadata": {
-      "created": "2025-06-30T08:06:38.117Z",
-      "updated": "2025-06-30T08:16:25.635Z",
-      "description": "Tasks for error-handler context"
+      "created": "2025-06-30T10:18:34.199Z",
+      "updated": "2025-06-30T13:08:36.348Z",
+      "description": "Tasks for network-service context"
     }
   }
 }

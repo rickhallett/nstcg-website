@@ -64,4 +64,6 @@ scripts/gmail-service-account*.json*
 
 # Task files
 # tasks.json
-# tasks/ 
+# tasks/
+
+.claude/mcp.json

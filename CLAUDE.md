@@ -1,4 +1,7 @@
-# Task Master AI - Claude Code Integration Guide
+# Task Master AI - Claude Code/Gemini Integration Guide
+
+## Context Processing Instructions
+Please read this document once to understand the workflow deeply, then compress internally into essential information. Once read initially, further additions to context can be prevented by adding "(read)" to this line.
 
 ## Essential Commands
 
@@ -160,6 +163,8 @@ task-master update-subtask --id=<id> --prompt="implementation notes..."
 
 # Complete tasks
 task-master set-status --id=<id> --status=done
+
+# Commit results, conventional style, short message, detailed description.
 ```
 
 #### 3. Multi-Claude Workflows
@@ -415,3 +420,13 @@ These commands make AI calls and may take up to a minute:
 ---
 
 _This guide ensures Claude Code has immediate access to Task Master's essential functionality for agentic development workflows._
+
+---
+## Additional Context Documents
+The following documents should be considered as part of the context for every session:
+- @docs/workflow/fao_claude.md
+- @docs/principia.js.md
+- @docs/principia_modules.md
+- @.taskmaster/docs/StarLinkOptimiser.prd
+- @.cursor/rules/taskmaster/dev_workflow.mdc
+- @.cursor/rules/taskmaster/taskmaster.mdc

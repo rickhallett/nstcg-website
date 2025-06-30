@@ -1,5 +1,5 @@
-import { ErrorHandlerService } from '../ErrorHandlerService';
-import { EventBus } from '../EventBus';
+import { ErrorHandlerService } from '../src/ErrorHandlerService';
+import { EventBus } from '../src/EventBus';
 import { LoggerService } from '../LoggerService';
 
 jest.mock('../EventBus');

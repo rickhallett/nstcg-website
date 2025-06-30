@@ -1,28 +1,28 @@
-import { EventBus, EventHandler } from '../src/EventBus';
+import { describe, it, beforeEach, expect, vi } from 'vitest';
+import { EventBus } from '../../src/principia/EventBus/EventBus';
 
-describe('EventBus Singleton', () => {
+describe('EventBus', () => {
   let eventBus: EventBus;
 
   beforeEach(() => {
-    EventBus._resetInstance(); // Reset instance before each test
+    EventBus._resetInstance(); // Assuming a test-only reset method
     eventBus = EventBus.getInstance();
   });
 
   it('should be a singleton, always returning the same instance', () => {
-    const instance1 = EventBus.getInstance();
     const instance2 = EventBus.getInstance();
-    expect(instance1).toBe(instance2);
+    expect(eventBus).toBe(instance2);
   });
 
   it('should subscribe a single handler to an event and trigger it on emit', () => {
-    const handler: EventHandler = jest.fn();
+    const handler = vi.fn();
     eventBus.on('test-event', handler);
     eventBus.emit('test-event');
     expect(handler).toHaveBeenCalled();
   });
 
   it('should pass payload data from emit to the subscribed handler', () => {
-    const handler: EventHandler<{ message: string }> = jest.fn();
+    const handler = vi.fn();
     const payload = { message: 'hello' };
     eventBus.on('test-event', handler);
     eventBus.emit('test-event', payload);
@@ -30,8 +30,8 @@ describe('EventBus Singleton', () => {
   });
 
   it('should allow multiple handlers for the same event', () => {
-    const handler1: EventHandler = jest.fn();
-    const handler2: EventHandler = jest.fn();
+    const handler1 = vi.fn();
+    const handler2 = vi.fn();
     eventBus.on('multi-event', handler1);
     eventBus.on('multi-event', handler2);
     eventBus.emit('multi-event');
@@ -40,8 +40,8 @@ describe('EventBus Singleton', () => {
   });
 
   it('should unsubscribe a specific handler, leaving others intact', () => {
-    const handlerToKeep: EventHandler = jest.fn();
-    const handlerToRemove: EventHandler = jest.fn();
+    const handlerToKeep = vi.fn();
+    const handlerToRemove = vi.fn();
     eventBus.on('mixed-event', handlerToKeep);
     eventBus.on('mixed-event', handlerToRemove);
     
@@ -53,11 +53,10 @@ describe('EventBus Singleton', () => {
   });
   
   it('should allow unsubscribing via a returned function', () => {
-    const handler: EventHandler = jest.fn();
+    const handler = vi.fn();
     const unsubscribe = eventBus.on('test-event', handler);
     unsubscribe();
     eventBus.emit('test-event');
     expect(handler).not.toHaveBeenCalled();
   });
 });
-
