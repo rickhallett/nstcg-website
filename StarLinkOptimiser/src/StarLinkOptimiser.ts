@@ -37,8 +37,8 @@ export class StarLinkOptimiser {
         this.state = ServiceState.RUNNING;
         this.runTest();
 
-        process.on('SIGINT', () => this.stop());
-        process.on('SIGTERM', () => this.stop());
+        process.on('SIGINT', () => this.shutdown());
+        process.on('SIGTERM', () => this.shutdown());
     }
 
     private runTest() {
@@ -74,6 +74,11 @@ export class StarLinkOptimiser {
         if (this.state !== ServiceState.FAILED) {
             this.state = ServiceState.STOPPED;
         }
+    }
+
+    shutdown() {
+        this.stop();
+        process.exit(0);
     }
 
     setFrequency(frequency: number) {

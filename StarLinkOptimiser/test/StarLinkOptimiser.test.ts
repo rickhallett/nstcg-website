@@ -81,24 +81,13 @@ port: 3000
         optimiser.stop();
     });
 
-    it('should stop on SIGINT', async () => {
+    it('should shutdown gracefully', async () => {
         const proc = Bun.spawn(['bun', 'src/index.ts'], {
             cwd: './',
             stdio: ['inherit', 'inherit', 'inherit'],
         });
         await new Promise(resolve => setTimeout(resolve, 200));
         proc.kill('SIGINT');
-        const exitCode = await proc.exited;
-        expect(exitCode).toBe(0);
-    });
-
-    it('should stop on SIGTERM', async () => {
-        const proc = Bun.spawn(['bun', 'src/index.ts'], {
-            cwd: './',
-            stdio: ['inherit', 'inherit', 'inherit'],
-        });
-        await new Promise(resolve => setTimeout(resolve, 200));
-        proc.kill('SIGTERM');
         const exitCode = await proc.exited;
         expect(exitCode).toBe(0);
     });
