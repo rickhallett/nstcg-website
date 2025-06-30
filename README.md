@@ -10,6 +10,42 @@ This document is the philosophical and architectural foundation of the NSTCG web
     *   [**Module Breakdown**](./docs/principia_modules.md): A detailed exploration of each module's role, responsibilities, and interactions, complete with diagrams.
 *   **TDD Blueprints**
     *   [**Master Blueprint**](./docs/blueprints/000_master_blueprint.md): The main index and build order for all Test-Driven Development blueprints.
+
+## Project Structure
+
+```
+.
+├── .claude/                    # Claude Code configuration
+│   ├── commands/              # Custom slash commands
+│   └── mcp.json              # MCP server configuration
+├── .cursor/                   # Cursor IDE configuration
+│   └── rules/                # Cursor-specific rules
+├── .taskmaster/              # Task management system
+│   ├── docs/                 # Project documentation
+│   ├── reports/              # Analysis reports
+│   ├── tasks/                # Task files and database
+│   └── config.json           # Taskmaster configuration
+├── docs/                     # Core documentation
+│   ├── blueprints/           # TDD blueprints for each module
+│   └── workflow/             # Development workflow guides
+├── src/                      # Main source code (TypeScript)
+│   ├── ApplicationError.ts   # Custom error handling
+│   ├── ErrorHandlerService.ts # Error service implementation
+│   ├── EventBus.ts           # Event-driven communication
+│   ├── LoggerService.ts      # Logging service
+│   ├── StateManager.ts       # Centralized state management
+│   └── index.ts              # Application entry point
+├── StarLinkOptimiser/        # Network monitoring service
+│   ├── observer/             # Web dashboard
+│   ├── src/                  # Service source code
+│   └── test/                 # Service tests
+├── test/                     # Test files for core modules
+├── CLAUDE.md                 # Claude Code context guide
+├── package.json              # Project dependencies
+├── tsconfig.json             # TypeScript configuration
+└── README.md                 # This file
+```
+
 ---
 
 ## 1. The Ghost of V1: Lessons from the Past

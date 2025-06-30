@@ -1,7 +1,7 @@
 // StarLinkOptimiser/test/StarLinkOptimiser.test.ts
 import { describe, it, expect, beforeEach, afterEach, createMock } from '../../src/PrincipiaTest';
-import { StarLinkOptimiser } from '../src/StarLinkOptimiser';
-import { rmSync } from 'fs';
+import { StarLinkOptimiser, ServiceState } from '../src/StarLinkOptimiser';
+import { rmSync, existsSync } from 'fs';
 import { SpeedTestRunner } from '../src/SpeedTestRunner';
 
 describe('StarLinkOptimiser', () => {
@@ -23,32 +23,49 @@ port: 3000
     });
 
     afterEach(() => {
-        optimiser.stop();
         rmSync('test.yaml');
-        if (Bun.file('test.log').size > 0) {
+        if (existsSync('test.log')) {
             rmSync('test.log');
+        }
+        if (existsSync('development.db.json')) {
+            rmSync('development.db.json');
         }
     });
 
-    it('should start and stop the service', async () => {
+    it('should have a registered state initially', () => {
+        expect(optimiser.getState()).toBe(ServiceState.REGISTERED);
+    });
+
+    it('should transition through states correctly on start and stop', async () => {
+        expect(optimiser.getState()).toBe(ServiceState.REGISTERED);
         await optimiser.start();
-        expect(optimiser.isRunning).toBe(true);
+        expect(optimiser.getState()).toBe(ServiceState.RUNNING);
         optimiser.stop();
-        expect(optimiser.isRunning).toBe(false);
+        expect(optimiser.getState()).toBe(ServiceState.STOPPED);
+    });
+
+    it('should transition to failed state on error', async () => {
+        mockSpeedTestRunner.run.mockImplementation(() => {
+            throw new Error('test error');
+        });
+        await optimiser.start();
+        await new Promise(resolve => setTimeout(resolve, 500));
+        expect(optimiser.getState()).toBe(ServiceState.FAILED);
+        optimiser.stop();
     });
 
     it('should parse csv and add to datastore', async () => {
         const csv = `Server ID,Sponsor,Server Name,Timestamp,Distance,Ping,Download,Upload,Share,IP Address
 11547,"KamaTera, Inc.","London","2025-06-30T10:23:34.290577Z",2131.952554256924,33.043,164663739.40317908,26290481.884721164,"",209.198.129.225`;
-        mockSpeedTestRunner.run.mockReturnValue(Promise.resolve(csv));
+        mockSpeedTestRunner.run.mockImplementation(() => Promise.resolve(csv));
         await optimiser.start();
-        await new Promise(resolve => setTimeout(resolve, 300));
-        optimiser.stop();
+        await new Promise(resolve => setTimeout(resolve, 500));
         const results = optimiser.dataStore.getAll();
         expect(results.length >= 2).toBe(true);
         expect(results[0].download).toBe(164663739.40317908);
         expect(results[0].upload).toBe(26290481.884721164);
         expect(results[0].ping).toBe(33.043);
+        optimiser.stop();
     });
 
     it('should stop on SIGINT', async () => {
@@ -79,4 +96,3 @@ port: 3000
         // For now, just check that the method doesn't throw.
     });
 });
-

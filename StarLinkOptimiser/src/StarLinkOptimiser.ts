@@ -4,11 +4,20 @@ import { SpeedTestRunner } from './SpeedTestRunner';
 import { DataStore, SpeedTestResult } from './DataStore';
 import { Logger } from './Logger';
 
+export enum ServiceState {
+    REGISTERED,
+    INITIALIZING,
+    RUNNING,
+    STOPPING,
+    STOPPED,
+    FAILED,
+}
+
 export class StarLinkOptimiser {
     private config: Config;
     public dataStore: DataStore;
     private timer: Timer | null = null;
-    public isRunning: boolean = false;
+    private state: ServiceState = ServiceState.REGISTERED;
     private speedTestRunner: typeof SpeedTestRunner;
 
     private constructor(config: Config, speedTestRunner: typeof SpeedTestRunner = SpeedTestRunner) {
@@ -23,14 +32,21 @@ export class StarLinkOptimiser {
     }
 
     async start() {
+        this.state = ServiceState.INITIALIZING;
         Logger.log(this.config, 'Starting StarLinkOptimiser');
-        this.isRunning = true;
+        this.state = ServiceState.RUNNING;
         this.timer = setInterval(async () => {
-            const output = await this.speedTestRunner.run(this.config);
-            Logger.log(this.config, `Speedtest output: ${output}`);
-            const result = this.parseCsv(output);
-            if (result) {
-                this.dataStore.add(result);
+            try {
+                const output = await this.speedTestRunner.run(this.config);
+                Logger.log(this.config, `Speedtest output: ${output}`);
+                const result = this.parseCsv(output);
+                if (result) {
+                    this.dataStore.add(result);
+                }
+            } catch (error) {
+                Logger.log(this.config, `Error running speedtest: ${error.message}`);
+                this.state = ServiceState.FAILED;
+                this.stop();
             }
         }, this.config.frequency);
 
@@ -39,11 +55,20 @@ export class StarLinkOptimiser {
     }
 
     stop() {
+        if (this.state !== ServiceState.FAILED) {
+            this.state = ServiceState.STOPPING;
+        }
         Logger.log(this.config, 'Stopping StarLinkOptimiser');
-        this.isRunning = false;
         if (this.timer) {
             clearInterval(this.timer);
         }
+        if (this.state !== ServiceState.FAILED) {
+            this.state = ServiceState.STOPPED;
+        }
+    }
+
+    getState(): ServiceState {
+        return this.state;
     }
 
     runInBackground() {

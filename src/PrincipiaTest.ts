@@ -119,6 +119,7 @@ type MockedFunction = {
   calls: any[][];
   results: any[];
   mockReturnValue(value: any): void;
+  mockImplementation(func: (...args: any[]) => any): void;
 };
 
 export function createMock(methods?: string[]): { [key: string]: MockedFunction } {
@@ -127,6 +128,11 @@ export function createMock(methods?: string[]): { [key: string]: MockedFunction 
   const mockFunction = (): MockedFunction => {
     const func: any = (...args: any[]) => {
       func.calls.push(args);
+      if (func.mockedImplementation) {
+        const result = func.mockedImplementation(...args);
+        func.results.push(result);
+        return result;
+      }
       const result = func.mockedReturnValue;
       func.results.push(result);
       return result;
@@ -134,8 +140,12 @@ export function createMock(methods?: string[]): { [key: string]: MockedFunction 
     func.calls = [];
     func.results = [];
     func.mockedReturnValue = undefined;
+    func.mockedImplementation = undefined;
     func.mockReturnValue = (value: any) => {
       func.mockedReturnValue = value;
+    };
+    func.mockImplementation = (implementation: (...args: any[]) => any) => {
+      func.mockedImplementation = implementation;
     };
     return func;
   };
