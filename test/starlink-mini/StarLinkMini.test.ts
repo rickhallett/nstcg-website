@@ -4,7 +4,7 @@ import { existsSync, readFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
 
 describe('StarLinkMini', () => {
-  const scriptPath = join(__dirname, '../../starlink-mini.sh');
+  const scriptPath = join(__dirname, '../../src/StarLinkMini/index.ts');
   const testName = 'test-session';
   const csvFile = `${testName}.csv`;
   const jsonFile = `${testName}.json`;
@@ -24,19 +24,19 @@ describe('StarLinkMini', () => {
   describe('Core Functionality', () => {
     it('should execute without errors', () => {
       expect(() => {
-        execSync(`${scriptPath} --help`, { stdio: 'pipe' });
+        execSync(`bun run ${scriptPath} --help`, { stdio: 'pipe' });
       }).not.toThrow();
     });
 
     it('should create output files with correct names', () => {
-      execSync(`${scriptPath} --name ${testName} --single-run`, { stdio: 'pipe' });
+      execSync(`bun run ${scriptPath} --name ${testName} --single-run`, { stdio: 'pipe' });
       
       expect(existsSync(csvFile)).toBe(true);
       expect(existsSync(jsonFile)).toBe(true);
     });
 
     it('should capture speed test results', () => {
-      execSync(`${scriptPath} --name ${testName} --single-run`, { stdio: 'pipe' });
+      execSync(`bun run ${scriptPath} --name ${testName} --single-run`, { stdio: 'pipe' });
       
       const csvContent = readFileSync(csvFile, 'utf-8');
       const lines = csvContent.trim().split('\n');
@@ -50,7 +50,7 @@ describe('StarLinkMini', () => {
     describe('--name parameter', () => {
       it('should create files with the specified name', () => {
         const customName = 'custom-test';
-        execSync(`${scriptPath} --name ${customName} --single-run`, { stdio: 'pipe' });
+        execSync(`bun run ${scriptPath} --name ${customName} --single-run`, { stdio: 'pipe' });
         
         expect(existsSync(`${customName}.csv`)).toBe(true);
         expect(existsSync(`${customName}.json`)).toBe(true);
@@ -62,7 +62,7 @@ describe('StarLinkMini', () => {
 
       it('should reject missing name parameter', () => {
         expect(() => {
-          execSync(`${scriptPath} --single-run`, { stdio: 'pipe' });
+          execSync(`bun run ${scriptPath} --single-run`, { stdio: 'pipe' });
         }).toThrow();
       });
     });
@@ -73,7 +73,7 @@ describe('StarLinkMini', () => {
       validCompassPoints.forEach(direction => {
         it(`should accept valid compass point: ${direction}`, () => {
           expect(() => {
-            execSync(`${scriptPath} --name ${testName} --direction ${direction} --single-run`, { stdio: 'pipe' });
+            execSync(`bun run ${scriptPath} --name ${testName} --direction ${direction} --single-run`, { stdio: 'pipe' });
           }).not.toThrow();
         });
       });
@@ -82,7 +82,7 @@ describe('StarLinkMini', () => {
         const degrees = [0, 45.5, 90, 180, 270, 359.9];
         degrees.forEach(deg => {
           expect(() => {
-            execSync(`${scriptPath} --name ${testName} --direction ${deg} --single-run`, { stdio: 'pipe' });
+            execSync(`bun run ${scriptPath} --name ${testName} --direction ${deg} --single-run`, { stdio: 'pipe' });
           }).not.toThrow();
         });
       });
@@ -91,13 +91,13 @@ describe('StarLinkMini', () => {
         const invalidDirections = ['XY', 'NNNN', 'EW', 'NS'];
         invalidDirections.forEach(dir => {
           expect(() => {
-            execSync(`${scriptPath} --name ${testName} --direction ${dir} --single-run`, { stdio: 'pipe' });
+            execSync(`bun run ${scriptPath} --name ${testName} --direction ${dir} --single-run`, { stdio: 'pipe' });
           }).toThrow();
         });
       });
 
       it('should store direction in output files', () => {
-        execSync(`${scriptPath} --name ${testName} --direction NW --single-run`, { stdio: 'pipe' });
+        execSync(`bun run ${scriptPath} --name ${testName} --direction NW --single-run`, { stdio: 'pipe' });
         
         const csvContent = readFileSync(csvFile, 'utf-8');
         expect(csvContent).toContain('NW');
@@ -113,7 +113,7 @@ describe('StarLinkMini', () => {
         const validTilts = [0, 15, 30, 45, 60, 75, 90];
         validTilts.forEach(tilt => {
           expect(() => {
-            execSync(`${scriptPath} --name ${testName} --tilt ${tilt} --single-run`, { stdio: 'pipe' });
+            execSync(`bun run ${scriptPath} --name ${testName} --tilt ${tilt} --single-run`, { stdio: 'pipe' });
           }).not.toThrow();
         });
       });
@@ -122,13 +122,13 @@ describe('StarLinkMini', () => {
         const invalidTilts = [-10, 95, 180, 'abc'];
         invalidTilts.forEach(tilt => {
           expect(() => {
-            execSync(`${scriptPath} --name ${testName} --tilt ${tilt} --single-run`, { stdio: 'pipe' });
+            execSync(`bun run ${scriptPath} --name ${testName} --tilt ${tilt} --single-run`, { stdio: 'pipe' });
           }).toThrow();
         });
       });
 
       it('should store tilt in output files', () => {
-        execSync(`${scriptPath} --name ${testName} --tilt 45 --single-run`, { stdio: 'pipe' });
+        execSync(`bun run ${scriptPath} --name ${testName} --tilt 45 --single-run`, { stdio: 'pipe' });
         
         const csvContent = readFileSync(csvFile, 'utf-8');
         const lines = csvContent.trim().split('\n');
@@ -143,7 +143,7 @@ describe('StarLinkMini', () => {
 
   describe('Output Format', () => {
     beforeEach(() => {
-      execSync(`${scriptPath} --name ${testName} --direction NE --tilt 30 --single-run`, { stdio: 'pipe' });
+      execSync(`bun run ${scriptPath} --name ${testName} --direction NE --tilt 30 --single-run`, { stdio: 'pipe' });
     });
 
     describe('CSV Format', () => {
@@ -203,13 +203,13 @@ describe('StarLinkMini', () => {
     it('should handle missing speedtest-cli gracefully', () => {
       // This test would need to mock the speedtest-cli absence
       // For now, we'll test that the script checks for it
-      const helpOutput = execSync(`${scriptPath} --help`, { encoding: 'utf-8' });
+      const helpOutput = execSync(`bun run ${scriptPath} --help`, { encoding: 'utf-8' });
       expect(helpOutput).toContain('speedtest-cli');
     });
 
     it('should log errors appropriately', () => {
       // Test with invalid parameters to trigger error logging
-      const result = execSync(`${scriptPath} --name ${testName} --direction INVALID 2>&1 || true`, { encoding: 'utf-8' });
+      const result = execSync(`bun run ${scriptPath} --name ${testName} --direction INVALID 2>&1 || true`, { encoding: 'utf-8' });
       expect(result).toContain('Error');
     });
   });
@@ -217,11 +217,11 @@ describe('StarLinkMini', () => {
   describe('Integration', () => {
     it('should append to existing files on multiple runs', () => {
       // First run
-      execSync(`${scriptPath} --name ${testName} --single-run`, { stdio: 'pipe' });
+      execSync(`bun run ${scriptPath} --name ${testName} --single-run`, { stdio: 'pipe' });
       const firstCsvSize = readFileSync(csvFile, 'utf-8').split('\n').length;
       
       // Second run
-      execSync(`${scriptPath} --name ${testName} --single-run`, { stdio: 'pipe' });
+      execSync(`bun run ${scriptPath} --name ${testName} --single-run`, { stdio: 'pipe' });
       const secondCsvSize = readFileSync(csvFile, 'utf-8').split('\n').length;
       
       expect(secondCsvSize).toBe(firstCsvSize + 1); // One more data line
@@ -229,8 +229,8 @@ describe('StarLinkMini', () => {
 
     it('should maintain data integrity across runs', () => {
       // Run twice
-      execSync(`${scriptPath} --name ${testName} --single-run`, { stdio: 'pipe' });
-      execSync(`${scriptPath} --name ${testName} --single-run`, { stdio: 'pipe' });
+      execSync(`bun run ${scriptPath} --name ${testName} --single-run`, { stdio: 'pipe' });
+      execSync(`bun run ${scriptPath} --name ${testName} --single-run`, { stdio: 'pipe' });
       
       const jsonContent = JSON.parse(readFileSync(jsonFile, 'utf-8'));
       expect(jsonContent.length).toBe(2);
