@@ -43,4 +43,26 @@ describe('SpeedTestRunner', () => {
 
         expect(error.message).toBe('speedtest-cli not found');
     });
+
+    it('should run speedtest-cli and return json output', async () => {
+        const commandExists = await Bun.spawn(['which', 'speedtest-cli']).exited === 0;
+        if (!commandExists) {
+            console.log('speedtest-cli not found, skipping test');
+            return;
+        }
+
+        const config: Config = {
+            testName: 'development',
+            frequency: 60000,
+            output: 'json',
+            logging: false,
+            logFile: '',
+            port: 3000
+        };
+        const output = await SpeedTestRunner.run(config);
+        const data = JSON.parse(output);
+        expect(data).toHaveProperty('download');
+        expect(data).toHaveProperty('upload');
+        expect(data).toHaveProperty('ping');
+    });
 });

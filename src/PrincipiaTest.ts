@@ -105,6 +105,11 @@ export function expect(actual: any) {
         if (actual <= expected) {
             throw new Error(`Expected ${actual} to be greater than ${expected}`);
         }
+    },
+    toHaveProperty(property: string) {
+        if (!actual.hasOwnProperty(property)) {
+            throw new Error(`Expected object to have property ${property}`);
+        }
     }
   };
 }
