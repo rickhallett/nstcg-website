@@ -101,6 +101,11 @@ export function expect(actual: any) {
         throw new Error('Expected function to have been called, but it was not.');
       }
     },
+    toBeGreaterThan(expected: number) {
+        if (actual <= expected) {
+            throw new Error(`Expected ${actual} to be greater than ${expected}`);
+        }
+    }
   };
 }
 
