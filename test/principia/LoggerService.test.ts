@@ -32,4 +32,11 @@ describe('LoggerService', () => {
     loggerService.setLevel('ERROR');
     expect(loggerService.getCurrentLevel()).toBe(LoggerService.LOG_LEVELS.ERROR);
   });
+
+  it('should have info, warn, error, and debug methods', () => {
+    expect(typeof loggerService.info).toBe('function');
+    expect(typeof loggerService.warn).toBe('function');
+    expect(typeof loggerService.error).toBe('function');
+    expect(typeof loggerService.debug).toBe('function');
+  });
 });

@@ -80,4 +80,61 @@ export class LoggerService {
   private shouldLog(level: number): boolean {
     return level >= this.currentLevel;
   }
+
+  /**
+   * Log an informational message
+   * @param message The message to log
+   * @param metadata Optional metadata to include
+   */
+  info(message: string, metadata?: any): void {
+    if (this.shouldLog(LoggerService.LOG_LEVELS.INFO)) {
+      this.processLog('INFO', message, metadata);
+    }
+  }
+
+  /**
+   * Log a warning message
+   * @param message The message to log
+   * @param metadata Optional metadata to include
+   */
+  warn(message: string, metadata?: any): void {
+    if (this.shouldLog(LoggerService.LOG_LEVELS.WARN)) {
+      this.processLog('WARN', message, metadata);
+    }
+  }
+
+  /**
+   * Log an error message
+   * @param message The message to log
+   * @param metadata Optional metadata to include
+   */
+  error(message: string, metadata?: any): void {
+    if (this.shouldLog(LoggerService.LOG_LEVELS.ERROR)) {
+      this.processLog('ERROR', message, metadata);
+    }
+  }
+
+  /**
+   * Log a debug message
+   * @param message The message to log
+   * @param metadata Optional metadata to include
+   */
+  debug(message: string, metadata?: any): void {
+    if (this.shouldLog(LoggerService.LOG_LEVELS.DEBUG)) {
+      this.processLog('DEBUG', message, metadata);
+    }
+  }
+
+  /**
+   * Process a log message (placeholder for now)
+   * @param level The log level
+   * @param message The message to log
+   * @param metadata Optional metadata
+   * @private
+   */
+  private processLog(level: string, message: string, metadata?: any): void {
+    // For now, just output to console - will be enhanced later
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] ${level}: ${message}`, metadata || {});
+  }
 }
