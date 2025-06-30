@@ -7,6 +7,10 @@
     "test": "/Users/oceanheart/.bun/bin/bun test/runTests.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/js-yaml": "^4.0.9"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
   }
 }

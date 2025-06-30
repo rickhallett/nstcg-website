@@ -7,6 +7,7 @@ import './DataStore.test';
 import './Logger.test';
 import './StarLinkOptimiser.test';
 import './JqWrapper.test';
+import './WebServer.test';
 // Import other test files here
 
 run();

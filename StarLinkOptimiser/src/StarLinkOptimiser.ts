@@ -18,8 +18,7 @@ export class StarLinkOptimiser {
     }
 
     static async create(configPath: string): Promise<StarLinkOptimiser> {
-        const yaml = await Bun.file(configPath).text();
-        const config = ConfigParser.parse(yaml);
+        const config = await ConfigParser.parseFile(configPath);
         return new StarLinkOptimiser(config);
     }
 

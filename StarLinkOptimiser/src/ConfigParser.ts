@@ -1,4 +1,6 @@
 // StarLinkOptimiser/src/ConfigParser.ts
+import * as yaml from 'js-yaml';
+
 export type Config = {
     testName: string;
     frequency: number;
@@ -9,22 +11,9 @@ export type Config = {
 };
 
 export class ConfigParser {
-    static parse(yaml: string): Config {
-        const config: any = {};
-        const lines = yaml.split('\n');
-        lines.forEach(line => {
-            const [key, value] = line.split(':').map(s => s.trim());
-            if (key && value) {
-                if (value === 'true' || value === 'false') {
-                    config[key] = value === 'true';
-                } else if (!isNaN(Number(value))) {
-                    config[key] = Number(value);
-                } else {
-                    config[key] = value;
-                }
-            }
-        });
-        return config as Config;
+    static async parseFile(filePath: string): Promise<Config> {
+        const fileContent = await Bun.file(filePath).text();
+        const config = yaml.load(fileContent) as Config;
+        return config;
     }
 }
-

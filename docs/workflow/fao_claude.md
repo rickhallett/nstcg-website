@@ -97,7 +97,8 @@ My prime directive is to read `/.claude/prime.md` to understand my mission. I se
 4.  **Confirm Failure:** Run the tests and confirm it fails because `EventBus` doesn't exist.
 5.  **Write Code:** Create `js/core/EventBus.js` with the minimal singleton pattern.
 6.  **Confirm Success:** Run tests and confirm it passes.
-7.  **Commit:** Commit the change with a precise message.
+7.  **Commit:** Commit the change with a precise message, conventional commit style, and a detailed description.
+8. ** Add to blueprint doc a section on what was learned in the development of this step. Relate to principles of software engineering and systems design.
 8.  **Repeat:** Move to the next test: `it('should subscribe a single handler...')`.
 </thinking>
 
