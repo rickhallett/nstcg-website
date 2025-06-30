@@ -22,8 +22,15 @@ export class WebServer implements IService {
                 if (url.pathname === '/') {
                     return new Response(Bun.file('observer/index.html'));
                 }
-                if (url.pathname === '/data') {
-                    return new Response(JSON.stringify(this.stateManager.get('results')), {
+                if (url.pathname.startsWith('/reports/')) {
+                    const testName = url.pathname.split('/')[2];
+                    // TODO: Implement report generation
+                    return new Response(`Report for ${testName}`);
+                }
+                if (url.pathname.startsWith('/api/data/')) {
+                    const testName = url.pathname.split('/')[3];
+                    const results = this.stateManager.get('results').filter((r: any) => r.testName === testName);
+                    return new Response(JSON.stringify(results), {
                         headers: { 'Content-Type': 'application/json' },
                     });
                 }
