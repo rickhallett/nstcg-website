@@ -242,13 +242,13 @@
           5,
           11
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-06-30T10:18:34.199Z",
-      "updated": "2025-06-30T13:06:06.950Z",
+      "updated": "2025-06-30T13:08:36.348Z",
       "description": "Tasks for network-service context"
     }
   }
