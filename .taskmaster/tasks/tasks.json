@@ -1,0 +1,255 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Project Structure and Configuration",
+        "description": "Initialize the project with Bun, TypeScript configuration, and create the basic directory structure for the StarLinkOptimiser service",
+        "details": "Create package.json with Bun runtime, setup tsconfig.json for TypeScript compilation, create src/ directory structure with config/, service/, and observer/ folders. Initialize git repository and create .gitignore. Setup basic project structure: src/config/, src/service/, src/observer/, src/types/, tests/",
+        "testStrategy": "Verify project structure exists, TypeScript compiles without errors, and Bun can execute basic TypeScript files",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement YAML Configuration Parser",
+        "description": "Create a configuration parser that reads YAML files with the format config.<testName>.yaml and validates the required fields",
+        "details": "Implement ConfigParser class that reads YAML files using Bun's built-in capabilities. Define TypeScript interfaces for configuration: testName (string), frequency (number in ms), output (string, default 'csv'), logging (boolean), logFile (string), port (number). Validate all required fields and provide sensible defaults. Handle file not found and parsing errors gracefully.",
+        "testStrategy": "Unit tests for valid YAML parsing, invalid YAML handling, missing file scenarios, and default value assignment",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Create SpeedTest CLI Wrapper",
+        "description": "Implement a wrapper around speedtest-cli that executes the command with configurable options and captures output",
+        "details": "Create SpeedTestRunner class that spawns speedtest-cli process using Bun's subprocess API. Support all speedtest-cli options through configuration. Handle both CSV and JSON output formats. Implement error handling for network failures, command not found, and timeout scenarios. Parse CSV/JSON output into structured TypeScript objects with fields: download_speed, upload_speed, latency, timestamp, server_info.",
+        "testStrategy": "Mock speedtest-cli command execution, test CSV and JSON parsing, verify error handling for various failure scenarios",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement Data Storage and Logging",
+        "description": "Create a data storage system to persist speed test results and implement configurable logging functionality",
+        "details": "Implement DataStore class using JSON files for persistence (no external dependencies). Store results in structured format with timestamps. Create Logger class that writes verbose speedtest-cli output to configurable log files when logging is enabled. Implement log rotation to prevent disk space issues. Data structure: { testName: string, results: Array<{timestamp: Date, download: number, upload: number, latency: number, raw_output?: string}> }",
+        "testStrategy": "Test data persistence across service restarts, verify log file creation and rotation, validate JSON serialization/deserialization",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Build Core Service Engine",
+        "description": "Implement the main service class with start(), stop(), and runInBackground() methods that orchestrate speed tests at configured intervals",
+        "details": "Create StarLinkOptimiser class with process management methods. Implement interval-based execution using setTimeout/setInterval. Handle graceful shutdown with SIGINT/SIGTERM handlers. Implement runInBackground() using Bun's process spawning. Track service state (running/stopped) and prevent multiple instances. Integrate ConfigParser, SpeedTestRunner, DataStore, and Logger components.",
+        "testStrategy": "Test service lifecycle (start/stop), verify interval execution, test background process creation, validate graceful shutdown",
+        "priority": "high",
+        "dependencies": [
+          4
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Service lifecycle management",
+            "description": "Implement comprehensive service lifecycle management including service registration, initialization, startup, shutdown, and cleanup procedures with proper state transitions",
+            "dependencies": [],
+            "details": "Design and implement service lifecycle states (registered, initializing, running, stopping, stopped, failed), create service registry for tracking active services, implement graceful startup and shutdown sequences, handle service dependencies and ordering, provide lifecycle event hooks and callbacks",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Interval-based execution system",
+            "description": "Develop a robust interval-based execution system for scheduling and running services at specified intervals with timing precision and error handling",
+            "dependencies": [
+              1
+            ],
+            "details": "Create timer management system with configurable intervals, implement precise scheduling mechanisms, handle timer drift and correction, provide interval adjustment capabilities, support one-time and recurring executions, implement execution queue management",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Process signal handling",
+            "description": "Implement comprehensive process signal handling for graceful shutdown, restart, and runtime control of the service orchestrator and managed services",
+            "dependencies": [
+              1
+            ],
+            "details": "Handle SIGTERM, SIGINT, SIGHUP, and other relevant signals, implement graceful shutdown procedures, provide signal propagation to child processes, create signal-based service control mechanisms, implement restart and reload functionality",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Background process spawning",
+            "description": "Create a robust background process spawning system for launching and managing child processes with proper isolation and resource management",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Implement process spawning with proper environment setup, handle process isolation and security, manage process resources and limits, implement process monitoring and health checks, handle process cleanup and zombie prevention, provide inter-process communication mechanisms",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "State management",
+            "description": "Develop comprehensive state management system for tracking service states, execution history, and runtime information with persistence and recovery capabilities",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Design state data structures and storage mechanisms, implement state persistence and recovery, create state synchronization across components, handle state transitions and validation, provide state querying and reporting interfaces, implement state backup and restoration",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Component integration",
+            "description": "Integrate all orchestrator components including lifecycle management, execution system, signal handling, and state management into a cohesive system",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "details": "Create unified component interfaces and APIs, implement component communication and coordination, handle component initialization and dependency resolution, provide error handling and recovery across components, implement configuration management and validation",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Service orchestration logic",
+            "description": "Implement the core orchestration logic that coordinates all components to provide comprehensive service management, scheduling, and monitoring capabilities",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "details": "Create main orchestration engine and control flow, implement service dependency resolution and ordering, handle complex scheduling scenarios and conflicts, provide monitoring and alerting capabilities, implement performance optimization and resource management, create comprehensive logging and debugging features",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Create JSON Output Processor with jq Wrapper",
+        "description": "Implement a jq wrapper for processing JSON output from speedtest-cli when JSON format is configured",
+        "details": "Create JQProcessor class that wraps jq command execution using Bun's subprocess. Implement common jq queries for extracting speed test metrics from JSON output. Handle jq command not found errors gracefully. Provide utility methods for common data transformations: extractMetrics(), formatForGraphs(), calculateAverages(). Support custom jq queries through configuration.",
+        "testStrategy": "Mock jq command execution, test JSON parsing and transformation, verify error handling when jq is not available",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Build Web Server for Dashboard",
+        "description": "Implement a lightweight HTTP server using Bun's built-in server to serve the observer dashboard and reports",
+        "details": "Create WebServer class using Bun.serve() API. Serve static files from observer/ directory. Implement routes: GET / (dashboard), GET /reports/:testName (individual reports), GET /api/data/:testName (JSON data for graphs). Handle CORS for local development. Implement proper HTTP status codes and error handling. Support configurable port from config file.",
+        "testStrategy": "Test HTTP server startup, verify static file serving, test API endpoints, validate CORS headers",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Create Observer Dashboard HTML Template",
+        "description": "Build the main dashboard HTML page with left navigation panel and responsive layout",
+        "details": "Create observer/index.html with modern, minimal design. Implement left navigation panel that dynamically lists available test configurations. Display average download, upload, and latency for each test in navigation. Use vanilla JavaScript for dynamic content loading. Implement responsive CSS grid layout. Auto-refresh functionality to detect new reports. No external CSS/JS dependencies - all inline or local files.",
+        "testStrategy": "Test responsive layout across devices, verify dynamic content loading, validate auto-refresh functionality",
+        "priority": "medium",
+        "dependencies": [
+          7
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Graph Generation System",
+        "description": "Create a system to generate interactive graphs for download speed, upload speed, and latency over time",
+        "details": "Implement GraphGenerator class that creates HTML/CSS/JS for three vertically stacked graphs. Use HTML5 Canvas or SVG for rendering (no external libraries). Implement smooth animations and modern styling. Generate time-series graphs with configurable time intervals. Include hover tooltips, zoom functionality, and responsive design. Export graphs as standalone HTML files that can be embedded in reports.",
+        "testStrategy": "Test graph rendering with various data sets, verify animations and interactions, validate responsive behavior",
+        "priority": "medium",
+        "dependencies": [
+          4,
+          6
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Build Report Generation Engine",
+        "description": "Create a system that generates individual HTML report files for each test configuration with embedded graphs",
+        "details": "Implement ReportGenerator class that creates individual HTML reports. Each report contains three graphs (download, upload, latency) with consistent styling. Generate reports after each speed test completion. Implement template system for consistent report layout. Include metadata: test name, date range, total tests, averages. Store reports in observer/reports/ directory with naming convention: {testName}-{timestamp}.html",
+        "testStrategy": "Test report generation with mock data, verify HTML structure and styling, validate file naming and storage",
+        "priority": "medium",
+        "dependencies": [
+          9
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Implement Dashboard Auto-Update System",
+        "description": "Create a system that automatically updates the dashboard with new reports as they are generated",
+        "details": "Implement file system watching or polling mechanism to detect new reports. Update navigation panel with new test results and averages. Implement WebSocket or Server-Sent Events for real-time updates (optional enhancement). Create API endpoints for fetching latest data: /api/tests (list all tests), /api/latest/:testName (latest results). Implement client-side JavaScript to poll for updates and refresh navigation.",
+        "testStrategy": "Test file system monitoring, verify navigation updates, validate API endpoint responses",
+        "priority": "low",
+        "dependencies": [
+          8,
+          10
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Create CLI Interface and Documentation",
+        "description": "Build command-line interface for service management and create comprehensive documentation",
+        "details": "Create CLI using Bun's argument parsing. Implement commands: start <configFile>, stop, status, generate-config <testName>. Add help system and version information. Create README.md with installation instructions, configuration examples, and usage guide. Document YAML configuration schema. Add example configuration files. Implement proper exit codes and error messages.",
+        "testStrategy": "Test all CLI commands, verify help system, validate configuration generation, test error scenarios",
+        "priority": "medium",
+        "dependencies": [
+          5,
+          11
+        ],
+        "status": "done",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-30T10:18:34.199Z",
+      "updated": "2025-06-30T13:08:36.348Z",
+      "description": "Tasks for network-service context"
+    }
+  }
+}

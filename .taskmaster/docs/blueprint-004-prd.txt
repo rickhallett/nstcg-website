@@ -1,0 +1,79 @@
+# Blueprint 004: LoggerService Implementation
+
+## Overview
+Implement the LoggerService module following the Principia.js architecture and Test-Driven Development.
+
+## Phase
+Phase 1 - Core Engine
+
+## Prerequisites: None (Core Engine module)
+
+## Architectural Canon
+1. The State is Singular: All application state lives only in the StateManager
+2. Events are the Messengers: All module communication happens only through the EventBus
+3. The Flow is Unidirectional: Action → Event → Logic → State Change → Re-render
+4. The Services are Sentinels: All external dependencies are isolated in a Service module
+5. Components are Dumb Artisans: Components only render state and emit events
+6. Views are the Conductors: Page-specific orchestration is the only job of a View Controller
+
+## Implementation Tasks
+
+### Core Implementation
+1. Create the module file structure
+2. Implement singleton pattern
+3. Set up log level definitions and interfaces
+4. Import EventBus for log event notifications
+
+### Test-Driven Development Tasks
+- [ ] Test: "should be a singleton instance" - Implement getInstance method
+- [ ] Test: "should have standard log methods (debug, info, warn, error)" - Create logging API
+- [ ] Test: "should respect log level filtering" - Implement level-based filtering
+- [ ] Test: "should format log messages with timestamp" - Add time formatting
+- [ ] Test: "should include source location in development mode" - Add caller info
+- [ ] Test: "should emit log:entry event via EventBus" - Integrate with EventBus
+- [ ] Test: "should support structured logging with objects" - Handle complex data
+- [ ] Test: "should handle circular references in logged objects" - Prevent JSON errors
+- [ ] Test: "should support multiple log transports" - Implement transport system
+- [ ] Test: "should write to console transport by default" - Console integration
+- [ ] Test: "should support custom transports via addTransport()" - Transport plugins
+- [ ] Test: "should call all transports for each log" - Transport broadcasting
+- [ ] Test: "should support log message formatting" - Template system
+- [ ] Test: "should support contextual logging with withContext()" - Context binding
+- [ ] Test: "should merge context into all logs" - Context application
+- [ ] Test: "should support child loggers with createChild()" - Logger hierarchy
+- [ ] Test: "should inherit parent context in child loggers" - Context inheritance
+- [ ] Test: "should support log buffering in setBuffered(true)" - Buffered mode
+- [ ] Test: "should flush buffered logs on flush()" - Buffer management
+- [ ] Test: "should limit buffer size to prevent memory issues" - Buffer bounds
+- [ ] Test: "should provide getRecentLogs() method" - Log history
+- [ ] Test: "should support log filtering with setFilter()" - Dynamic filtering
+- [ ] Test: "should measure performance with time() and timeEnd()" - Performance logging
+- [ ] Test: "should group related logs with group() and groupEnd()" - Log grouping
+- [ ] Test: "should support different formats (json, pretty, minimal)" - Format options
+
+### Integration Tasks
+- [ ] Integrate with EventBus for log event notifications
+- [ ] Add development/production mode handling
+- [ ] Set up console transport
+- [ ] Add TypeScript type definitions
+- [ ] Add JSDoc comments to all public methods
+
+### Documentation & PR
+- [ ] Update module exports in index.js
+- [ ] Create comprehensive PR with test results
+
+## Testing Strategy
+Follow strict TDD process:
+1. Write/uncomment one test
+2. Run test and see it fail
+3. Implement minimal code to pass
+4. Refactor if needed
+5. Commit the change
+6. Repeat for next test
+
+## Success Criteria
+- All tests in tests/core/LoggerService.test.js pass
+- Properly integrated with EventBus
+- Follows all architectural canon rules
+- Clean, documented code
+- Comprehensive PR created via gh tool

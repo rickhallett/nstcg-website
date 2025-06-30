@@ -1,579 +1,105 @@
-# NSTCG Website
+# Principia.js: A Manifesto for Principled Software Development
 
-> North Swanage Traffic Consultation Group - Community Action Platform
+This document is the philosophical and architectural foundation of the NSTCG website rewrite. It is not merely a set of instructions, but a manifesto for a specific way of building software. It codifies the "why" behind our technical decisions, capturing the wisdom gained from past experiences and laying out a clear, intentional path forward. Its purpose is to ensure that every line of code is written with purpose, clarity, and a long-term vision for maintainability and growth.
 
-A modern web application designed to mobilize community engagement for traffic safety initiatives in North Swanage, Dorset. Built with performance, security, and user experience in mind.
+---
+## Documentation Index
 
-## 🚀 Quick Start
+*   **Architectural Deep Dive**
+    *   [**Principia.js Manifesto**](./docs/principia.js.md): The core philosophy, principles, and developer journey.
+    *   [**Module Breakdown**](./docs/principia_modules.md): A detailed exploration of each module's role, responsibilities, and interactions, complete with diagrams.
+*   **TDD Blueprints**
+    *   [**Master Blueprint**](./docs/blueprints/000_master_blueprint.md): The main index and build order for all Test-Driven Development blueprints.
 
-```bash
-# Clone the repository
-git clone https://github.com/your-username/nstcg-website.git
-cd nstcg-website
-
-# Install dependencies
-npm install
-
-# Copy environment variables
-cp .env.example .env.local
-
-# Run development servers (frontend + API)
-npm run both
-
-# Open http://localhost:5173 in your browser
-```
-
-## 📋 Features
-
-- **Community Registration**: Secure participant sign-up with duplicate detection
-- **Real-time Updates**: Live countdown timers and activity feeds
-- **Gamification System**: Points, leaderboards, and referral tracking
-- **Donation Processing**: Stripe integration for campaign funding
-- **Dynamic Configuration**: Notion-based feature flags
-- **Email Campaigns**: Automated activation and engagement emails
-- **Social Sharing**: Integrated sharing with referral attribution
-- **Mobile Responsive**: Optimized for all device sizes
-
-## 🛠️ Technology Stack
-
-- **Frontend**: Vite, Vanilla JavaScript (ES6+), Modular CSS
-- **Backend**: Vercel Serverless Functions (Node.js)
-- **Database**: Notion API
-- **Payments**: Stripe
-- **Security**: Google reCAPTCHA v3
-- **Build Tools**: Vite, Vercel
-
-## 📁 Project Structure
-
-<details>
-<summary><strong>📊 Complete Project Tree (Click to expand)</strong></summary>
+## Project Structure
 
 ```
 .
-├── 404.html
-├── ai_docs
-│   └── claude_code_fresh_tutorials.md
-├── api                     # Vercel serverless functions
-│   ├── _init-google-credentials.js
-│   ├── activate-user.js
-│   ├── analyze-concerns.js
-│   ├── create-checkout-session.js
-│   ├── debug-env.js
-│   ├── debug-log.js
-│   ├── feature-flags.js
-│   ├── get-all-participants.js
-│   ├── get-count.js
-│   ├── get-donations.js
-│   ├── get-leaderboard.js
-│   ├── get-recent-signups.js
-│   ├── get-total-donations.js
-│   ├── get-user-stats.js
-│   ├── log-visit.js
-│   ├── middleware
-│   │   └── feature-flags.js
-│   ├── notion-feature-flags.js
-│   ├── submit-form.js
-│   ├── track-share.js
-│   ├── utils
-│   │   └── logger.js
-│   ├── verify-recaptcha.js
-│   └── webhook
-│       └── stripe.js
-├── architecture.md
-├── CLAUDE.md
-├── components              # Reusable HTML components
-│   └── navigation.html
-├── config                  # Application configuration
-│   ├── feature-precedence.js
-│   └── features.js
-├── css                     # Modular CSS architecture
-│   ├── base
-│   │   ├── animations.css
-│   │   ├── reset.css
-│   │   ├── typography.css
-│   │   └── variables.css
-│   ├── components
-│   │   ├── confirmation.css
-│   │   ├── counter.css
-│   │   ├── financial-card.css
-│   │   ├── forms.css
-│   │   ├── gamification.css
-│   │   ├── hero.css
-│   │   ├── impact-map.css
-│   │   ├── live-feed.css
-│   │   ├── messages.css
-│   │   ├── modal.css
-│   │   ├── navigation.css
-│   │   ├── share-buttons.css
-│   │   ├── social-proof.css
-│   │   ├── survey.css
-│   │   ├── thought-bubbles.css
-│   │   └── toast.css
-│   ├── layout
-│   │   ├── container.css
-│   │   ├── footer.css
-│   │   └── header.css
-│   ├── main.css
-│   ├── pages
-│   │   ├── donate.css
-│   │   └── feeds.css
-│   └── utilities
-│       ├── helpers.css
-│       ├── mobile.css
-│       └── registration-state.css
-├── data                    # Static JSON data
-│   ├── feed-actions.json
-│   ├── social-referral-codes.json
-│   └── thought-bubbles.json
-├── docs                    # Technical documentation
-│   ├── activation-testing-procedure.md
-│   ├── GAMIFICATION_SETUP.md
-│   ├── leaderboard-debugging.md
-│   ├── NOTION_FEATURE_FLAGS.md
-│   ├── RECAPTCHA_SERVICE_ACCOUNT_SPEC.md
-│   └── RECAPTCHA_SETUP.md
-├── donate.html
-├── email                   # Email campaigns and templates
-│   ├── activate-compiled.html
-│   ├── activate.html
-│   ├── activate.mjml
-│   ├── auto_smtp.py      # Python email automation
-│   ├── auto-mailto.py
-│   ├── pytest.ini
-│   ├── README.md
-│   ├── requirements-test.txt
-│   └── tests             # Email system tests
-│       ├── __init__.py
-│       ├── conftest.py
-│       ├── fixtures
-│       ├── mock_smtp_server.py
-│       ├── test_auto_smtp.py
-│       ├── test_integration.py
-│       └── test_performance.py
-├── favicon.ico
-├── feeds.html
-├── images                  # Static images and assets
-│   ├── impact_non_sat_height_compressed.png
-│   ├── impact_non_sat_height.png
-│   ├── impact_non_sat_height.webp
-│   └── social-share-preview-placeholder.txt
-├── index.html
-├── js                      # JavaScript modules
-│   ├── components         # Reusable UI components
-│   │   ├── counter.js
-│   │   ├── share-buttons.js
-│   │   └── toast.js
-│   ├── config            # JS configuration files
-│   │   ├── api.config.js
-│   │   ├── app.config.js
-│   │   └── ui.config.js
-│   ├── core              # Core system modules
-│   │   ├── CacheManager.js
-│   │   ├── eventBus.js
-│   │   ├── state-example.js
-│   │   └── StateManager.js
-│   ├── donate-entry.js   # Page entry points
-│   ├── donate.js
-│   ├── feeds-entry.js
-│   ├── leaderboard-entry.js
-│   ├── main-entry.js
-│   ├── main.js
-│   ├── modules           # Feature modules
-│   │   ├── api-integration.js
-│   │   ├── api-preloader.js
-│   │   ├── api.js
-│   │   ├── countdown.js
-│   │   ├── donate-features.js
-│   │   ├── feed.js
-│   │   ├── feeds-page.js
-│   │   ├── forms.js
-│   │   ├── homepage-features.js
-│   │   ├── leaderboard-features.js
-│   │   ├── leaderboard.js
-│   │   ├── modal.js
-│   │   ├── nav-timer.js
-│   │   ├── navigation-features.js
-│   │   ├── navigation.js
-│   │   ├── recaptcha.js
-│   │   ├── referral-utils.js
-│   │   ├── share-features.js
-│   │   ├── share-functionality.js
-│   │   └── social.js
-│   ├── share-entry.js
-│   └── utils             # Utility functions
-│       ├── alpine-check.js
-│       ├── cache.js
-│       ├── debug-logger.js
-│       ├── dom.js
-│       ├── feature-flags.js
-│       ├── include-nav.js
-│       ├── templates.js
-│       └── validation.js
-├── leaderboard.html
-├── logs                    # Application logs
-│   ├── api
-│   │   ├── activate-user-2025-06-28.log
-│   │   └── get-leaderboard-2025-06-28.log
-│   └── frontend
-│       └── activation-flow-2025-06-28.log
-├── maintenance.html
-├── package.json
-├── PRD                     # Product Requirements Documents
-│   ├── community-engagement-features.md
-│   ├── donations-page.md
-│   ├── email-campaign-activation.md
-│   ├── footer-legal-pages.md
-│   ├── live-feeds-page.md
-│   ├── navigation-system.md
-│   ├── nstcg-modularization.md
-│   ├── recaptcha.md
-│   ├── referral-gamification.md
-│   ├── state-management-improvements.md
-│   └── vercel-local-development-setup.md
-├── privacy-policy.html
-├── public                  # Public assets (duplicated for deployment)
-│   ├── components
-│   ├── css
-│   ├── data
-│   └── images
-├── README.md
-├── screenshots             # Test failure screenshots
-│   └── [Various test failure screenshots]
-├── scripts                 # Build and utility scripts
-│   ├── apply-org-policy.sh
-│   ├── cleanup-test-databases.js
-│   ├── compile-email-wrapper.js
-│   ├── compile-email.js
-│   ├── create-feature-flags-database.js
-│   ├── create-gamification-database.js
-│   ├── email-campaign.js
-│   ├── launch-campaign.js
-│   ├── monitor-campaign.js
-│   ├── oauth-setup.js
-│   ├── setup-gmail-auth.js
-│   ├── test-activation-flow.js
-│   ├── test-email-campaign.js
-│   ├── vercel-deploy-config.js
-│   └── [Additional utility scripts]
-├── share.html
-├── specs                   # Feature specifications
-│   ├── donation-page-implementation.md
-│   ├── email-campaign-implementation.md
-│   ├── referral-e2e-testing-spec.md
-│   └── referral-gamification-spec.md
-├── terms-and-conditions.html
-├── tests                   # End-to-end testing suite
-│   ├── config
-│   │   ├── puppeteer-config.js
-│   │   └── test-constants.js
-│   ├── e2e
-│   │   ├── activation.test.js
-│   │   ├── leaderboard.test.js
-│   │   ├── referral-enhanced.test.js
-│   │   ├── referral.test.js
-│   │   ├── registration.test.js
-│   │   └── sharing.test.js
-│   ├── fixtures
-│   │   └── test-users.json
-│   ├── setup
-│   │   ├── global-setup-enhanced.js
-│   │   ├── global-setup.js
-│   │   └── global-teardown.js
-│   └── utils
-│       ├── custom-matchers.js
-│       ├── notion-helpers.js
-│       ├── performance-monitor.js
-│       └── test-helpers.js
-├── vercel.json
-└── vite.config.js
-
-49 directories, 263 files
+├── .claude/                    # Claude Code configuration
+│   ├── commands/              # Custom slash commands
+│   └── mcp.json              # MCP server configuration
+├── .cursor/                   # Cursor IDE configuration
+│   └── rules/                # Cursor-specific rules
+├── .taskmaster/              # Task management system
+│   ├── docs/                 # Project documentation
+│   ├── reports/              # Analysis reports
+│   ├── tasks/                # Task files and database
+│   └── config.json           # Taskmaster configuration
+├── docs/                     # Core documentation
+│   ├── blueprints/           # TDD blueprints for each module
+│   └── workflow/             # Development workflow guides
+├── src/                      # Main source code (TypeScript)
+│   ├── ApplicationError.ts   # Custom error handling
+│   ├── ErrorHandlerService.ts # Error service implementation
+│   ├── EventBus.ts           # Event-driven communication
+│   ├── LoggerService.ts      # Logging service
+│   ├── StateManager.ts       # Centralized state management
+│   └── index.ts              # Application entry point
+├── StarLinkOptimiser/        # Network monitoring service
+│   ├── observer/             # Web dashboard
+│   ├── src/                  # Service source code
+│   └── test/                 # Service tests
+├── test/                     # Test files for core modules
+├── CLAUDE.md                 # Claude Code context guide
+├── package.json              # Project dependencies
+├── tsconfig.json             # TypeScript configuration
+└── README.md                 # This file
 ```
-
-</details>
-
-### 🏗️ Architecture Overview
-
-| Directory | Purpose | Key Files |
-|-----------|---------|-----------|
-| **`api/`** | Vercel serverless functions | `submit-form.js`, `get-leaderboard.js`, `create-checkout-session.js` |
-| **`css/`** | Modular CSS architecture | `base/`, `components/`, `layout/`, `utilities/` |
-| **`js/`** | JavaScript modules | `core/`, `modules/`, `components/`, `utils/` |
-| **`email/`** | Email campaign system | `auto_smtp.py`, `activate.mjml`, Python tests |
-| **`scripts/`** | Development & deployment | Database setup, email campaigns, OAuth setup |
-| **`tests/`** | E2E testing suite | Playwright tests, fixtures, custom matchers |
-| **`docs/`** | Technical documentation | Setup guides, debugging procedures |
-| **`PRD/`** | Product requirements | Feature specifications and requirements |
-| **`specs/`** | Implementation specs | Detailed implementation guides |
-
-### 🎯 Key Features by Directory
-
-- **Frontend Modules** (`js/modules/`): API integration, gamification, referral system, social sharing
-- **Styling System** (`css/`): Component-based CSS with base styles, utilities, and responsive design
-- **Backend APIs** (`api/`): Registration, leaderboards, payments, feature flags, user analytics
-- **Email System** (`email/`): MJML templates, Python automation, comprehensive testing
-- **Testing Suite** (`tests/`): End-to-end tests with Playwright, performance monitoring
-- **Documentation** (`docs/`, `specs/`, `PRD/`): Complete technical and product documentation
-
-## 🔧 Development
-
-### Prerequisites
-
-- Node.js v22.x or higher
-- npm or yarn
-- Notion account with API access
-- Stripe account (for payment features)
-- Google reCAPTCHA account
-
-### Environment Variables
-
-Create a `.env.local` file with the following variables:
-
-```bash
-# Notion Integration
-NOTION_TOKEN=your_notion_integration_token
-NOTION_DATABASE_ID=main_participant_database_id
-NOTION_GAMIFICATION_DB_ID=gamification_database_id
-NOTION_FEATURE_FLAGS_DB_ID=feature_flags_database_id
-NOTION_DONATIONS_DB_ID=donations_database_id
-
-# Stripe Configuration
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PRICE_ID=price_...
-
-# Google reCAPTCHA
-RECAPTCHA_SECRET_KEY=your_recaptcha_secret_key
-
-# Site Configuration
-SITE_URL=http://localhost:5173  # https://nstcg.org in production
-
-# Feature Flags (optional, can use Notion instead)
-FEATURE_DONATIONS=true
-FEATURE_LEADERBOARD=true
-FEATURE_REFERRAL=true
-```
-
-### Running Development Servers
-
-```bash
-# Run both Vite and Vercel dev servers concurrently
-npm run both
-
-# Or run them separately:
-npm run dev:vite    # Frontend on http://localhost:5173
-npm run dev:vercel  # API on http://localhost:3000
-```
-
-### Building for Production
-
-```bash
-# Build the frontend assets
-npm run build
-
-# Preview production build locally
-npm run preview
-```
-
-## 🚀 Deployment
-
-### Deploy to Vercel
-
-1. **Install Vercel CLI**:
-   ```bash
-   npm i -g vercel
-   ```
-
-2. **Deploy**:
-   ```bash
-   vercel
-   
-   # For production deployment
-   vercel --prod
-   ```
-
-3. **Set Environment Variables**:
-   - Go to your Vercel dashboard
-   - Navigate to Project Settings → Environment Variables
-   - Add all required environment variables
-
-### GitHub Integration
-
-1. Push repository to GitHub
-2. Import project in Vercel dashboard
-3. Configure environment variables
-4. Deploy automatically on push to main branch
-
-## 📊 Database Setup
-
-### 1. Create Notion Integration
-
-1. Visit [Notion Integrations](https://www.notion.so/my-integrations)
-2. Click "New integration"
-3. Configure with these capabilities:
-   - Read content
-   - Update content
-   - Insert content
-4. Copy the integration token
-
-### 2. Create Required Databases
-
-Run the setup scripts:
-
-```bash
-# Create main participant database
-node scripts/create-database.js
-
-# Create gamification database
-node scripts/create-gamification-database.js
-
-# Create feature flags database
-node scripts/create-feature-flags-database.js
-```
-
-Or create manually with these properties:
-
-**Main Database**:
-- Name (Title)
-- Email (Email)
-- First Name (Text)
-- Last Name (Text)
-- Source (Text)
-- Timestamp (Date)
-- User ID (Text)
-- Referrer (Text)
-- Comments (Text)
-- Visitor Type (Select: Local/Tourist)
-
-**Gamification Database**:
-- Email (Email)
-- Name (Title)
-- Display Name (Text)
-- User ID (Text)
-- Referral Code (Text)
-- Total Points (Number)
-- [Additional point tracking fields...]
-
-### 3. Share Databases with Integration
-
-For each database:
-1. Click "..." menu → "Add connections"
-2. Search for your integration name
-3. Add the connection
-
-## 🔐 Security Features
-
-- **Rate Limiting**: 10 requests/minute per IP for form submissions
-- **Input Validation**: Client and server-side validation
-- **CSRF Protection**: Token-based protection
-- **Content Security Policy**: Strict CSP headers
-- **Bot Protection**: Google reCAPTCHA v3 + honeypot fields
-- **Data Privacy**: Email masking, opt-in features
-
-## 📝 API Documentation
-
-### Core Endpoints
-
-**POST /api/submit-form**
-- Handles participant registration
-- Rate limited
-- Returns: `{ success: true, id: "..." }`
-
-**GET /api/get-count**
-- Returns participant count
-- Cached for 1 minute
-- Returns: `{ count: 250 }`
-
-**GET /api/get-leaderboard**
-- Returns gamification leaderboard
-- Returns: `{ leaderboard: [...], stats: {...} }`
-
-**POST /api/create-checkout-session**
-- Creates Stripe checkout session
-- Returns: `{ url: "https://checkout.stripe.com/..." }`
-
-For complete API documentation, see `architecture.md`.
-
-## 🧪 Testing
-
-### Local Testing
-
-```bash
-# Test form submission
-curl -X POST http://localhost:3000/api/submit-form \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "John Doe",
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "test@example.com",
-    "visitorType": "local"
-  }'
-
-# Test participant count
-curl http://localhost:3000/api/get-count
-
-# Test rate limiting (run 11 times quickly)
-for i in {1..11}; do
-  curl -X POST http://localhost:3000/api/submit-form \
-    -H "Content-Type: application/json" \
-    -d '{"name": "Test", "email": "test@example.com"}'
-done
-```
-
-### Production Testing
-
-Replace `localhost:3000` with your production domain.
-
-## 🎮 Feature Flags
-
-Features can be toggled via Notion database or environment variables:
-
-1. **Via Notion** (recommended):
-   - Open Feature Flags database
-   - Change value to `true`, `false`, or `unset`
-   - Changes take effect within 5 minutes
-
-2. **Via Environment Variables**:
-   - Set `FEATURE_*` variables
-   - Redeploy to apply changes
-
-## 📧 Email Campaigns
-
-### Compile Email Templates
-
-```bash
-# Compile MJML to HTML
-npm run compile-email
-
-# Send test email
-node scripts/test-send-email.js
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Support
-
-- **Documentation**: See `architecture.md` for detailed technical documentation
-- **Issues**: [GitHub Issues](https://github.com/your-username/nstcg-website/issues)
-- **Contact**: support@nstcg.org
-
-## 🙏 Acknowledgments
-
-- North Swanage community members
-- Swanage Town Council
-- All contributors and supporters
 
 ---
 
-Built with ❤️ for the North Swanage community
+## 1. The Ghost of V1: Lessons from the Past
+
+A rewrite is a rare opportunity. It's a chance to correct past mistakes, pay down technical debt, and build something resilient. The architecture of Principia.js is a direct response to the inferred challenges of the previous system (v1). To understand why we are building this way, we must first understand the problems we are solving.
+
+*   **The Problem of Unpredictable State:** In v1, state was likely scattered. Data could live anywhere: in global variables, in multiple component instances, directly in the DOM. This leads to chaos. When a bug occurs, you don't know where the incorrect data came from. Updating state in one place might have unforeseen consequences elsewhere. Debugging becomes a nightmare of chasing ghosts through the machine.
+*   **The Problem of "Spaghetti" Communication:** V1 likely suffered from tightly coupled modules. Component A would have a direct reference to Component B, which in turn would call a function in Module C. This creates a brittle web of dependencies. You can't change one part of the system without breaking another. Reusing a component in a different context is impossible because it's tied to its specific neighbors.
+*   **The Problem of Mixed Concerns:** In v1, logic was probably mixed indiscriminately. A single component file might contain UI rendering (HTML), styling (CSS), data fetching (`fetch`), business logic (calculations, validation), and state manipulation all in one place. These "god objects" are impossible to test, difficult to reason about, and a nightmare to refactor.
+*   **The Problem of API Brittleness:** The v1 codebase likely had direct calls to the Notion API scattered throughout the application. When Notion changes its API, or if we decide to move to a different backend, we would have to hunt down every single `fetch` call and change it. The application's logic is corrupted by the specific details of the external service.
+*   **The Problem of Fragility:** Without a rigorous testing culture, v1 was likely fragile. Every new feature or bug fix had the potential to silently break something else. There was no safety net. Development slows to a crawl as developers become afraid to touch the code for fear of unknown side effects.
+
+Principia.js is the antidote to these problems. It is a deliberate, opinionated architecture designed to enforce discipline and create a system that is predictable, scalable, and a pleasure to work on.
+
+---
+
+## 2. The Architectural Canon: The Six Immutable Laws
+
+These six principles are the heart of Principia.js. They are not suggestions; they are laws. They are enforced by the very structure of the folders and the flow of data. Violating them is not just bad practice; it's actively difficult to do within this framework.
+
+### I. The State is Singular
+*   **What it is:** All application state—every piece of data that can change—lives in a single, global `StateManager` object. No component, service, or model stores its own persistent state.
+*   **Why it matters:** This creates a **single source of truth**. There is never any ambiguity about the state of the application. When you need to know the value of something, there is only one place to look. This radically simplifies debugging. State changes become predictable and traceable. It also opens the door for advanced features like state snapshots, undo/redo functionality, and even "time-travel debugging."
+
+### II. Events are the Messengers
+*   **What it is:** Modules do not call each other directly. Instead, they communicate through a central `EventBus`. A component doesn't tell a model to register a user; it emits a `form:submit` event. The model listens for that event and acts accordingly.
+*   **Why it matters:** This enforces **decoupling**. The `FormComponent` knows nothing about the `UserModel`, and vice-versa. They only know about the `EventBus`. This means you can swap out modules with zero impact on others. You could replace the `FormComponent` with a completely different UI, and as long as it emits the same event, the application works perfectly. The system becomes a set of independent, plug-and-play parts.
+
+### III. The Flow is Unidirectional
+*   **What it is:** Data flows in one direction, and one direction only: `Action → Event → Logic → State Change → Re-render`. A user clicks a button (Action), which triggers an `Event`. A `Model` or `View Controller` (Logic) handles the event, performs some work, and tells the `StateManager` to update. The `StateManager` (State Change) updates its data, which automatically triggers the relevant `Components` to re-render with the new state.
+*   **Why it matters:** This creates **predictability**. You can reason about the flow of logic without getting lost in circles. It prevents the cascading, unpredictable updates that plague systems with two-way data binding. When something changes on the screen, you know exactly what sequence of events led to it.
+
+### IV. The Services are Sentinels
+*   **What it is:** All interaction with the outside world (APIs, `localStorage`, etc.) is isolated in a `Service` module. The `NotionService` is the *only* part of the application that knows how to talk to Notion. The `ApiService` is the only part that knows how to make an HTTP request.
+*   **Why it matters:** This creates an **Anti-Corruption Layer**. The core of your application (models, components) is protected from the messy, ever-changing details of external APIs. If Notion changes its data format, you only have to update the `NotionService`. The rest of the application remains untouched. This makes the system incredibly resilient to external changes.
+
+### V. Components are Dumb Artisans
+*   **What it is:** Components are responsible for one thing: rendering a piece of UI based on the state they are given (`props` and `state`). They contain no business logic. They simply receive data and render HTML. When the user does something, the component's only job is to emit an event.
+*   **Why it matters:** This creates **reusability and testability**. A "dumb" component can be reused anywhere in the application because it has no external dependencies on models or services. It's also trivial to test: give it some props, and assert that it renders the correct HTML.
+
+### VI. Views are the Conductors
+*   **What it is:** While components are "dumb," `View Controllers` are the "smart" orchestrators for a specific page or view. The `HomePage` controller is responsible for initializing all the components on the home page, listening for their events, and delegating tasks to the appropriate `Models`.
+*   **Why it matters:** This provides a clear **separation of concerns**. Page-level logic has a designated home. It keeps the components clean while providing a place to manage the complexity of a full user-facing view.
+
+---
+
+## 3. The Developer's Journey: What You Will Learn
+
+Building an application with Principia.js is not just a task; it's a learning experience. By adhering to this methodology, you are not just using a framework; you are building one. This process is designed to instill a deep understanding of the principles that underpin modern web development.
+
+*   **You will master architectural patterns:** You will gain first-hand experience implementing fundamental software design patterns: the Singleton, the Observer (EventBus), the Facade (Services), and the Anti-Corruption Layer.
+*   **You will understand the "why" of modern frameworks:** Why do tools like React, Vue, and Redux exist? By building your own `StateManager`, `Component` model, and `dom-diff` utility, you will understand the problems these libraries solve from the inside out. You will never look at them as "magic" again.
+*   **You will internalize Test-Driven Development (TDD):** This project follows a strict TDD loop. You will learn the discipline of writing a failing test *before* writing the implementation code. This practice forces you to think clearly about your module's API and requirements upfront. It builds a comprehensive safety net that gives you the confidence to refactor and add features without fear.
+*   **You will learn to write truly decoupled code:** The `EventBus` and `Service` layers will force you to think about dependencies. You will learn to build modules that are independent, reusable, and easy to test in isolation—the hallmark of a professional software engineer.
+*   **You will build a system from the ground up:** The "Foundation-First" build order is a masterclass in project strategy. You will learn how to build a complex system by starting with a stable core and progressively adding layers of functionality, ensuring that each new piece rests on a tested and reliable foundation.
+
+This project is a dojo. It is a place to practice the art of software engineering with a clear philosophy and a structured approach. The result will not only be a functional website but also a more skilled and principled developer.

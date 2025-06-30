@@ -43,10 +43,6 @@ dev-debug.log
 *.sln
 *.sw?
 # OS specific
-# Task files
-tasks.json
-tasks/
-
 # OAuth tokens (sensitive)
 gmail-tokens.json
 scripts/gmail-tokens.json
@@ -60,3 +56,14 @@ test-results/*
 # Service account credentials (sensitive)
 scripts/gmail-service-account*.json*
 *service-account*.json*
+
+# Gemini
+.gemini/settings.json
+
+# Logs
+
+# Task files
+# tasks.json
+# tasks/
+
+.claude/mcp.json

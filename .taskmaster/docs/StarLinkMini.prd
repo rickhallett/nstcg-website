@@ -1,0 +1,170 @@
+# Product Requirements Document: StarLinkMini
+
+## 1. Overview
+
+StarLinkMini is a lightweight TypeScript tool that wraps `speedtest-cli` to add scheduled execution, directional tracking, and persistent storage capabilities. It enhances the base speedtest-cli functionality by adding metadata about dish orientation (direction and tilt) and automating regular test execution. The tool is designed for immediate deployment and personal use, with minimal configuration required.
+
+## 2. Goals
+
+* Provide a simple, immediately usable tool for monitoring Starlink connection quality
+* Create persistent logs of connection performance over time
+* Support directional and tilt data for analyzing connection quality based on dish orientation
+* Enable easy data analysis through standardized CSV and JSON outputs
+* Maintain a minimal footprint with no external dependencies beyond speedtest-cli
+
+## 3. Features
+
+### 3.1 Core Functionality
+
+* **Automated Testing**: Run speed tests every 10 minutes using system scheduler
+* **Enhanced Data Collection**: Augment speedtest-cli output with directional metadata
+* **Persistent Storage**: Append results to named CSV and JSON files
+* **Named Sessions**: Use `--name` parameter to create uniquely named output files
+* **Directional Tracking**: Record dish direction using `--direction` parameter (not provided by speedtest-cli)
+* **Tilt Recording**: Track dish tilt angle using `--tilt` parameter (not provided by speedtest-cli)
+
+### 3.2 Command Line Interface
+
+```bash
+# Basic usage
+bun run src/StarLinkMini/index.ts --name session1
+
+# With direction (compass points)
+bun run src/StarLinkMini/index.ts --name outdoor-test --direction NW
+
+# With precise direction (degrees)
+bun run src/StarLinkMini/index.ts --name outdoor-test --direction 315.5
+
+# With tilt angle
+bun run src/StarLinkMini/index.ts --name outdoor-test --direction NW --tilt 45
+
+# Full example
+bun run src/StarLinkMini/index.ts --name winter-test --direction NNW --tilt 30
+
+# Single run mode (for testing)
+bun run src/StarLinkMini/index.ts --name test --single-run
+
+# Schedule mode (sets up cron job)
+bun run src/StarLinkMini/index.ts --name continuous --schedule
+```
+
+### 3.3 Direction Parameter Specification
+
+* **Compass Points**: Single letter (N, S, E, W) up to 3 letters (NNW, ESE, etc.)
+* **Numeric Degrees**: Float value 0-359.9 representing degrees from North
+* **Validation**: Invalid compass combinations rejected, degrees wrapped modulo 360
+
+### 3.4 Output File Formats
+
+The tool enhances speedtest-cli's native CSV and JSON output by adding directional metadata.
+
+#### CSV Format (`<name>.csv`):
+- Uses speedtest-cli's `--csv` output as base
+- Appends `direction` and `tilt` columns
+- Headers included on first run
+
+#### JSON Format (`<name>.json`):
+- Uses speedtest-cli's `--json` output as base
+- Adds `direction`, `direction_degrees`, and `tilt` fields
+- Stores as array of test results for time-series analysis
+
+## 4. Technical Requirements
+
+### 4.1 Dependencies
+
+* **speedtest-cli**: Must be installed and accessible in PATH
+* **Bun**: TypeScript runtime for execution
+* **Node.js types**: For TypeScript development
+
+### 4.2 Implementation Details
+
+* **TypeScript Implementation**: Core logic in `src/StarLinkMini/index.ts`
+* **Module Structure**:
+  - `index.ts`: Main entry point and CLI handling
+  - `DirectionValidator.ts`: Direction parameter validation
+  - `SpeedTestRunner.ts`: Wrapper for speedtest-cli execution
+  - `DataStore.ts`: File persistence logic
+  - `Scheduler.ts`: Cron job management
+* **Error Handling**: Graceful handling of missing speedtest-cli, network failures
+* **Type Safety**: Full TypeScript types for all data structures
+
+
+## 5. Test Suite Requirements
+
+The test suite should verify:
+
+### 5.1 Core Functionality Tests
+* Script executes without errors
+* Speed test runs successfully
+* Results are captured correctly
+* Files are created with correct names
+
+### 5.2 Parameter Validation Tests
+* `--name` parameter creates correctly named files
+* `--direction` accepts valid compass points (N, NE, NNE, etc.)
+* `--direction` accepts numeric degrees (0-359.9)
+* `--direction` rejects invalid inputs
+* `--tilt` accepts valid integer degrees
+* `--tilt` rejects out-of-range values
+
+### 5.3 Output Format Tests
+* CSV file has correct headers
+* CSV data is properly formatted
+* JSON file is valid JSON
+* JSON structure matches specification
+* Timestamps are in ISO 8601 format
+
+### 5.4 Error Handling Tests
+* Handles missing speedtest-cli gracefully
+* Handles network failures appropriately
+* Recovers from interrupted tests
+* Logs errors appropriately
+
+### 5.5 Integration Tests
+* Continuous operation for multiple cycles
+* File append operations work correctly
+* No data loss during long runs
+* Proper cleanup on termination
+
+## 6. Usage Examples
+
+### Basic Monitoring
+```bash
+# Start monitoring with default settings
+./starlink-mini.sh --name home-monitor
+
+# Check results
+tail -f home-monitor.csv
+```
+
+### Directional Analysis
+```bash
+# Test different orientations
+./starlink-mini.sh --name north-test --direction N --tilt 30
+./starlink-mini.sh --name west-test --direction W --tilt 45
+
+# Compare results
+grep "^2024-01-15" north-test.csv west-test.csv
+```
+
+### Long-term Monitoring
+```bash
+# Add to crontab for continuous monitoring
+*/10 * * * * /path/to/starlink-mini.sh --name continuous --direction 320 --tilt 40
+```
+
+## 7. Future Enhancements (Out of Scope for v1)
+
+* Web dashboard for real-time visualization
+* Automated analysis and alerting
+* Multi-location comparison tools
+* Integration with Starlink API
+* Mobile app companion
+
+## 8. Success Criteria
+
+* Tool can be deployed and producing data within 5 minutes
+* No external dependencies beyond speedtest-cli and standard Unix tools
+* Data format is immediately compatible with common analysis tools (Excel, Pandas, etc.)
+* Stable operation for weeks without intervention
+* Clear error messages guide users to solutions

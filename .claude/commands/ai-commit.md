@@ -102,6 +102,7 @@ When reading files:
 - **Limit content**: For large files (>5000 chars), focus on changed sections
 - **Understand context**: Look at imports, function signatures, and overall structure
 - **Identify relationships**: Note how changes in different files relate to each other
+- Do NOT say authored or edited by you, just say the changes you made
 
 ## Safety Guidelines
 

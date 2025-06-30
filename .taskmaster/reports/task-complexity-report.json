@@ -1,0 +1,109 @@
+{
+	"meta": {
+		"generatedAt": "2025-06-30T10:20:23.383Z",
+		"tasksAnalyzed": 12,
+		"totalTasks": 12,
+		"analysisCount": 12,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": false
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Setup Project Structure and Configuration",
+			"complexityScore": 3,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the project initialization into: 1) Bun and TypeScript setup, 2) Directory structure creation, 3) Git repository initialization, 4) Basic configuration files setup",
+			"reasoning": "Standard project setup with well-defined requirements. Low complexity but multiple discrete steps that can be parallelized."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Implement YAML Configuration Parser",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divide into: 1) YAML parsing implementation, 2) TypeScript interface definitions, 3) Validation logic, 4) Default value handling, 5) Error handling and testing",
+			"reasoning": "Moderate complexity involving file I/O, parsing, validation, and error handling. Multiple components that need integration."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Create SpeedTest CLI Wrapper",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break into: 1) Subprocess execution wrapper, 2) Command option configuration, 3) CSV output parsing, 4) JSON output parsing, 5) Error handling for network/command failures, 6) Output structure definition",
+			"reasoning": "Higher complexity due to external process management, multiple output formats, and extensive error handling scenarios."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Implement Data Storage and Logging",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divide into: 1) JSON-based DataStore implementation, 2) Data persistence and retrieval, 3) Logger class with file operations, 4) Log rotation mechanism, 5) Data structure validation and serialization",
+			"reasoning": "Moderate complexity with file I/O, data persistence, and log management. Multiple components requiring careful integration."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Build Core Service Engine",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down into: 1) Service lifecycle management, 2) Interval-based execution system, 3) Process signal handling, 4) Background process spawning, 5) State management, 6) Component integration, 7) Service orchestration logic",
+			"reasoning": "High complexity as it's the central orchestrator integrating all components. Involves process management, timing, and complex state handling."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Create JSON Output Processor with jq Wrapper",
+			"complexityScore": 4,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divide into: 1) jq command wrapper implementation, 2) Common query methods, 3) Custom query support, 4) Error handling for missing jq dependency",
+			"reasoning": "Moderate-low complexity. External dependency management and JSON processing, but well-defined scope."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Build Web Server for Dashboard",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break into: 1) HTTP server setup with Bun.serve(), 2) Static file serving, 3) API route implementation, 4) CORS configuration, 5) Error handling and status codes, 6) Port configuration integration",
+			"reasoning": "Moderate-high complexity involving HTTP server implementation, routing, and API design. Multiple endpoints and configurations."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Create Observer Dashboard HTML Template",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divide into: 1) HTML structure and layout, 2) CSS responsive design, 3) Navigation panel implementation, 4) Dynamic content loading JavaScript, 5) Auto-refresh functionality",
+			"reasoning": "Moderate complexity involving frontend development with responsive design and dynamic content. No external dependencies adds some complexity."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Implement Graph Generation System",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down into: 1) Canvas/SVG rendering engine, 2) Time-series data processing, 3) Interactive features (hover, zoom), 4) Animation system, 5) Responsive graph layout, 6) Export functionality",
+			"reasoning": "High complexity due to custom graph rendering without external libraries. Requires mathematical calculations, animations, and interactive features."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Build Report Generation Engine",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divide into: 1) Report template system, 2) Graph embedding logic, 3) Metadata calculation and display, 4) File generation and naming, 5) Report storage management",
+			"reasoning": "Moderate complexity involving template processing, file generation, and integration with graph system. Well-defined but multiple components."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "Implement Dashboard Auto-Update System",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break into: 1) File system monitoring, 2) API endpoints for data fetching, 3) Client-side polling mechanism, 4) Navigation panel updates, 5) Real-time data synchronization, 6) WebSocket/SSE implementation (optional)",
+			"reasoning": "Moderate-high complexity involving real-time updates, file system monitoring, and client-server communication. Multiple update mechanisms to implement."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Create CLI Interface and Documentation",
+			"complexityScore": 4,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divide into: 1) CLI argument parsing and command structure, 2) Service management commands implementation, 3) Help system and version info, 4) Configuration generation utility, 5) Documentation and examples creation",
+			"reasoning": "Moderate-low complexity. Standard CLI development with well-defined commands. Documentation requires thoroughness but is straightforward."
+		}
+	]
+}
