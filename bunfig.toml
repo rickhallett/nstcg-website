@@ -1,2 +1,2 @@
-bun[test]
+[test]
 ignore = ["v1/**"]
