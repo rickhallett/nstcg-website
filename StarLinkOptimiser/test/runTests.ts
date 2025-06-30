@@ -6,6 +6,7 @@ import './SpeedTestRunner.test';
 import './DataStore.test';
 import './Logger.test';
 import './StarLinkOptimiser.test';
+import './JqWrapper.test';
 // Import other test files here
 
 run();
