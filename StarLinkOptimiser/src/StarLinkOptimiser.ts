@@ -3,6 +3,7 @@ import { Config, ConfigParser } from './ConfigParser';
 import { SpeedTestRunner } from './SpeedTestRunner';
 import { DataStore, SpeedTestResult } from './DataStore';
 import { Logger } from './Logger';
+import { writeFileSync, readFileSync, existsSync, rmSync } from 'fs';
 
 export enum ServiceState {
     REGISTERED,
@@ -19,11 +20,13 @@ export class StarLinkOptimiser {
     private timer: Timer | null = null;
     private state: ServiceState = ServiceState.REGISTERED;
     private speedTestRunner: typeof SpeedTestRunner;
+    private pidFilePath: string;
 
     private constructor(config: Config, speedTestRunner: typeof SpeedTestRunner = SpeedTestRunner) {
         this.config = config;
         this.dataStore = new DataStore(`${config.testName}.db.json`);
         this.speedTestRunner = speedTestRunner;
+        this.pidFilePath = `${config.testName}.pid`;
     }
 
     static async create(configPath: string): Promise<StarLinkOptimiser> {
@@ -78,6 +81,9 @@ export class StarLinkOptimiser {
 
     shutdown() {
         this.stop();
+        if (existsSync(this.pidFilePath)) {
+            rmSync(this.pidFilePath);
+        }
         process.exit(0);
     }
 
@@ -89,13 +95,22 @@ export class StarLinkOptimiser {
         return this.state;
     }
 
-    runInBackground() {
-        const proc = Bun.spawn(['bun', 'src/index.ts'], {
+    runInBackground(configPath: string) {
+        const proc = Bun.spawn(['bun', 'src/index.ts', configPath], {
             cwd: './',
             stdio: ['ignore', 'ignore', 'ignore'],
             detached: true,
         });
+        writeFileSync(this.pidFilePath, proc.pid.toString());
         proc.unref();
+    }
+
+    stopBackground() {
+        if (existsSync(this.pidFilePath)) {
+            const pid = parseInt(readFileSync(this.pidFilePath, 'utf-8'));
+            process.kill(pid, 'SIGTERM');
+            rmSync(this.pidFilePath);
+        }
     }
 
     private parseCsv(csv: string): SpeedTestResult | null {

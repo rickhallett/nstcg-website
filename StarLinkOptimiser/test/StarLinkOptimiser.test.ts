@@ -7,6 +7,7 @@ import { SpeedTestRunner } from '../src/SpeedTestRunner';
 describe('StarLinkOptimiser', () => {
     let optimiser: StarLinkOptimiser;
     const mockSpeedTestRunner = createMock(['run']);
+    const testConfigPath = 'test.yaml';
 
     beforeEach(async () => {
         const config = `
@@ -17,18 +18,21 @@ logging: true
 logFile: test.log
 port: 3000
 `;
-        await Bun.write('test.yaml', config);
-        optimiser = await StarLinkOptimiser.create('test.yaml');
+        await Bun.write(testConfigPath, config);
+        optimiser = await StarLinkOptimiser.create(testConfigPath);
         (optimiser as any).speedTestRunner = mockSpeedTestRunner;
     });
 
     afterEach(() => {
-        rmSync('test.yaml');
+        rmSync(testConfigPath);
         if (existsSync('test.log')) {
             rmSync('test.log');
         }
         if (existsSync('development.db.json')) {
             rmSync('development.db.json');
+        }
+        if (existsSync('development.pid')) {
+            rmSync('development.pid');
         }
     });
 
@@ -82,7 +86,7 @@ port: 3000
     });
 
     it('should shutdown gracefully', async () => {
-        const proc = Bun.spawn(['bun', 'src/index.ts'], {
+        const proc = Bun.spawn(['bun', 'src/index.ts', testConfigPath], {
             cwd: './',
             stdio: ['inherit', 'inherit', 'inherit'],
         });
@@ -92,9 +96,12 @@ port: 3000
         expect(exitCode).toBe(0);
     });
 
-    it('should run in background', async () => {
-        optimiser.runInBackground();
-        // How to assert that the process is running in the background?
-        // For now, just check that the method doesn't throw.
+    it('should run in background and stop', async () => {
+        optimiser.runInBackground(testConfigPath);
+        await new Promise(resolve => setTimeout(resolve, 200));
+        expect(existsSync('development.pid')).toBe(true);
+        optimiser.stopBackground();
+        await new Promise(resolve => setTimeout(resolve, 200));
+        expect(existsSync('development.pid')).toBe(false);
     });
 });
