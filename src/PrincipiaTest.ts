@@ -2,16 +2,16 @@
 
 type Test = {
   description: string;
-  callback: () => void;
+  callback: () => void | Promise<void>;
   only: boolean;
   skip: boolean;
-  beforeEaches: (() => void)[];
-  afterEaches: (() => void)[];
+  beforeEaches: (() => void | Promise<void>)[];
+  afterEaches: (() => void | Promise<void>)[];
 };
 
 let tests: Test[] = [];
-let beforeEaches: (() => void)[] = [];
-let afterEaches: (() => void)[] = [];
+let beforeEaches: (() => void | Promise<void>)[] = [];
+let afterEaches: (() => void | Promise<void>)[] = [];
 
 export function describe(name: string, callback: () => void) {
   console.log(name);
@@ -22,47 +22,51 @@ export function describe(name: string, callback: () => void) {
   afterEaches = parentAfterEaches;
 }
 
-export const it = (description: string, callback: () => void) => {
+export const it = (description: string, callback: () => void | Promise<void>) => {
   tests.push({ description, callback, only: false, skip: false, beforeEaches: [...beforeEaches], afterEaches: [...afterEaches] });
 };
 
-it.only = (description: string, callback: () => void) => {
+it.only = (description: string, callback: () => void | Promise<void>) => {
   tests.push({ description, callback, only: true, skip: false, beforeEaches: [...beforeEaches], afterEaches: [...afterEaches] });
 };
 
-it.skip = (description: string, callback: () => void) => {
+it.skip = (description: string, callback: () => void | Promise<void>) => {
   tests.push({ description, callback, only: false, skip: true, beforeEaches: [...beforeEaches], afterEaches: [...afterEaches] });
 };
 
-export function beforeEach(callback: () => void) {
+export function beforeEach(callback: () => void | Promise<void>) {
   beforeEaches.push(callback);
 }
 
-export function afterEach(callback: () => void) {
+export function afterEach(callback: () => void | Promise<void>) {
   afterEaches.push(callback);
 }
 
-export function run() {
+export async function run() {
   const hasOnly = tests.some(test => test.only);
   const testsToRun = hasOnly ? tests.filter(t => t.only) : tests;
 
-  testsToRun.forEach(test => {
+  for (const test of testsToRun) {
     if (test.skip) {
       console.log(`  - ${test.description}`);
-      return;
+      continue;
     }
     try {
-      test.beforeEaches.forEach(beforeEach => beforeEach());
-      test.callback();
+      for (const beforeEach of test.beforeEaches) {
+        await beforeEach();
+      }
+      await test.callback();
       console.log(`  ✓ ${test.description}`);
     } catch (error) {
       console.error(`  ✗ ${test.description}`);
       console.error(error);
       process.exit(1);
     } finally {
-      test.afterEaches.forEach(afterEach => afterEach());
+      for (const afterEach of test.afterEaches) {
+        await afterEach();
+      }
     }
-  });
+  }
   tests = [];
 }
 

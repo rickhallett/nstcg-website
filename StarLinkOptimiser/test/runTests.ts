@@ -5,6 +5,7 @@ import './ConfigParser.test';
 import './SpeedTestRunner.test';
 import './DataStore.test';
 import './Logger.test';
+import './StarLinkOptimiser.test';
 // Import other test files here
 
 run();
