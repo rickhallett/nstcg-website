@@ -22,4 +22,25 @@ describe('SpeedTestRunner', () => {
         const output = await SpeedTestRunner.run(config);
         expect(output.includes('Server ID,Sponsor,Server Name,Timestamp,Distance,Ping,Download,Upload,Share,IP Address')).toBe(true);
     });
+
+    it('should throw an error if speedtest-cli is not found', async () => {
+        const config: Config = {
+            testName: 'development',
+            frequency: 60000,
+            output: 'csv',
+            logging: false,
+            logFile: '',
+            port: 3000
+        };
+
+        let error;
+        try {
+            // @ts-ignore
+            await SpeedTestRunner.run(config, 'non-existent-command');
+        } catch (e) {
+            error = e;
+        }
+
+        expect(error.message).toBe('speedtest-cli not found');
+    });
 });
