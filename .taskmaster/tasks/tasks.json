@@ -201,7 +201,7 @@
           4,
           6
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -248,7 +248,7 @@
     ],
     "metadata": {
       "created": "2025-06-30T10:18:34.199Z",
-      "updated": "2025-06-30T12:56:18.630Z",
+      "updated": "2025-06-30T12:59:18.445Z",
       "description": "Tasks for network-service context"
     }
   }

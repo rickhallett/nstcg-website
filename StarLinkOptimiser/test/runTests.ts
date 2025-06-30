@@ -11,6 +11,7 @@ import './WebServer.test';
 import '../../test/StateManager.test';
 import '../../test/ServiceRegistry.test';
 import './GraphGenerator.test';
+import './ReportGenerator.test';
 // Import other test files here
 
 run();
