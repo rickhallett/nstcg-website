@@ -3,6 +3,7 @@ import { Config, ConfigParser } from './ConfigParser';
 import { SpeedTestRunner } from './SpeedTestRunner';
 import { DataStore, SpeedTestResult } from './DataStore';
 import { Logger } from './Logger';
+import { StateManager } from '../../src/StateManager';
 import { writeFileSync, readFileSync, existsSync, rmSync } from 'fs';
 
 export enum ServiceState {
@@ -18,7 +19,7 @@ export class StarLinkOptimiser {
     private config: Config;
     public dataStore: DataStore;
     private timer: Timer | null = null;
-    private state: ServiceState = ServiceState.REGISTERED;
+    private stateManager: StateManager;
     private speedTestRunner: typeof SpeedTestRunner;
     private pidFilePath: string;
 
@@ -27,6 +28,11 @@ export class StarLinkOptimiser {
         this.dataStore = new DataStore(`${config.testName}.db.json`);
         this.speedTestRunner = speedTestRunner;
         this.pidFilePath = `${config.testName}.pid`;
+        this.stateManager = StateManager.getInstance();
+        this.stateManager.initialize({
+            serviceState: ServiceState.REGISTERED,
+            results: [],
+        });
     }
 
     static async create(configPath: string): Promise<StarLinkOptimiser> {
@@ -35,9 +41,9 @@ export class StarLinkOptimiser {
     }
 
     async start() {
-        this.state = ServiceState.INITIALIZING;
+        this.stateManager.set('serviceState', ServiceState.INITIALIZING);
         Logger.log(this.config, 'Starting StarLinkOptimiser');
-        this.state = ServiceState.RUNNING;
+        this.stateManager.set('serviceState', ServiceState.RUNNING);
         this.runTest();
 
         process.on('SIGINT', () => this.shutdown());
@@ -45,7 +51,7 @@ export class StarLinkOptimiser {
     }
 
     private runTest() {
-        if (this.state !== ServiceState.RUNNING) {
+        if (this.stateManager.get('serviceState') !== ServiceState.RUNNING) {
             return;
         }
         this.timer = setTimeout(async () => {
@@ -55,10 +61,11 @@ export class StarLinkOptimiser {
                 const result = this.parseCsv(output);
                 if (result) {
                     this.dataStore.add(result);
+                    this.stateManager.set('results', this.dataStore.getAll());
                 }
             } catch (error) {
                 Logger.log(this.config, `Error running speedtest: ${error.message}`);
-                this.state = ServiceState.FAILED;
+                this.stateManager.set('serviceState', ServiceState.FAILED);
                 this.stop();
             } finally {
                 this.runTest();
@@ -67,15 +74,15 @@ export class StarLinkOptimiser {
     }
 
     stop() {
-        if (this.state !== ServiceState.FAILED) {
-            this.state = ServiceState.STOPPING;
+        if (this.stateManager.get('serviceState') !== ServiceState.FAILED) {
+            this.stateManager.set('serviceState', ServiceState.STOPPING);
         }
         Logger.log(this.config, 'Stopping StarLinkOptimiser');
         if (this.timer) {
             clearTimeout(this.timer);
         }
-        if (this.state !== ServiceState.FAILED) {
-            this.state = ServiceState.STOPPED;
+        if (this.stateManager.get('serviceState') !== ServiceState.FAILED) {
+            this.stateManager.set('serviceState', ServiceState.STOPPED);
         }
     }
 
@@ -92,7 +99,7 @@ export class StarLinkOptimiser {
     }
 
     getState(): ServiceState {
-        return this.state;
+        return this.stateManager.get('serviceState');
     }
 
     runInBackground(configPath: string) {

@@ -2,7 +2,7 @@
 import { describe, it, expect } from '../../src/PrincipiaTest';
 import { WebServer } from '../src/WebServer';
 import { Config } from '../src/ConfigParser';
-import { DataStore } from '../src/DataStore';
+import { StateManager } from '../../src/StateManager';
 
 describe('WebServer', () => {
     it('should serve the observer dashboard', async () => {
@@ -15,8 +15,16 @@ describe('WebServer', () => {
             logFile: '',
             port: port
         };
-        const dataStore = new DataStore();
-        const webServer = new WebServer(config, dataStore);
+        const stateManager = StateManager.getInstance();
+        stateManager.initialize({
+            results: [{
+                timestamp: new Date().toISOString(),
+                download: 100,
+                upload: 50,
+                ping: 20
+            }]
+        });
+        const webServer = new WebServer(config);
         
         try {
             webServer.start();

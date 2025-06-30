@@ -1,16 +1,16 @@
 // StarLinkOptimiser/src/WebServer.ts
 import { Config } from './ConfigParser';
-import { DataStore } from './DataStore';
+import { StateManager } from '../../src/StateManager';
 import { Server } from 'bun';
 
 export class WebServer {
     private config: Config;
-    private dataStore: DataStore;
+    private stateManager: StateManager;
     private server: Server | null = null;
 
-    constructor(config: Config, dataStore: DataStore) {
+    constructor(config: Config) {
         this.config = config;
-        this.dataStore = dataStore;
+        this.stateManager = StateManager.getInstance();
     }
 
     start() {
@@ -22,7 +22,7 @@ export class WebServer {
                     return new Response(Bun.file('observer/index.html'));
                 }
                 if (url.pathname === '/data') {
-                    return new Response(JSON.stringify(this.dataStore.getAll()), {
+                    return new Response(JSON.stringify(this.stateManager.get('results')), {
                         headers: { 'Content-Type': 'application/json' },
                     });
                 }
