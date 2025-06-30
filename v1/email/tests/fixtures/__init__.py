@@ -1,1 +1,0 @@
-# Test fixtures and mock data for email campaign testing
