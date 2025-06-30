@@ -1,0 +1,57 @@
+# Product Requirements Document: StarLinkOptimiser
+
+## 1. Overview
+
+StarLinkOptimiser is a standalone service that continuously monitors network performance by running `speedtest-cli` at configurable intervals. It logs the results, processes them, and generates a web-based dashboard with interactive graphs to visualize download speed, upload speed, and latency over time. This tool is designed for users who need to monitor and optimize their Starlink (or other) internet connection, particularly for remote work, streaming, or online gaming.
+
+## 2. Goals
+
+*   To provide a simple, automated way to monitor internet connection performance.
+*   To generate clear, easy-to-understand reports that visualize network performance trends.
+*   To create a dependency-free, standalone service that is easy to set up and run.
+
+## 3. Features
+
+### 3.1. Core Service
+
+*   **Configuration:** The service is configured via a YAML file (`config.<testName>.yaml`).
+    *   `testName`: A unique name for the test configuration.
+    *   `frequency`: The interval in milliseconds at which to run the speed test.
+    *   `output`: The output format for the `speedtest-cli` command (default: `csv`). All `speedtest-cli` options should be supported.
+    *   `logging`: If `true`, the verbose output of `speedtest-cli` is logged to a file specified by `logFile`.
+    *   `port`: The port on which to run the web server for the reports.
+*   **Process Management:**
+    *   `start()`: Starts the service.
+    *   `stop()`: Stops the service.
+    *   `runInBackground()`: Runs the service as a background process.
+*   **Output Processing:**
+    *   A wrapper around `jq` to process JSON output from `speedtest-cli`.
+    *   The service will parse the output and store it in a structured format.
+
+### 3.2. Reporting
+
+*   **Observer Dashboard:**
+    *   A web-based dashboard (`observer/index.html`) that displays the reports.
+    *   A left-hand navigation panel that lists all available reports.
+    *   Each navigation link will display the average download, upload, and latency for that report.
+    *   The dashboard will automatically update with new reports as they are generated.
+*   **Individual Reports:**
+    *   Each report will be a separate HTML file.
+    *   The report will contain three vertically stacked graphs:
+        *   Download speed over time.
+        *   Upload speed over time.
+        *   Latency over time.
+    *   The graphs will be modern, minimal, and slightly animated.
+    *   The time intervals for the graphs will be configurable.
+
+## 4. Technical Requirements
+
+*   **Stack:** Bun, TypeScript, Bash.
+*   **Dependencies:** No external dependencies.
+*   **Testing:** The service will be developed using TDD.
+*   **Code Quality:** The code will adhere to high software engineering standards.
+
+## 5. Out of Scope
+
+*   Real-time updates to the graphs. The reports will be generated after each speed test.
+*   User authentication or authorization. The dashboard will be publicly accessible on the configured port.

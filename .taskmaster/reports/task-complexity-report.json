@@ -1,69 +1,109 @@
 {
 	"meta": {
-		"generatedAt": "2025-06-30T08:08:27.930Z",
-		"tasksAnalyzed": 5,
-		"totalTasks": 5,
-		"analysisCount": 7,
+		"generatedAt": "2025-06-30T10:20:23.383Z",
+		"tasksAnalyzed": 12,
+		"totalTasks": 12,
+		"analysisCount": 12,
 		"thresholdScore": 5,
 		"projectName": "Taskmaster",
 		"usedResearch": false
 	},
 	"complexityAnalysis": [
 		{
-			"taskId": 6,
-			"taskTitle": "Add Error Recovery Mechanisms",
-			"complexityScore": 8,
-			"recommendedSubtasks": 6,
-			"expansionPrompt": "Break down the error recovery mechanisms into subtasks covering: 1) Recovery eligibility determination, 2) API error retry logic, 3) Storage error recovery implementation, 4) Integration with handleError method, 5) Recovery event emission, 6) Unit tests for recovery scenarios",
-			"reasoning": "This is the most complex task as it involves sophisticated error recovery strategies for different error types. It requires deep understanding of various error scenarios and appropriate recovery mechanisms. The implementation needs to handle multiple edge cases and integrate with other system components."
-		},
-		{
-			"taskId": 7,
-			"taskTitle": "Document and Export the ErrorHandlerService",
-			"complexityScore": 2,
-			"recommendedSubtasks": 3,
-			"expansionPrompt": "Break down the documentation and export task into subtasks covering: 1) JSDoc documentation for all methods and classes, 2) Export implementation for ErrorHandlerService and related classes, 3) Creation of index.js with proper exports",
-			"reasoning": "This is a relatively simple task focused on documentation and module exports. The complexity is low as it primarily involves adding JSDoc comments and ensuring proper exports. The task is important for usability but doesn't involve complex implementation logic."
-		},
-		{
 			"taskId": 1,
-			"taskTitle": "Create ErrorHandlerService Singleton Class",
+			"taskTitle": "Setup Project Structure and Configuration",
 			"complexityScore": 3,
-			"recommendedSubtasks": 2,
-			"expansionPrompt": "Break down the implementation of the ErrorHandlerService singleton class into subtasks including: 1) Creating the basic class structure with singleton pattern implementation, and 2) Adding proper JSDoc documentation and implementing the constructor with validation",
-			"reasoning": "This is a relatively straightforward implementation of a singleton pattern. The code is already provided and follows standard practices. The complexity is low as it only involves creating a class with static methods and a private constructor."
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the project initialization into: 1) Bun and TypeScript setup, 2) Directory structure creation, 3) Git repository initialization, 4) Basic configuration files setup",
+			"reasoning": "Standard project setup with well-defined requirements. Low complexity but multiple discrete steps that can be parallelized."
 		},
 		{
 			"taskId": 2,
-			"taskTitle": "Implement Initialization Method",
+			"taskTitle": "Implement YAML Configuration Parser",
 			"complexityScore": 5,
-			"recommendedSubtasks": 3,
-			"expansionPrompt": "Break down the implementation of the init() method into subtasks including: 1) Setting up dependency injection for LoggerService and EventBus, 2) Implementing the error event listener with proper error handling, and 3) Implementing the unhandledrejection event listener with proper error handling",
-			"reasoning": "This task involves dependency injection and setting up global event listeners. It has moderate complexity due to the need to properly handle different types of errors and integrate with other services. The implementation requires understanding of browser events and error handling patterns."
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divide into: 1) YAML parsing implementation, 2) TypeScript interface definitions, 3) Validation logic, 4) Default value handling, 5) Error handling and testing",
+			"reasoning": "Moderate complexity involving file I/O, parsing, validation, and error handling. Multiple components that need integration."
 		},
 		{
 			"taskId": 3,
-			"taskTitle": "Implement Error Handling Method",
+			"taskTitle": "Create SpeedTest CLI Wrapper",
 			"complexityScore": 6,
-			"recommendedSubtasks": 4,
-			"expansionPrompt": "Break down the implementation of the handleError() method into subtasks including: 1) Implementing error normalization to ensure proper Error objects, 2) Adding error logging with context information, 3) Implementing silent error handling logic, and 4) Creating user-friendly message determination and UI notification",
-			"reasoning": "This task has higher complexity as it involves multiple decision paths based on error types, integration with both logging and UI notification systems, and proper error normalization. The implementation needs to handle various edge cases and provide appropriate user feedback."
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break into: 1) Subprocess execution wrapper, 2) Command option configuration, 3) CSV output parsing, 4) JSON output parsing, 5) Error handling for network/command failures, 6) Output structure definition",
+			"reasoning": "Higher complexity due to external process management, multiple output formats, and extensive error handling scenarios."
 		},
 		{
 			"taskId": 4,
-			"taskTitle": "Create Custom Application Error Classes",
+			"taskTitle": "Implement Data Storage and Logging",
 			"complexityScore": 5,
-			"recommendedSubtasks": 3,
-			"expansionPrompt": "Break down the implementation of custom error classes into subtasks including: 1) Creating the base ApplicationError class with proper stack trace handling, 2) Implementing the APIError class with status code handling, and 3) Implementing the ValidationError class with validation errors array",
-			"reasoning": "This task involves extending the native Error class and implementing proper inheritance patterns. It has moderate complexity due to the need to maintain proper stack traces and handle different types of application-specific errors with their unique properties."
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divide into: 1) JSON-based DataStore implementation, 2) Data persistence and retrieval, 3) Logger class with file operations, 4) Log rotation mechanism, 5) Data structure validation and serialization",
+			"reasoning": "Moderate complexity with file I/O, data persistence, and log management. Multiple components requiring careful integration."
 		},
 		{
 			"taskId": 5,
-			"taskTitle": "Integrate ErrorHandlerService with Application Bootstrap",
+			"taskTitle": "Build Core Service Engine",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down into: 1) Service lifecycle management, 2) Interval-based execution system, 3) Process signal handling, 4) Background process spawning, 5) State management, 6) Component integration, 7) Service orchestration logic",
+			"reasoning": "High complexity as it's the central orchestrator integrating all components. Involves process management, timing, and complex state handling."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Create JSON Output Processor with jq Wrapper",
 			"complexityScore": 4,
-			"recommendedSubtasks": 2,
-			"expansionPrompt": "Break down the integration of ErrorHandlerService with application bootstrap into subtasks including: 1) Implementing the service initialization in the application startup sequence, and 2) Adding try-catch blocks to handle errors during initialization",
-			"reasoning": "This task involves integrating the error handler into the application bootstrap process. It has moderate complexity due to the need to ensure the error handler is initialized before other services and can catch errors during the initialization process. The implementation requires understanding of the application lifecycle."
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divide into: 1) jq command wrapper implementation, 2) Common query methods, 3) Custom query support, 4) Error handling for missing jq dependency",
+			"reasoning": "Moderate-low complexity. External dependency management and JSON processing, but well-defined scope."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Build Web Server for Dashboard",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break into: 1) HTTP server setup with Bun.serve(), 2) Static file serving, 3) API route implementation, 4) CORS configuration, 5) Error handling and status codes, 6) Port configuration integration",
+			"reasoning": "Moderate-high complexity involving HTTP server implementation, routing, and API design. Multiple endpoints and configurations."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Create Observer Dashboard HTML Template",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divide into: 1) HTML structure and layout, 2) CSS responsive design, 3) Navigation panel implementation, 4) Dynamic content loading JavaScript, 5) Auto-refresh functionality",
+			"reasoning": "Moderate complexity involving frontend development with responsive design and dynamic content. No external dependencies adds some complexity."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Implement Graph Generation System",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down into: 1) Canvas/SVG rendering engine, 2) Time-series data processing, 3) Interactive features (hover, zoom), 4) Animation system, 5) Responsive graph layout, 6) Export functionality",
+			"reasoning": "High complexity due to custom graph rendering without external libraries. Requires mathematical calculations, animations, and interactive features."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Build Report Generation Engine",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divide into: 1) Report template system, 2) Graph embedding logic, 3) Metadata calculation and display, 4) File generation and naming, 5) Report storage management",
+			"reasoning": "Moderate complexity involving template processing, file generation, and integration with graph system. Well-defined but multiple components."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "Implement Dashboard Auto-Update System",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break into: 1) File system monitoring, 2) API endpoints for data fetching, 3) Client-side polling mechanism, 4) Navigation panel updates, 5) Real-time data synchronization, 6) WebSocket/SSE implementation (optional)",
+			"reasoning": "Moderate-high complexity involving real-time updates, file system monitoring, and client-server communication. Multiple update mechanisms to implement."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Create CLI Interface and Documentation",
+			"complexityScore": 4,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divide into: 1) CLI argument parsing and command structure, 2) Service management commands implementation, 3) Help system and version info, 4) Configuration generation utility, 5) Documentation and examples creation",
+			"reasoning": "Moderate-low complexity. Standard CLI development with well-defined commands. Documentation requires thoroughness but is straightforward."
 		}
 	]
 }

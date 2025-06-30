@@ -1,0 +1,12 @@
+{
+  "name": "starlink-optimiser",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "bun src/index.ts",
+    "test": "bun test/runTests.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
