@@ -13,7 +13,7 @@ export class StarLinkOptimiser {
 
     private constructor(config: Config, speedTestRunner: typeof SpeedTestRunner = SpeedTestRunner) {
         this.config = config;
-        this.dataStore = new DataStore();
+        this.dataStore = new DataStore(`${config.testName}.db.json`);
         this.speedTestRunner = speedTestRunner;
     }
 
