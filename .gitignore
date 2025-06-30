@@ -43,10 +43,6 @@ dev-debug.log
 *.sln
 *.sw?
 # OS specific
-# Task files
-tasks.json
-tasks/
-
 # OAuth tokens (sensitive)
 gmail-tokens.json
 scripts/gmail-tokens.json
@@ -63,3 +59,9 @@ scripts/gmail-service-account*.json*
 
 # Gemini
 .gemini/settings.json
+
+# Logs
+
+# Task files
+# tasks.json
+# tasks/ 
