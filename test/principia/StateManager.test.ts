@@ -21,6 +21,15 @@ describe('StateManager', () => {
     expect(stateManager.get('a.b')).toBe(1);
   });
 
+  it('should return entire state when get() called without path', () => {
+    const stateManager = StateManager.getInstance();
+    const initialState = { user: { name: 'John' }, theme: 'dark' };
+    stateManager.initialize(initialState);
+    const entireState = stateManager.get();
+    expect(entireState).toEqual(initialState);
+    expect(entireState).not.toBe(initialState); // Should be a clone
+  });
+
   it('should get a value using a dot notation path', () => {
     const stateManager = StateManager.getInstance();
     stateManager.initialize({ user: { name: 'John' } });

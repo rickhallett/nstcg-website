@@ -35,7 +35,11 @@ export class StateManager {
     return cloned;
   }
 
-  get(path: string): any {
+  get(path?: string): any {
+    if (!path) {
+      return this.deepClone(this.state);
+    }
+    
     const keys = path.split('.');
     let current = this.state;
     for (const key of keys) {
