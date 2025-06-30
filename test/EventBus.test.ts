@@ -1,4 +1,4 @@
-import { EventBus, EventHandler } from '../EventBus';
+import { EventBus, EventHandler } from '../src/EventBus';
 
 describe('EventBus Singleton', () => {
   let eventBus: EventBus;

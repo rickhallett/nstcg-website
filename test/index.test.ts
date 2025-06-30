@@ -1,6 +1,8 @@
-import { ErrorHandlerService } from '../ErrorHandlerService';
-import { EventBus } from '../EventBus';
-import { LoggerService } from '../LoggerService';
+import { jest } from '@jest/globals';
+import { ErrorHandlerService } from '../src/ErrorHandlerService';
+import { LoggerService } from '../src/LoggerService';
+import { EventBus } from '../src/EventBus';
+import { ApplicationError, APIError, ValidationError } from '../src/ApplicationError';
 
 jest.mock('../ErrorHandlerService');
 jest.mock('../EventBus');

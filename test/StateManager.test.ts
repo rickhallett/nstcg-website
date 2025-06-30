@@ -1,5 +1,5 @@
-import { StateManager } from '../StateManager';
-import { EventBus } from '../EventBus';
+import { StateManager } from '../src/StateManager';
+import { EventBus } from '../src/EventBus';
 
 jest.mock('../EventBus');
 
