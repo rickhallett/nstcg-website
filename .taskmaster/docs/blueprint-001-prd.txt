@@ -1,0 +1,68 @@
+# Blueprint 001: EventBus Implementation
+
+## Overview
+Implement the EventBus module following the Principia.js architecture and Test-Driven Development.
+
+## Phase
+Phase 1 - Core Engine
+
+## Prerequisites: None (Core Engine module)
+
+## Architectural Canon
+1. The State is Singular: All application state lives only in the StateManager
+2. Events are the Messengers: All module communication happens only through the EventBus
+3. The Flow is Unidirectional: Action → Event → Logic → State Change → Re-render
+4. The Services are Sentinels: All external dependencies are isolated in a Service module
+5. Components are Dumb Artisans: Components only render state and emit events
+6. Views are the Conductors: Page-specific orchestration is the only job of a View Controller
+
+## Implementation Tasks
+
+### Core Implementation
+1. Create the module file structure
+2. Implement singleton pattern
+3. Set up TypeScript interfaces and types
+
+### Test-Driven Development Tasks
+- [ ] Test: "should be a singleton, always returning the same instance" - Implement getInstance method
+- [ ] Test: "should subscribe a single handler to an event and trigger it on emit" - Implement on() and emit() methods
+- [ ] Test: "should pass payload data from emit to the subscribed handler" - Enhance emit() to pass data
+- [ ] Test: "should allow multiple handlers for the same event" - Update event storage to handle arrays
+- [ ] Test: "should return unsubscribe function when subscribing" - Return function from on()
+- [ ] Test: "should remove handler when unsubscribe is called" - Implement unsubscribe logic
+- [ ] Test: "should not call handler after unsubscribe" - Verify unsubscribe functionality
+- [ ] Test: "should handle events with no subscribers gracefully" - Add error handling
+- [ ] Test: "should call handlers in order of subscription" - Ensure FIFO execution
+- [ ] Test: "should catch and log errors in handlers without affecting other handlers" - Add error isolation
+- [ ] Test: "should emit special error event when handler throws" - Implement error event system
+- [ ] Test: "should support once() for single-use handlers" - Implement once() method
+- [ ] Test: "should allow * wildcard subscriptions for all events" - Add wildcard support
+- [ ] Test: "should provide event name to wildcard handlers" - Pass event metadata
+- [ ] Test: "should be able to remove all handlers for an event with off()" - Implement off() method
+- [ ] Test: "should be able to check if event has listeners with hasListeners()" - Add introspection
+
+### Integration Tasks
+- [ ] Add error handling through ErrorHandlerService (once available)
+- [ ] Implement logging via LoggerService (once available)
+- [ ] Add TypeScript type definitions
+- [ ] Add JSDoc comments to all public methods
+
+### Documentation & PR
+- [ ] Update module exports in index.js
+- [ ] Create comprehensive PR with test results
+
+## Testing Strategy
+Follow strict TDD process:
+1. Write/uncomment one test
+2. Run test and see it fail
+3. Implement minimal code to pass
+4. Refactor if needed
+5. Commit the change
+6. Repeat for next test
+
+## Success Criteria
+- All tests in tests/core/EventBus.test.js pass
+- No direct dependencies between modules
+- Follows all architectural canon rules
+- Clean, documented code
+- Comprehensive PR created via gh tool
