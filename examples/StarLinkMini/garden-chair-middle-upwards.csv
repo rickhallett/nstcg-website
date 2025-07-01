@@ -1,0 +1,20 @@
+timestamp,download_mbps,upload_mbps,ping_ms,server_name,server_location,direction,tilt
+2025-07-01T05:11:26.395Z,176.43,25.80,28.0,"FibreNest","Slough, GB",260,10
+2025-07-01T05:12:28.271Z,133.46,9.49,28.9,"FibreNest","Slough, GB",260,10
+2025-07-01T05:22:49.954Z,131.43,21.67,32.0,"Cilix Limited","Bracknell, GB",260,10
+2025-07-01T05:42:49.846Z,222.64,14.45,31.9,"FibreNest","Slough, GB",260,10
+2025-07-01T05:52:50.281Z,112.71,22.68,39.7,"FibreNest","Slough, GB",260,10
+2025-07-01T06:12:50.182Z,157.88,14.51,43.8,"Box Broadband Ltd","London, GB",260,10
+2025-07-01T06:22:50.019Z,120.70,28.39,40.7,"Cilix Limited","Bracknell, GB",260,10
+2025-07-01T06:42:50.003Z,169.47,22.96,41.0,"Cilix Limited","Bracknell, GB",260,10
+2025-07-01T06:52:50.093Z,85.29,13.52,36.5,"Box Broadband Ltd","London, GB",260,10
+2025-07-01T07:12:50.047Z,24.75,21.83,37.2,"Cilix Limited","Bracknell, GB",260,10
+2025-07-01T07:22:50.267Z,45.77,12.19,39.6,"Hyperoptic Limited","London, GB",260,10
+2025-07-01T07:42:50.592Z,93.63,15.60,30.4,"Vorboss Limited","London, GB",260,10
+2025-07-01T07:52:50.112Z,135.71,15.75,30.5,"Lit Fibre Group Ltd.","London, GB",260,10
+2025-07-01T08:12:50.360Z,87.14,12.35,31.8,"Glide","London, GB",260,10
+2025-07-01T08:22:50.177Z,114.82,22.61,29.2,"toob Ltd","London, GB",260,10
+2025-07-01T08:42:50.703Z,15.02,5.07,34.4,"toob Ltd","London, GB",260,10
+2025-07-01T08:52:49.994Z,173.33,19.03,30.3,"Glide","London, GB",260,10
+2025-07-01T09:12:50.439Z,88.84,5.35,38.1,"toob Ltd","London, GB",260,10
+2025-07-01T09:22:50.766Z,93.00,4.48,43.6,"toob Ltd","London, GB",260,10

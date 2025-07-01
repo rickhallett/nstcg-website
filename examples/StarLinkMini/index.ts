@@ -123,7 +123,7 @@ async function runSpeedTest(options: CliOptions): Promise<void> {
 
   try {
     console.log(`Running speed test for session: ${options.name}`);
-    
+
     const result = await runner.run();
     const enhancedResult = {
       ...result,
@@ -135,7 +135,7 @@ async function runSpeedTest(options: CliOptions): Promise<void> {
     };
 
     await dataStore.save(enhancedResult);
-    
+
     console.log('Speed test completed successfully');
     console.log(`Download: ${result.download.mbps} Mbps`);
     console.log(`Upload: ${result.upload.mbps} Mbps`);
@@ -149,10 +149,16 @@ async function runSpeedTest(options: CliOptions): Promise<void> {
 async function main(): Promise<void> {
   const options = await parseCliArgs();
 
-  // Check if speedtest-cli is available
+  // Check if speedtest-cli is available and verify output format
   try {
     const runner = new SpeedTestRunner();
-    await runner.checkAvailability();
+    const isAvailable = await runner.checkAvailability();
+    if (!isAvailable) {
+      throw new Error('speedtest-cli not found');
+    }
+
+    // Verify JSON output format
+    await runner.verifyOutput();
   } catch (error) {
     console.error('Error: speedtest-cli is not installed or not in PATH');
     console.error('Please install it with: pip install speedtest-cli');
@@ -160,11 +166,9 @@ async function main(): Promise<void> {
   }
 
   if (options.schedule) {
-    // Set up cron job
+    // Set up pure TypeScript scheduler
     const scheduler = new Scheduler();
     await scheduler.setup(options);
-    console.log('Scheduled speed tests every 10 minutes');
-    console.log('Use system cron tools to manage the schedule');
     return;
   }
 
@@ -175,10 +179,10 @@ async function main(): Promise<void> {
     // Run continuously every 10 minutes
     console.log('Starting continuous monitoring (Ctrl+C to stop)');
     await runSpeedTest(options); // Run immediately
-    
+
     const interval = 10 * 60 * 1000; // 10 minutes in milliseconds
     setInterval(() => runSpeedTest(options), interval);
-    
+
     // Handle graceful shutdown
     process.on('SIGINT', () => {
       console.log('\nStopping monitoring...');

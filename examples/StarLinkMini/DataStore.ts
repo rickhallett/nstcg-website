@@ -55,7 +55,7 @@ export class DataStore {
 
   private async saveToCsv(result: EnhancedSpeedTestResult): Promise<void> {
     const csvExists = await exists(this.csvFile);
-    
+
     // Build CSV row
     const row = [
       result.timestamp,
@@ -86,14 +86,24 @@ export class DataStore {
       if (jsonExists) {
         const content = await readFile(this.jsonFile, 'utf-8');
         results = JSON.parse(content);
+        console.log(`Loaded ${results.length} existing results from ${this.jsonFile}`);
+      } else {
+        console.log(`Creating new JSON file: ${this.jsonFile}`);
       }
     } catch (error) {
-      // If file doesn't exist or is invalid, start fresh
+      console.warn(`Error reading existing JSON file ${this.jsonFile}, starting fresh:`, error);
       results = [];
     }
 
     results.push(result);
-    await writeFile(this.jsonFile, JSON.stringify(results, null, 2));
+
+    try {
+      await writeFile(this.jsonFile, JSON.stringify(results, null, 2));
+      console.log(`✓ Successfully saved result to ${this.jsonFile} (${results.length} total results)`);
+    } catch (error) {
+      console.error(`✗ Failed to write to ${this.jsonFile}:`, error);
+      throw error;
+    }
   }
 
   async getLatestResult(): Promise<EnhancedSpeedTestResult | null> {
@@ -103,7 +113,7 @@ export class DataStore {
 
       const content = await readFile(this.jsonFile, 'utf-8');
       const results = JSON.parse(content);
-      
+
       return results.length > 0 ? results[results.length - 1] : null;
     } catch (error) {
       return null;

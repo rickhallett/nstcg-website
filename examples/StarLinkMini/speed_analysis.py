@@ -86,6 +86,25 @@ def get_directional_info(data: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
+def format_dataset_name(analysis: Dict[str, Any], case: str = "title") -> str:
+    """Formats the dataset name with directional info if available."""
+    base_name_raw = analysis["filename"].replace(".json", "").replace("_", " ")
+    base_name = base_name_raw.upper() if case == "upper" else base_name_raw.title()
+
+    dir_info = analysis.get("directional_info", {})
+    direction = dir_info.get("primary_direction")
+    tilt = dir_info.get("primary_tilt")
+
+    # Only show if direction or tilt has a non-zero value.
+    has_dir_info = (
+        direction is not None and tilt is not None and (direction != 0 or tilt != 0)
+    )
+
+    if has_dir_info:
+        return f"{base_name} ({direction}°/{tilt}°)"
+    return base_name
+
+
 def create_statistics_table(metrics: Dict[str, List[float]]) -> Table:
     """Create a Rich table with speed statistics."""
     table = Table(title="📊 Speed Test Statistics", box=box.ROUNDED)
@@ -365,6 +384,7 @@ def rank_datasets(analyses: List[Dict[str, Any]]) -> Dict[str, List[Tuple[str, f
 
 def create_ranking_table(
     ranking_data: List[Tuple[str, float]],
+    analyses: List[Dict[str, Any]],
     title: str,
     metric_unit: str = "",
     reverse_ranking: bool = False,
@@ -391,8 +411,14 @@ def create_ranking_table(
         else:
             rank_style = f"{idx}"
 
+        # Find the corresponding analysis object
+        analysis = next((a for a in analyses if a["filename"] == filename), None)
+
         # Format filename for display
-        display_name = filename.replace(".json", "").replace("_", " ").title()
+        if analysis:
+            display_name = format_dataset_name(analysis)
+        else:
+            display_name = filename.replace(".json", "").replace("_", " ").title()
 
         # Format value
         if metric_unit:
@@ -418,7 +444,7 @@ def create_summary_comparison_table(analyses: List[Dict[str, Any]]) -> Table:
     table.add_column("Duration", style="blue", justify="center")
 
     for analysis in analyses:
-        filename = analysis["filename"].replace(".json", "").replace("_", " ").title()
+        filename = format_dataset_name(analysis)
         score = calculate_heuristic_score(analysis)
 
         table.add_row(
@@ -471,7 +497,9 @@ def extract_time_series_data(
     return time_series
 
 
-def create_time_series_plots(time_series_data: Dict[str, Dict[str, List]]):
+def create_time_series_plots(
+    time_series_data: Dict[str, Dict[str, List]], analyses: List[Dict[str, Any]]
+):
     """Create time series plots for each metric using plotext."""
     if not PLOTEXT_AVAILABLE:
         console.print(
@@ -534,7 +562,12 @@ def create_time_series_plots(time_series_data: Dict[str, Dict[str, List]]):
 
     for idx, (filename, data) in enumerate(time_series_data.items()):
         color = colors[idx % len(colors)]
-        label = filename.replace(".json", "").replace("_", " ").title()
+        analysis = next((a for a in analyses if a["filename"] == filename), None)
+        label = (
+            format_dataset_name(analysis)
+            if analysis
+            else filename.replace(".json", "").replace("_", " ").title()
+        )
         plt.plot(
             data["timestamps"],
             data["download_speeds"],
@@ -555,7 +588,12 @@ def create_time_series_plots(time_series_data: Dict[str, Dict[str, List]]):
 
     for idx, (filename, data) in enumerate(time_series_data.items()):
         color = colors[idx % len(colors)]
-        label = filename.replace(".json", "").replace("_", " ").title()
+        analysis = next((a for a in analyses if a["filename"] == filename), None)
+        label = (
+            format_dataset_name(analysis)
+            if analysis
+            else filename.replace(".json", "").replace("_", " ").title()
+        )
         plt.plot(
             data["timestamps"],
             data["upload_speeds"],
@@ -576,7 +614,12 @@ def create_time_series_plots(time_series_data: Dict[str, Dict[str, List]]):
 
     for idx, (filename, data) in enumerate(time_series_data.items()):
         color = colors[idx % len(colors)]
-        label = filename.replace(".json", "").replace("_", " ").title()
+        analysis = next((a for a in analyses if a["filename"] == filename), None)
+        label = (
+            format_dataset_name(analysis)
+            if analysis
+            else filename.replace(".json", "").replace("_", " ").title()
+        )
         plt.plot(
             data["timestamps"],
             data["latencies"],
@@ -655,10 +698,6 @@ def create_consistency_analysis_tables(analyses: List[Dict[str, Any]]) -> List[T
     """Create Rich tables for consistency analysis."""
     tables = []
 
-    # Add consistency metrics to analyses
-    for analysis in analyses:
-        analysis["consistency"] = calculate_consistency_metrics(analysis)
-
     # Standard Deviations Table
     std_table = Table(
         title="📊 Standard Deviations (Lower = More Consistent)", box=box.ROUNDED
@@ -669,7 +708,7 @@ def create_consistency_analysis_tables(analyses: List[Dict[str, Any]]) -> List[T
     std_table.add_column("Latency", style="red", justify="right")
 
     for analysis in analyses:
-        filename = analysis["filename"].replace(".json", "").replace("_", " ").title()
+        filename = format_dataset_name(analysis)
         std = analysis["consistency"]["standard_deviations"]
         std_table.add_row(
             filename,
@@ -691,25 +730,20 @@ def create_consistency_analysis_tables(analyses: List[Dict[str, Any]]) -> List[T
     stability_table.add_column("Overall", style="bold magenta", justify="right")
 
     # Sort by overall stability
-    sorted_analyses = sorted(
+    sorted_by_stability = sorted(
         analyses,
         key=lambda x: x["consistency"]["stability_scores"]["overall"],
         reverse=True,
     )
 
-    for idx, analysis in enumerate(sorted_analyses):
-        filename = analysis["filename"].replace(".json", "").replace("_", " ").title()
+    for idx, analysis in enumerate(sorted_by_stability):
+        filename = format_dataset_name(analysis, case="upper")
         scores = analysis["consistency"]["stability_scores"]
-
-        # Add rank emoji
-        rank_emoji = (
-            "🥇"
-            if idx == 0
-            else "🥈" if idx == 1 else "🥉" if idx == 2 else f"{idx + 1}"
-        )
+        rank_class = f"rank-{idx + 1}" if idx < 3 else ""
+        rank_display = f"#{idx + 1}"
 
         stability_table.add_row(
-            f"{rank_emoji} {filename}",
+            f"{rank_display} {filename}",
             f"{scores['download']:.1f}",
             f"{scores['upload']:.1f}",
             f"{scores['latency']:.1f}",
@@ -721,15 +755,515 @@ def create_consistency_analysis_tables(analyses: List[Dict[str, Any]]) -> List[T
     return tables
 
 
+def get_common_css() -> str:
+    """Get the common CSS styles for all reports."""
+    return """
+            body { 
+                font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+                line-height: 1.4;
+                margin: 0;
+                padding: 20px;
+                background-color: #ffffff;
+                color: #000000;
+                font-size: 13px;
+            }
+            .container { 
+                max-width: 1000px;
+                margin: 0 auto;
+                background: #ffffff;
+                border: 2px solid #000000;
+                padding: 30px;
+            }
+            h1, h2, h3 { 
+                color: #000000; 
+                font-weight: bold;
+                letter-spacing: 1px;
+            }
+            h1 { 
+                text-align: center; 
+                border-bottom: 2px solid #000000; 
+                padding-bottom: 15px; 
+                margin-bottom: 30px;
+                font-size: 24px;
+            }
+            h2 { 
+                border-bottom: 1px solid #000000; 
+                padding-bottom: 8px; 
+                margin-top: 40px;
+                font-size: 18px;
+            }
+            h3 { 
+                margin-top: 25px;
+                font-size: 16px;
+            }
+            .summary-grid { 
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1px;
+                margin: 30px 0;
+                border: 2px solid #000000;
+            }
+            .summary-card { 
+                background: #f8f8f8;
+                color: #000000;
+                padding: 20px;
+                text-align: center;
+                border-right: 1px solid #000000;
+                border-bottom: 1px solid #000000;
+            }
+            .summary-card:last-child { border-right: none; }
+            .summary-card h3 { 
+                color: #000000; 
+                margin: 0 0 10px 0; 
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
+            .summary-card .value { 
+                font-size: 28px; 
+                font-weight: bold; 
+                display: block;
+                margin: 10px 0;
+            }
+            .summary-card .unit { 
+                font-size: 11px; 
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            table { 
+                width: 100%;
+                border-collapse: collapse;
+                margin: 25px 0;
+                background: #ffffff;
+                border: 2px solid #000000;
+            }
+            th, td { 
+                padding: 12px 8px;
+                text-align: left;
+                border-right: 1px solid #000000;
+                border-bottom: 1px solid #000000;
+            }
+            th:last-child, td:last-child { border-right: none; }
+            th { 
+                background-color: #000000;
+                color: #ffffff;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                font-size: 11px;
+            }
+            tr:nth-child(even) { background-color: #f8f8f8; }
+            tr:hover { background-color: #eeeeee; }
+            .champion { 
+                background: #000000;
+                color: #ffffff;
+                padding: 25px;
+                text-align: center;
+                margin: 30px 0;
+                border: 2px solid #000000;
+            }
+            .champion h2 { 
+                color: #ffffff; 
+                border: none; 
+                margin: 0 0 15px 0;
+                font-size: 20px;
+            }
+            .metric-positive { font-weight: bold; }
+            .metric-negative { font-weight: bold; }
+            .metric-good { color: #000000; font-weight: bold; }
+            .metric-average { color: #555555; }
+            .metric-poor { color: #888888; }
+            .rank-1 { background-color: #eeeeee !important; font-weight: bold; }
+            .rank-2 { background-color: #f5f5f5 !important; }
+            .rank-3 { background-color: #fafafa !important; }
+            .timestamp { 
+                text-align: center;
+                color: #666666;
+                margin-top: 40px;
+                border-top: 1px solid #000000;
+                padding-top: 20px;
+                font-size: 11px;
+                letter-spacing: 1px;
+            }
+            .ascii-art {
+                text-align: center;
+                font-size: 12px;
+                line-height: 1.2;
+                margin: 20px 0;
+                white-space: pre;
+            }
+            .definition {
+                background: #f8f8f8;
+                padding: 15px;
+                margin: 20px 0;
+                border-left: 4px solid #000000;
+                font-size: 12px;
+            }
+            .report-link {
+                display: block;
+                padding: 15px;
+                margin: 10px 0;
+                background: #f8f8f8;
+                border: 1px solid #000000;
+                text-decoration: none;
+                color: #000000;
+                font-weight: bold;
+            }
+            .report-link:hover {
+                background: #eeeeee;
+            }
+            .report-meta {
+                font-size: 11px;
+                color: #666666;
+                margin-top: 5px;
+            }
+    """
+
+
+def ensure_reports_directory() -> str:
+    """Ensure the reports directory exists and return its path."""
+    import os
+
+    reports_dir = "reports"
+    if not os.path.exists(reports_dir):
+        os.makedirs(reports_dir)
+    return reports_dir
+
+
+def update_reports_index(
+    report_filename: str, report_title: str, report_description: str
+):
+    """Update the reports index.html with a new report link."""
+    from datetime import datetime
+    import os
+
+    reports_dir = ensure_reports_directory()
+    index_path = os.path.join(reports_dir, "index.html")
+
+    # Read existing index or create new one
+    existing_links = []
+    if os.path.exists(index_path):
+        try:
+            with open(index_path, "r", encoding="utf-8") as f:
+                content = f.read()
+                # Extract existing links between markers
+                start_marker = "<!-- REPORTS_START -->"
+                end_marker = "<!-- REPORTS_END -->"
+                if start_marker in content and end_marker in content:
+                    start_idx = content.find(start_marker) + len(start_marker)
+                    end_idx = content.find(end_marker)
+                    existing_links_section = content[start_idx:end_idx].strip()
+                    if existing_links_section:
+                        existing_links = [existing_links_section]
+        except Exception:
+            existing_links = []
+
+    # Generate new link HTML
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    new_link = f"""
+                <a href="{report_filename}" class="report-link">
+                    {report_title}
+                    <div class="report-meta">{report_description} • Generated: {timestamp}</div>
+                </a>"""
+
+    # Combine all links (newest first)
+    all_links = [new_link] + existing_links
+    links_html = "\n".join(all_links)
+
+    # Generate complete index.html
+    total_reports = len(all_links)
+    index_content = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Starlink Analysis Reports</title>
+        <style>{get_common_css()}</style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="ascii-art">
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║                        STARLINK ANALYSIS REPORTS                             ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+            </div>
+            
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h3>Total Reports</h3>
+                    <div class="value">{total_reports}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Latest</h3>
+                    <div class="value">{report_title.split()[0]}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Last Updated</h3>
+                    <div class="value">{datetime.now().strftime('%H:%M')}</div>
+                    <div class="unit">{datetime.now().strftime('%Y-%m-%d')}</div>
+                </div>
+            </div>
+
+            <h2>AVAILABLE REPORTS</h2>
+            <!-- REPORTS_START -->{links_html}
+            <!-- REPORTS_END -->
+
+            <div class="timestamp">
+                Index updated on {timestamp}
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    # Write the updated index
+    with open(index_path, "w", encoding="utf-8") as f:
+        f.write(index_content)
+
+    return index_path
+
+
+def generate_consistency_html_report(
+    analyses: List[Dict[str, Any]], output_file: str = "consistency_analysis.html"
+):
+    """Generate a dedicated HTML consistency analysis report."""
+    from datetime import datetime
+    import os
+
+    # Ensure reports directory exists
+    reports_dir = ensure_reports_directory()
+    output_path = os.path.join(reports_dir, output_file)
+
+    # Sort by overall stability
+    sorted_by_stability = sorted(
+        analyses,
+        key=lambda x: x["consistency"]["stability_scores"]["overall"],
+        reverse=True,
+    )
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Starlink Consistency Analysis Report</title>
+        <style>{get_common_css()}</style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="ascii-art">
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║                     STARLINK CONSISTENCY ANALYSIS                            ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+            </div>
+            
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h3>Datasets</h3>
+                    <div class="value">{len(analyses)}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Most Stable</h3>
+                    <div class="value">{sorted_by_stability[0]['filename'].replace('.json', '').replace('_', ' ').upper()}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Best Stability</h3>
+                    <div class="value">{sorted_by_stability[0]['consistency']['stability_scores']['overall']:.1f}</div>
+                    <div class="unit">/100</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Avg Stability</h3>
+                    <div class="value">{sum(a['consistency']['stability_scores']['overall'] for a in analyses) / len(analyses):.1f}</div>
+                    <div class="unit">/100</div>
+                </div>
+            </div>
+
+            <div class="definition">
+                <strong>CONSISTENCY METRICS EXPLAINED:</strong><br>
+                • <strong>Standard Deviation:</strong> Lower values indicate more consistent performance<br>
+                • <strong>Stability Score:</strong> Higher values (0-100) indicate more reliable connections<br>
+                • <strong>Coefficient of Variation:</strong> Normalized measure of variability
+            </div>
+
+            <h2>STABILITY RANKINGS</h2>
+            <h3>OVERALL STABILITY SCORES (HIGHER = MORE STABLE)</h3>
+            <table>
+                <tr>
+                    <th>Rank</th>
+                    <th>Dataset</th>
+                    <th>DL Stability</th>
+                    <th>UL Stability</th>
+                    <th>Lat Stability</th>
+                    <th>Overall Score</th>
+                </tr>
+    """
+
+    for idx, analysis in enumerate(sorted_by_stability):
+        filename = format_dataset_name(analysis, case="upper")
+        scores = analysis["consistency"]["stability_scores"]
+        rank_class = f"rank-{idx + 1}" if idx < 3 else ""
+        rank_display = f"#{idx + 1}"
+
+        html_content += f"""
+                <tr class="{rank_class}">
+                    <td><strong>{rank_display}</strong></td>
+                    <td>{filename}</td>
+                    <td>{scores['download']:.1f}</td>
+                    <td>{scores['upload']:.1f}</td>
+                    <td>{scores['latency']:.1f}</td>
+                    <td><strong>{scores['overall']:.1f}</strong></td>
+                </tr>
+        """
+
+    html_content += "</table>"
+
+    # Standard Deviations Analysis
+    html_content += """
+            <h2>VARIABILITY ANALYSIS</h2>
+            <h3>STANDARD DEVIATIONS (LOWER = MORE CONSISTENT)</h3>
+            <table>
+                <tr>
+                    <th>Dataset</th>
+                    <th>Download StdDev</th>
+                    <th>Upload StdDev</th>
+                    <th>Latency StdDev</th>
+                    <th>Consistency Grade</th>
+                </tr>
+    """
+
+    for analysis in analyses:
+        filename = format_dataset_name(analysis, case="upper")
+        std = analysis["consistency"]["standard_deviations"]
+        overall_stability = analysis["consistency"]["stability_scores"]["overall"]
+
+        # Grade consistency
+        if overall_stability >= 80:
+            grade = "EXCELLENT"
+            grade_class = "metric-good"
+        elif overall_stability >= 60:
+            grade = "GOOD"
+            grade_class = "metric-average"
+        else:
+            grade = "VARIABLE"
+            grade_class = "metric-poor"
+
+        html_content += f"""
+                <tr>
+                    <td><strong>{filename}</strong></td>
+                    <td>{std['download']:.2f} Mbps</td>
+                    <td>{std['upload']:.2f} Mbps</td>
+                    <td>{std['latency']:.2f} ms</td>
+                    <td class="{grade_class}"><strong>{grade}</strong></td>
+                </tr>
+        """
+
+    html_content += "</table>"
+
+    # Detailed Metrics Table
+    html_content += """
+            <h2>DETAILED CONSISTENCY METRICS</h2>
+            <h3>COEFFICIENT OF VARIATION ANALYSIS</h3>
+            <table>
+                <tr>
+                    <th>Dataset</th>
+                    <th>DL CoV</th>
+                    <th>UL CoV</th>
+                    <th>Lat CoV</th>
+                    <th>Performance Notes</th>
+                </tr>
+    """
+
+    for analysis in analyses:
+        filename = format_dataset_name(analysis, case="upper")
+        cv = analysis["consistency"]["coefficients_of_variation"]
+
+        # Performance assessment
+        avg_cv = (cv["download"] + cv["upload"] + cv["latency"]) / 3
+        if avg_cv < 0.2:
+            notes = "Very stable connection"
+        elif avg_cv < 0.4:
+            notes = "Generally stable"
+        else:
+            notes = "Variable performance"
+
+        html_content += f"""
+                <tr>
+                    <td><strong>{filename}</strong></td>
+                    <td>{cv['download']:.3f}</td>
+                    <td>{cv['upload']:.3f}</td>
+                    <td>{cv['latency']:.3f}</td>
+                    <td>{notes}</td>
+                </tr>
+        """
+
+    html_content += "</table>"
+
+    # Champion announcement
+    if sorted_by_stability:
+        winner_filename = sorted_by_stability[0][0]
+        winner_analysis = next(
+            (a for a in analyses if a["filename"] == winner_filename), None
+        )
+
+        stability_info = ""
+        if winner_analysis:
+            winner_name = format_dataset_name(winner_analysis)
+            stability_score = winner_analysis["consistency"]["stability_scores"][
+                "overall"
+            ]
+            stability_info = (
+                f"\\nStability Score: [bold cyan]{stability_score:.1f}/100[/bold cyan]"
+            )
+        else:
+            winner_name = winner_filename.replace(".json", "").replace("_", " ").title()
+
+        console.print("\n")
+        console.print(
+            Panel(
+                f"🏆 Overall Winner: [bold green]{winner_name}[/bold green]\\n"
+                f"Performance Score: [bold yellow]{sorted_by_stability[0][1]:.2f} points[/bold yellow]{stability_info}",
+                title="🎉 Champion Dataset",
+                border_style="gold1",
+            )
+        )
+
+    # Footer
+    html_content += f"""
+            <div class="timestamp">
+                Consistency analysis generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    # Write the HTML file
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(html_content)
+
+    # Update the reports index
+    report_desc = f"Stability analysis of {len(analyses)} dataset(s)"
+    update_reports_index(output_file, "Consistency Analysis", report_desc)
+
+    return output_path
+
+
 def generate_html_report(
-    analyses: List[Dict[str, Any]], output_file: str = "starlink_analysis_report.html"
+    analyses: List[Dict[str, Any]], output_file: str = "comprehensive_analysis.html"
 ):
     """Generate a comprehensive HTML report."""
+    from datetime import datetime
+    import os
 
-    # Calculate consistency metrics if not already done
-    for analysis in analyses:
-        if "consistency" not in analysis:
-            analysis["consistency"] = calculate_consistency_metrics(analysis)
+    # Ensure reports directory exists
+    reports_dir = ensure_reports_directory()
+    output_path = os.path.join(reports_dir, output_file)
 
     # Get rankings
     rankings = rank_datasets(analyses)
@@ -741,125 +1275,56 @@ def generate_html_report(
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Starlink Speed Test Analysis Report</title>
-        <style>
-            body {{ 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                line-height: 1.6;
-                margin: 0;
-                padding: 20px;
-                background-color: #f5f5f5;
-            }}
-            .container {{ 
-                max-width: 1200px;
-                margin: 0 auto;
-                background: white;
-                padding: 30px;
-                border-radius: 10px;
-                box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            }}
-            h1, h2, h3 {{ color: #2c3e50; }}
-            h1 {{ text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 10px; }}
-            h2 {{ border-left: 4px solid #3498db; padding-left: 15px; margin-top: 30px; }}
-            .summary-grid {{ 
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 20px;
-                margin: 20px 0;
-            }}
-            .summary-card {{ 
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 20px;
-                border-radius: 10px;
-                text-align: center;
-            }}
-            .summary-card h3 {{ color: white; margin-top: 0; }}
-            .summary-card .value {{ font-size: 2em; font-weight: bold; }}
-            .summary-card .unit {{ font-size: 0.8em; opacity: 0.8; }}
-            table {{ 
-                width: 100%;
-                border-collapse: collapse;
-                margin: 20px 0;
-                background: white;
-            }}
-            th, td {{ 
-                padding: 12px;
-                text-align: left;
-                border-bottom: 1px solid #ddd;
-            }}
-            th {{ 
-                background-color: #3498db;
-                color: white;
-                font-weight: bold;
-            }}
-            tr:nth-child(even) {{ background-color: #f2f2f2; }}
-            tr:hover {{ background-color: #e8f4fd; }}
-            .champion {{ 
-                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-                color: white;
-                padding: 20px;
-                border-radius: 10px;
-                text-align: center;
-                margin: 20px 0;
-            }}
-            .champion h2 {{ color: white; border: none; margin: 0; }}
-            .metric-positive {{ color: #27ae60; font-weight: bold; }}
-            .metric-negative {{ color: #e74c3c; font-weight: bold; }}
-            .rank-1 {{ background-color: #f1c40f !important; }}
-            .rank-2 {{ background-color: #95a5a6 !important; }}
-            .rank-3 {{ background-color: #cd7f32 !important; }}
-            .timestamp {{ 
-                text-align: center;
-                color: #7f8c8d;
-                font-style: italic;
-                margin-top: 30px;
-                border-top: 1px solid #eee;
-                padding-top: 15px;
-            }}
-        </style>
+        <style>{get_common_css()}</style>
     </head>
     <body>
         <div class="container">
-            <h1>🛰️ Starlink Speed Test Analysis Report</h1>
+            <div class="ascii-art">
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║                        STARLINK SPEED TEST ANALYSIS                          ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+            </div>
             
             <div class="summary-grid">
                 <div class="summary-card">
-                    <h3>📊 Datasets Analyzed</h3>
+                    <h3>Datasets</h3>
                     <div class="value">{len(analyses)}</div>
                 </div>
                 <div class="summary-card">
-                    <h3>📈 Total Tests</h3>
+                    <h3>Total Tests</h3>
                     <div class="value">{sum(a['test_count'] for a in analyses)}</div>
                 </div>
                 <div class="summary-card">
-                    <h3>⚡ Best Download</h3>
+                    <h3>Peak Download</h3>
                     <div class="value">{max(a['averages']['download'] for a in analyses):.1f}</div>
                     <div class="unit">Mbps</div>
                 </div>
                 <div class="summary-card">
-                    <h3>🏆 Champion</h3>
-                    <div class="value">{rankings['heuristic'][0][0].replace('.json', '').replace('_', ' ').title()}</div>
+                    <h3>Champion</h3>
+                    <div class="value">{format_dataset_name(rankings['heuristic'][0][0], case='upper')}</div>
                 </div>
             </div>
     """
 
     # Dataset Comparison Table
     html_content += """
-            <h2>📊 Dataset Comparison Overview</h2>
+            <h2>DATASET COMPARISON OVERVIEW</h2>
             <table>
                 <tr>
                     <th>Dataset</th>
                     <th>Tests</th>
-                    <th>Avg Download (Mbps)</th>
-                    <th>Avg Upload (Mbps)</th>
-                    <th>Avg Latency (ms)</th>
-                    <th>Performance Score</th>
+                    <th>Avg DL (Mbps)</th>
+                    <th>Avg UL (Mbps)</th>
+                    <th>Avg Lat (ms)</th>
+                    <th>Score</th>
                     <th>Duration</th>
                 </tr>
     """
 
     for analysis in analyses:
-        filename = analysis["filename"].replace(".json", "").replace("_", " ").title()
+        filename = format_dataset_name(analysis, case="upper")
         score = calculate_heuristic_score(analysis)
         html_content += f"""
                 <tr>
@@ -877,41 +1342,39 @@ def generate_html_report(
 
     # Performance Rankings
     html_content += """
-            <h2>🏆 Performance Rankings</h2>
-            <h3>🎯 Overall Performance Score</h3>
+            <h2>PERFORMANCE RANKINGS</h2>
+            <h3>OVERALL PERFORMANCE SCORE</h3>
             <table>
                 <tr><th>Rank</th><th>Dataset</th><th>Score</th></tr>
     """
 
     for idx, (filename, score) in enumerate(rankings["heuristic"]):
         rank_class = f"rank-{idx + 1}" if idx < 3 else ""
-        rank_emoji = (
-            "🥇"
-            if idx == 0
-            else "🥈" if idx == 1 else "🥉" if idx == 2 else f"{idx + 1}"
+        rank_display = f"#{idx + 1}"
+        analysis = next((a for a in analyses if a["filename"] == filename), None)
+        display_name = (
+            format_dataset_name(analysis, case="upper")
+            if analysis
+            else filename.upper()
         )
-        display_name = filename.replace(".json", "").replace("_", " ").title()
         html_content += f"""
                 <tr class="{rank_class}">
-                    <td><strong>{rank_emoji}</strong></td>
+                    <td><strong>{rank_display}</strong></td>
                     <td>{display_name}</td>
-                    <td>{score:.2f} pts</td>
+                    <td>{score:.2f}</td>
                 </tr>
         """
 
     html_content += "</table>"
 
-    # Consistency Analysis
+    # Consistency Analysis (abbreviated for comprehensive report)
     html_content += """
-            <h2>📈 Consistency Analysis</h2>
-            <h3>🎯 Stability Scores (Higher = More Stable)</h3>
+            <h2>CONSISTENCY OVERVIEW</h2>
+            <h3>TOP STABILITY SCORES</h3>
             <table>
                 <tr>
                     <th>Rank</th>
                     <th>Dataset</th>
-                    <th>Download Stability</th>
-                    <th>Upload Stability</th>
-                    <th>Latency Stability</th>
                     <th>Overall Stability</th>
                 </tr>
     """
@@ -922,46 +1385,17 @@ def generate_html_report(
         reverse=True,
     )
 
-    for idx, analysis in enumerate(sorted_by_stability):
-        filename = analysis["filename"].replace(".json", "").replace("_", " ").title()
+    for idx, analysis in enumerate(sorted_by_stability[:5]):  # Top 5 only
+        filename = format_dataset_name(analysis, case="upper")
         scores = analysis["consistency"]["stability_scores"]
         rank_class = f"rank-{idx + 1}" if idx < 3 else ""
-        rank_emoji = (
-            "🥇"
-            if idx == 0
-            else "🥈" if idx == 1 else "🥉" if idx == 2 else f"{idx + 1}"
-        )
+        rank_display = f"#{idx + 1}"
 
         html_content += f"""
                 <tr class="{rank_class}">
-                    <td><strong>{rank_emoji}</strong></td>
+                    <td><strong>{rank_display}</strong></td>
                     <td>{filename}</td>
-                    <td>{scores['download']:.1f}</td>
-                    <td>{scores['upload']:.1f}</td>
-                    <td>{scores['latency']:.1f}</td>
-                    <td><strong>{scores['overall']:.1f}</strong></td>
-                </tr>
-        """
-
-    html_content += "</table>"
-
-    # Statistical Details
-    html_content += """
-            <h2>📊 Statistical Details</h2>
-            <h3>📏 Standard Deviations (Lower = More Consistent)</h3>
-            <table>
-                <tr><th>Dataset</th><th>Download (Mbps)</th><th>Upload (Mbps)</th><th>Latency (ms)</th></tr>
-    """
-
-    for analysis in analyses:
-        filename = analysis["filename"].replace(".json", "").replace("_", " ").title()
-        std = analysis["consistency"]["standard_deviations"]
-        html_content += f"""
-                <tr>
-                    <td><strong>{filename}</strong></td>
-                    <td>{std['download']:.2f}</td>
-                    <td>{std['upload']:.2f}</td>
-                    <td>{std['latency']:.2f}</td>
+                    <td><strong>{scores['overall']:.1f}/100</strong></td>
                 </tr>
         """
 
@@ -969,22 +1403,34 @@ def generate_html_report(
 
     # Champion announcement
     if rankings["heuristic"]:
-        winner = rankings["heuristic"][0]
-        winner_analysis = next(a for a in analyses if a["filename"] == winner[0])
-        winner_stability = winner_analysis["consistency"]["stability_scores"]["overall"]
+        winner_filename = rankings["heuristic"][0][0]
+        winner_analysis = next(
+            (a for a in analyses if a["filename"] == winner_filename), None
+        )
 
-        html_content += f"""
-            <div class="champion">
-                <h2>🎉 Champion Dataset</h2>
-                <h3>🏆 Overall Winner: {winner[0].replace('.json', '').replace('_', ' ').title()}</h3>
-                <p><strong>Performance Score:</strong> {winner[1]:.2f} points</p>
-                <p><strong>Stability Score:</strong> {winner_stability:.1f}/100</p>
-            </div>
-        """
+        stability_info = ""
+        if winner_analysis:
+            winner_name = format_dataset_name(winner_analysis)
+            stability_score = winner_analysis["consistency"]["stability_scores"][
+                "overall"
+            ]
+            stability_info = (
+                f"\\nStability Score: [bold cyan]{stability_score:.1f}/100[/bold cyan]"
+            )
+        else:
+            winner_name = winner_filename.replace(".json", "").replace("_", " ").title()
+
+        console.print("\n")
+        console.print(
+            Panel(
+                f"🏆 Overall Winner: [bold green]{winner_name}[/bold green]\\n"
+                f"Performance Score: [bold yellow]{rankings['heuristic'][0][1]:.2f} points[/bold yellow]{stability_info}",
+                title="🎉 Champion Dataset",
+                border_style="gold1",
+            )
+        )
 
     # Footer
-    from datetime import datetime
-
     html_content += f"""
             <div class="timestamp">
                 Report generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -995,10 +1441,14 @@ def generate_html_report(
     """
 
     # Write the HTML file
-    with open(output_file, "w", encoding="utf-8") as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write(html_content)
 
-    return output_file
+    # Update the reports index
+    report_desc = f"Comprehensive analysis of {len(analyses)} dataset(s)"
+    update_reports_index(output_file, "Comprehensive Analysis", report_desc)
+
+    return output_path
 
 
 def present_comparative_analysis(
@@ -1006,8 +1456,14 @@ def present_comparative_analysis(
     show_plots: bool = False,
     show_consistency: bool = False,
     generate_report: bool = False,
+    generate_consistency_report: bool = False,
 ):
     """Present comprehensive comparative analysis with Rich formatting."""
+    # Ensure all analyses have consistency metrics calculated upfront
+    for analysis in analyses:
+        if "consistency" not in analysis:
+            analysis["consistency"] = calculate_consistency_metrics(analysis)
+
     console.print("\n")
     console.print(
         Panel.fit(
@@ -1029,20 +1485,24 @@ def present_comparative_analysis(
 
     # Heuristic score ranking (most important)
     heuristic_table = create_ranking_table(
-        rankings["heuristic"], "🎯 Overall Performance Score", "pts"
+        rankings["heuristic"], analyses, "🎯 Overall Performance Score", "pts"
     )
 
     # Average metrics rankings
     avg_dl_table = create_ranking_table(
-        rankings["avg_download"], "📊 Average Download Speed", "Mbps"
+        rankings["avg_download"], analyses, "📊 Average Download Speed", "Mbps"
     )
 
     avg_ul_table = create_ranking_table(
-        rankings["avg_upload"], "📈 Average Upload Speed", "Mbps"
+        rankings["avg_upload"], analyses, "📈 Average Upload Speed", "Mbps"
     )
 
     avg_lat_table = create_ranking_table(
-        rankings["avg_latency"], "⚡ Average Latency", "ms", reverse_ranking=True
+        rankings["avg_latency"],
+        analyses,
+        "⚡ Average Latency",
+        "ms",
+        reverse_ranking=True,
     )
 
     # Display in columns
@@ -1059,15 +1519,19 @@ def present_comparative_analysis(
     console.print("[bold]📊 Median Performance Rankings[/bold]")
 
     med_dl_table = create_ranking_table(
-        rankings["median_download"], "🔽 Median Download Speed", "Mbps"
+        rankings["median_download"], analyses, "🔽 Median Download Speed", "Mbps"
     )
 
     med_ul_table = create_ranking_table(
-        rankings["median_upload"], "🔼 Median Upload Speed", "Mbps"
+        rankings["median_upload"], analyses, "🔼 Median Upload Speed", "Mbps"
     )
 
     med_lat_table = create_ranking_table(
-        rankings["median_latency"], "📡 Median Latency", "ms", reverse_ranking=True
+        rankings["median_latency"],
+        analyses,
+        "📡 Median Latency",
+        "ms",
+        reverse_ranking=True,
     )
 
     console.print(Columns([med_dl_table, med_ul_table, med_lat_table]))
@@ -1077,11 +1541,11 @@ def present_comparative_analysis(
     console.print("[bold]🚀 Peak Performance Rankings[/bold]")
 
     max_dl_table = create_ranking_table(
-        rankings["max_download"], "⚡ Maximum Download Speed", "Mbps"
+        rankings["max_download"], analyses, "⚡ Maximum Download Speed", "Mbps"
     )
 
     max_ul_table = create_ranking_table(
-        rankings["max_upload"], "⚡ Maximum Upload Speed", "Mbps"
+        rankings["max_upload"], analyses, "⚡ Maximum Upload Speed", "Mbps"
     )
 
     console.print(Columns([max_dl_table, max_ul_table]))
@@ -1091,11 +1555,11 @@ def present_comparative_analysis(
     console.print("[bold]📉 Minimum Performance Rankings[/bold]")
 
     min_dl_table = create_ranking_table(
-        rankings["min_download"], "🔻 Minimum Download Speed", "Mbps"
+        rankings["min_download"], analyses, "🔻 Minimum Download Speed", "Mbps"
     )
 
     min_ul_table = create_ranking_table(
-        rankings["min_upload"], "🔻 Minimum Upload Speed", "Mbps"
+        rankings["min_upload"], analyses, "🔻 Minimum Upload Speed", "Mbps"
     )
 
     console.print(Columns([min_dl_table, min_ul_table]))
@@ -1112,28 +1576,32 @@ def present_comparative_analysis(
     # Time series plots
     if show_plots:
         time_series_data = extract_time_series_data(analyses)
-        create_time_series_plots(time_series_data)
+        create_time_series_plots(time_series_data, analyses)
 
     # Winner announcement (with stability info if available)
     if rankings["heuristic"]:
-        winner = rankings["heuristic"][0]
-        winner_analysis = next(a for a in analyses if a["filename"] == winner[0])
+        winner_filename = rankings["heuristic"][0][0]
+        winner_analysis = next(
+            (a for a in analyses if a["filename"] == winner_filename), None
+        )
 
-        # Add stability info if consistency analysis was done
         stability_info = ""
-        if "consistency" in winner_analysis:
+        if winner_analysis:
+            winner_name = format_dataset_name(winner_analysis)
             stability_score = winner_analysis["consistency"]["stability_scores"][
                 "overall"
             ]
             stability_info = (
-                f"\nStability Score: [bold cyan]{stability_score:.1f}/100[/bold cyan]"
+                f"\\nStability Score: [bold cyan]{stability_score:.1f}/100[/bold cyan]"
             )
+        else:
+            winner_name = winner_filename.replace(".json", "").replace("_", " ").title()
 
         console.print("\n")
         console.print(
             Panel(
-                f"🏆 Overall Winner: [bold green]{winner[0].replace('.json', '').replace('_', ' ').title()}[/bold green]\n"
-                f"Performance Score: [bold yellow]{winner[1]:.2f} points[/bold yellow]{stability_info}",
+                f"🏆 Overall Winner: [bold green]{winner_name}[/bold green]\\n"
+                f"Performance Score: [bold yellow]{rankings['heuristic'][0][1]:.2f} points[/bold yellow]{stability_info}",
                 title="🎉 Champion Dataset",
                 border_style="gold1",
             )
@@ -1143,21 +1611,24 @@ def present_comparative_analysis(
     if generate_report:
         console.print("\n")
         console.print(
-            "[bold green]📄 Generating comprehensive HTML report...[/bold green]"
+            "[bold green]📄 Generating HTML report for comparative analysis...[/bold green]"
         )
 
-        with console.status("[bold green]Creating report..."):
+        # Create HTML report
+        with console.status("[bold green]Creating comprehensive analysis report..."):
             report_file = generate_html_report(analyses)
 
         console.print(
             Panel(
-                f"[bold green]✅ Report generated successfully![/bold green]\n"
+                f"[bold green]✅ Comprehensive analysis report generated![/bold green]\n"
                 f"📄 File: [bold]{report_file}[/bold]\n"
-                f"🌐 [dim]Open this file in your web browser to view the comprehensive report[/dim]",
+                f"🌐 [dim]Open this file in your web browser to view the report[/dim]",
                 title="Report Ready",
                 style="bold green",
             )
         )
+
+    return report_file
 
 
 def main():
@@ -1198,6 +1669,12 @@ def main():
         "--report",
         action="store_true",
         help="Generate comprehensive HTML report",
+    )
+
+    parser.add_argument(
+        "--consistency-report",
+        action="store_true",
+        help="Generate dedicated HTML consistency analysis report",
     )
 
     args = parser.parse_args()
@@ -1256,6 +1733,7 @@ def main():
             show_plots=args.plots,
             show_consistency=args.consistency,
             generate_report=args.report,
+            generate_consistency_report=args.consistency_report,
         )
 
     else:
@@ -1415,7 +1893,7 @@ def main():
                 analysis = analyze_file_silent(args.file)
                 if analysis:
                     time_series_data = extract_time_series_data([analysis])
-                    create_time_series_plots(time_series_data)
+                    create_time_series_plots(time_series_data, [analysis])
             else:
                 console.print(
                     "[yellow]⚠ plotext not available. Install with: pip install plotext[/yellow]"
