@@ -1,4 +1,7 @@
-class ApplicationError extends Error {
+/**
+ * Base error class for application-specific errors
+ */
+export class ApplicationError extends Error {
   public userMessage: string;
   public context: any;
 
@@ -13,7 +16,10 @@ class ApplicationError extends Error {
   }
 }
 
-class APIError extends ApplicationError {
+/**
+ * Error class for API-related errors
+ */
+export class APIError extends ApplicationError {
   public statusCode: number;
 
   constructor(message: string, userMessage: string, apiDetails: any = {}) {
@@ -22,7 +28,10 @@ class APIError extends ApplicationError {
   }
 }
 
-class ValidationError extends ApplicationError {
+/**
+ * Error class for validation errors
+ */
+export class ValidationError extends ApplicationError {
   public validationErrors: any[];
 
   constructor(message: string, userMessage: string, validationErrors: any[] = []) {
@@ -30,5 +39,3 @@ class ValidationError extends ApplicationError {
     this.validationErrors = validationErrors;
   }
 }
-
-export { ApplicationError, APIError, ValidationError };

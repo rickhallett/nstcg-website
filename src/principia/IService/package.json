@@ -1,0 +1,23 @@
+{
+  "name": "@principia/iservice",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Base service interface for Principia.js architecture",
+  "source": "./index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo 'No tests for interface module'",
+    "test:watch": "echo 'No tests for interface module'"
+  },
+  "keywords": ["service", "interface", "principia"],
+  "author": "NSTCG",
+  "license": "MIT"
+}

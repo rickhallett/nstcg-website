@@ -1,0 +1,23 @@
+{
+  "name": "@principia/logger-service",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Centralized logging service for Principia.js architecture",
+  "source": "./index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "bun test LoggerService.test.ts",
+    "test:watch": "bun test --watch LoggerService.test.ts"
+  },
+  "keywords": ["logger", "logging", "service", "principia"],
+  "author": "NSTCG",
+  "license": "MIT"
+}

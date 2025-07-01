@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principia.js Browser Usage Examples</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 { color: #333; }
+        h2 { color: #555; margin-top: 30px; }
+        h3 { color: #666; }
+        pre {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border: 1px solid #e1e1e1;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+        }
+        .example {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f0f8ff;
+            border-radius: 4px;
+            border-left: 4px solid #0066cc;
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        .output {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Principia.js Browser Usage Examples</h1>
+        <p>This page demonstrates how to use Principia.js modules in the browser using the UMD builds.</p>
+        
+        <h2>Individual Module Usage</h2>
+        
+        <div class="example">
+            <h3>EventBus Module</h3>
+            <p>Load the EventBus module and use it for pub/sub messaging:</p>
+            <pre><code>&lt;script src="../EventBus/dist/eventbus.umd.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+// The module is available as window.PrincipiaEventBus
+const eventBus = PrincipiaEventBus.EventBus.getInstance();
+
+// Subscribe to an event
+eventBus.on('user:login', (data) => {
+    console.log('User logged in:', data);
+});
+
+// Emit an event
+eventBus.emit('user:login', { username: 'john_doe' });
+&lt;/script&gt;</code></pre>
+            <button onclick="demoEventBus()">Run EventBus Demo</button>
+            <div id="eventbus-output" class="output" style="display:none;"></div>
+        </div>
+
+        <div class="example">
+            <h3>StateManager Module</h3>
+            <p>Load and use the StateManager for centralized state management:</p>
+            <pre><code>&lt;script src="../StateManager/dist/statemanager.umd.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+// Initialize StateManager with EventBus
+const stateManager = new PrincipiaStateManager.StateManager(eventBus);
+stateManager.initialize({
+    user: null,
+    theme: 'light',
+    count: 0
+});
+
+// Subscribe to state changes
+stateManager.subscribe('count', (newValue) => {
+    console.log('Count changed to:', newValue);
+});
+
+// Update state
+stateManager.set('count', 5);
+&lt;/script&gt;</code></pre>
+            <button onclick="demoStateManager()">Run StateManager Demo</button>
+            <div id="statemanager-output" class="output" style="display:none;"></div>
+        </div>
+
+        <h2>Complete Framework Usage</h2>
+        
+        <div class="example">
+            <h3>Using the Complete Principia.js Bundle</h3>
+            <p>Load the entire framework with a single script tag:</p>
+            <pre><code>&lt;script src="../dist/principia.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+// All modules are available under the Principia namespace
+const { EventBus, StateManager, ApplicationError } = Principia;
+
+// Create instances
+const eventBus = EventBus.getInstance();
+const stateManager = new StateManager(eventBus);
+
+// Use the framework
+stateManager.initialize({ app: { name: 'My App' } });
+console.log('App state:', stateManager.get('app'));
+&lt;/script&gt;</code></pre>
+            <button onclick="demoFramework()">Run Framework Demo</button>
+            <div id="framework-output" class="output" style="display:none;"></div>
+        </div>
+
+        <h2>ES Module Usage (Modern Browsers)</h2>
+        
+        <div class="example">
+            <h3>Using ES Modules</h3>
+            <p>For modern browsers, you can use the ES module builds:</p>
+            <pre><code>&lt;script type="module"&gt;
+import { EventBus } from '../EventBus/dist/eventbus.esm.js';
+import { StateManager } from '../StateManager/dist/statemanager.esm.js';
+
+const eventBus = EventBus.getInstance();
+const stateManager = new StateManager(eventBus);
+
+// Your application code here
+&lt;/script&gt;</code></pre>
+        </div>
+
+        <h2>CDN Usage</h2>
+        
+        <div class="example">
+            <h3>Loading from CDN</h3>
+            <p>Once published, you can load Principia.js from a CDN:</p>
+            <pre><code>&lt;!-- Minified version --&gt;
+&lt;script src="https://unpkg.com/@principia/framework/dist/principia.min.js"&gt;&lt;/script&gt;
+
+&lt;!-- Or individual modules --&gt;
+&lt;script src="https://unpkg.com/@principia/eventbus/dist/eventbus.umd.min.js"&gt;&lt;/script&gt;</code></pre>
+        </div>
+    </div>
+
+    <!-- Load the actual built modules for demos -->
+    <script src="../EventBus/dist/eventbus.umd.js"></script>
+    <script src="../StateManager/dist/statemanager.umd.js"></script>
+    
+    <script>
+        function demoEventBus() {
+            const output = document.getElementById('eventbus-output');
+            output.style.display = 'block';
+            output.textContent = '';
+            
+            try {
+                const eventBus = PrincipiaEventBus.EventBus.getInstance();
+                
+                // Clear any existing listeners
+                eventBus.off('demo:event');
+                
+                // Subscribe to an event
+                eventBus.on('demo:event', (data) => {
+                    output.textContent += `Event received: ${JSON.stringify(data)}\n`;
+                });
+                
+                // Emit events
+                output.textContent += 'Subscribing to "demo:event"...\n';
+                output.textContent += 'Emitting event with data: { message: "Hello from EventBus!" }\n';
+                eventBus.emit('demo:event', { message: 'Hello from EventBus!' });
+                
+                output.textContent += 'Emitting event with data: { count: 42 }\n';
+                eventBus.emit('demo:event', { count: 42 });
+                
+                output.textContent += '\n✅ EventBus demo completed successfully!';
+            } catch (error) {
+                output.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        function demoStateManager() {
+            const output = document.getElementById('statemanager-output');
+            output.style.display = 'block';
+            output.textContent = '';
+            
+            try {
+                const eventBus = PrincipiaEventBus.EventBus.getInstance();
+                const stateManager = new PrincipiaStateManager.StateManager(eventBus);
+                
+                // Initialize state
+                stateManager.initialize({
+                    user: { name: 'Guest', role: 'visitor' },
+                    settings: { theme: 'light', notifications: true },
+                    counter: 0
+                });
+                
+                output.textContent += 'Initial state:\n';
+                output.textContent += JSON.stringify(stateManager.get(), null, 2) + '\n\n';
+                
+                // Subscribe to changes
+                stateManager.subscribe('counter', (newValue) => {
+                    output.textContent += `Counter changed to: ${newValue}\n`;
+                });
+                
+                // Update state
+                output.textContent += 'Updating counter to 5...\n';
+                stateManager.set('counter', 5);
+                
+                output.textContent += 'Updating user name to "John Doe"...\n';
+                stateManager.set('user.name', 'John Doe');
+                
+                output.textContent += '\nFinal state:\n';
+                output.textContent += JSON.stringify(stateManager.get(), null, 2);
+                
+                output.textContent += '\n\n✅ StateManager demo completed successfully!';
+            } catch (error) {
+                output.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        function demoFramework() {
+            const output = document.getElementById('framework-output');
+            output.style.display = 'block';
+            output.textContent = '';
+            
+            output.textContent = '⚠️ Framework bundle not yet built.\n';
+            output.textContent += 'Run "bun run build:principia" first to create the bundle.\n';
+            output.textContent += 'Then refresh this page to see the demo.';
+            
+            // This will work once the framework is built
+            if (typeof Principia !== 'undefined') {
+                output.textContent = '';
+                try {
+                    const { EventBus, StateManager, ApplicationError } = Principia;
+                    
+                    const eventBus = EventBus.getInstance();
+                    const stateManager = new StateManager(eventBus);
+                    
+                    stateManager.initialize({
+                        app: {
+                            name: 'Principia Demo App',
+                            version: '1.0.0',
+                            modules: ['EventBus', 'StateManager', 'ApplicationError']
+                        }
+                    });
+                    
+                    output.textContent += 'Framework loaded successfully!\n\n';
+                    output.textContent += 'Available modules:\n';
+                    output.textContent += Object.keys(Principia).join(', ') + '\n\n';
+                    output.textContent += 'App state:\n';
+                    output.textContent += JSON.stringify(stateManager.get('app'), null, 2);
+                    
+                    output.textContent += '\n\n✅ Framework demo completed successfully!';
+                } catch (error) {
+                    output.textContent = `❌ Error: ${error.message}`;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

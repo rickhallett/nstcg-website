@@ -2,13 +2,15 @@
   "name": "@principia/eventbus",
   "version": "1.0.0",
   "description": "EventBus - Singleton event management system for decoupled module communication in Principia.js architecture",
+  "source": "./index.ts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "module": "dist/index.js",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "bun test ../../../test/principia/EventBus.test.ts",
+    "test": "bun test EventBus.test.ts",
+    "test:watch": "bun test --watch EventBus.test.ts",
     "clean": "rm -rf dist"
   },
   "keywords": [
@@ -21,7 +23,6 @@
   "author": "Principia.js Team",
   "license": "MIT",
   "devDependencies": {
-    "typescript": "^5.3.3",
-    "vitest": "^1.2.0"
+    "typescript": "^5.3.3"
   }
 }

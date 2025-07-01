@@ -8,5 +8,9 @@
     "declarationMap": true
   },
   "include": ["*.ts"],
-  "exclude": ["*.test.ts", "*.spec.ts", "dist"]
+  "exclude": ["*.test.ts", "*.spec.ts", "dist"],
+  "references": [
+    { "path": "../IService" },
+    { "path": "../LoggerService" }
+  ]
 }

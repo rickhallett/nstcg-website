@@ -1,0 +1,28 @@
+{
+  "name": "@principia/error-handler-service",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Centralized error handling service for Principia.js architecture",
+  "source": "./index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "bun test ErrorHandlerService.test.ts",
+    "test:watch": "bun test --watch ErrorHandlerService.test.ts"
+  },
+  "keywords": ["error", "handler", "service", "principia"],
+  "author": "NSTCG",
+  "license": "MIT",
+  "peerDependencies": {
+    "@principia/event-bus": "^1.0.0",
+    "@principia/logger-service": "^1.0.0",
+    "@principia/application-error": "^1.0.0"
+  }
+}

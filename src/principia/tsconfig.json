@@ -1,0 +1,12 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./ApplicationError" },
+    { "path": "./IService" },
+    { "path": "./EventBus" },
+    { "path": "./LoggerService" },
+    { "path": "./ErrorHandlerService" },
+    { "path": "./StateManager" },
+    { "path": "./ServiceRegistry" }
+  ]
+}

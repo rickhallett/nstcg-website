@@ -1,6 +1,6 @@
-import { ErrorHandlerService } from './ErrorHandlerService';
-import { EventBus } from './EventBus';
-import { LoggerService } from './LoggerService';
+import { ErrorHandlerService } from './principia/ErrorHandlerService';
+import { EventBus } from './principia/EventBus';
+import { LoggerService } from './principia/LoggerService';
 
 function initializeServices() {
   const eventBus = EventBus.getInstance();
