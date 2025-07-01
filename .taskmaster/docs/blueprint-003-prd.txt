@@ -1,0 +1,76 @@
+# Blueprint 003: ErrorHandlerService Implementation
+
+## Overview
+Implement the ErrorHandlerService module following the Principia.js architecture and Test-Driven Development.
+
+## Phase
+Phase 1 - Core Engine
+
+## Prerequisites: None (Core Engine module)
+
+## Architectural Canon
+1. The State is Singular: All application state lives only in the StateManager
+2. Events are the Messengers: All module communication happens only through the EventBus
+3. The Flow is Unidirectional: Action → Event → Logic → State Change → Re-render
+4. The Services are Sentinels: All external dependencies are isolated in a Service module
+5. Components are Dumb Artisans: Components only render state and emit events
+6. Views are the Conductors: Page-specific orchestration is the only job of a View Controller
+
+## Implementation Tasks
+
+### Core Implementation
+1. Create the module file structure
+2. Implement singleton pattern
+3. Set up error type definitions and interfaces
+4. Import EventBus for error event notifications
+
+### Test-Driven Development Tasks
+- [ ] Test: "should be a singleton instance" - Implement getInstance method
+- [ ] Test: "should capture and log uncaught errors" - Set up global error handlers
+- [ ] Test: "should capture unhandled promise rejections" - Handle promise rejections
+- [ ] Test: "should emit error:occurred event via EventBus" - Integrate with EventBus
+- [ ] Test: "should include error details in event payload" - Structure error data
+- [ ] Test: "should categorize errors by type" - Implement error classification
+- [ ] Test: "should format error stack traces" - Clean stack trace presentation
+- [ ] Test: "should extract error context (file, line, column)" - Parse error metadata
+- [ ] Test: "should handle string errors gracefully" - Support throw "string"
+- [ ] Test: "should handle non-Error objects" - Support arbitrary throws
+- [ ] Test: "should prevent infinite error loops" - Add recursion protection
+- [ ] Test: "should track error frequency" - Implement error counting
+- [ ] Test: "should support error recovery strategies" - Add recovery callbacks
+- [ ] Test: "should provide registerHandler() for custom handlers" - Plugin system
+- [ ] Test: "should call custom handlers in order" - Handler chain execution
+- [ ] Test: "should stop propagation if handler returns true" - Handler control flow
+- [ ] Test: "should support error severity levels" - Add error classification
+- [ ] Test: "should expose recent errors via getRecentErrors()" - Error history
+- [ ] Test: "should limit error history to prevent memory leaks" - Bounded history
+- [ ] Test: "should provide clearErrors() method" - History cleanup
+- [ ] Test: "should support development vs production modes" - Environment awareness
+- [ ] Test: "should sanitize sensitive data in production" - Security considerations
+
+### Integration Tasks
+- [ ] Integrate with EventBus for error notifications
+- [ ] Add development/production mode handling
+- [ ] Set up global window error listeners
+- [ ] Add TypeScript type definitions
+- [ ] Add JSDoc comments to all public methods
+
+### Documentation & PR
+- [ ] Update module exports in index.js
+- [ ] Create comprehensive PR with test results
+
+## Testing Strategy
+Follow strict TDD process:
+1. Write/uncomment one test
+2. Run test and see it fail
+3. Implement minimal code to pass
+4. Refactor if needed
+5. Commit the change
+6. Repeat for next test
+
+## Success Criteria
+- All tests in tests/core/ErrorHandlerService.test.js pass
+- Properly integrated with EventBus
+- Follows all architectural canon rules
+- Clean, documented code
+- Comprehensive PR created via gh tool
