@@ -1,6 +1,9 @@
 {
   "scripts": {
-    "test": "bun test/runTests.ts"
+    "test": "bun test/runTests.ts",
+    "build:principia": "bun src/principia/build.js",
+    "clean:principia": "bun src/principia/build.js clean",
+    "build": "bun run build:principia"
   },
   "devDependencies": {
     "@babel/core": "^7.27.7",
