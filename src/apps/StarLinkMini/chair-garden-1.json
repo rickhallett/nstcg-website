@@ -1,0 +1,107 @@
+[
+  {
+    "timestamp": "2025-06-30T16:30:57.478Z",
+    "download": {
+      "bandwidth": 89754234.12345678,
+      "bytes": 112567890,
+      "elapsed": 0,
+      "mbps": 89.754234123456
+    },
+    "upload": {
+      "bandwidth": 25443221.112233,
+      "bytes": 32445567,
+      "elapsed": 0,
+      "mbps": 25.443221112233
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 28.123
+    },
+    "server": {
+      "id": "10580",
+      "name": "aql",
+      "location": "Leeds, GB",
+      "country": "United Kingdom",
+      "host": "speedtest.aql.com:8080",
+      "port": 8080,
+      "ip": "speedtest.aql.com"
+    },
+    "result": {
+      "id": "10580",
+      "url": ""
+    },
+    "direction": "45",
+    "direction_degrees": 45,
+    "tilt": 35
+  },
+  {
+    "timestamp": "2025-06-30T16:40:39.331Z",
+    "download": {
+      "bandwidth": 176543098.87654321,
+      "bytes": 220665432,
+      "elapsed": 0,
+      "mbps": 176.543098876543
+    },
+    "upload": {
+      "bandwidth": 31987654.334455,
+      "bytes": 40987654,
+      "elapsed": 0,
+      "mbps": 31.987654334455
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 22.789
+    },
+    "server": {
+      "id": "55810",
+      "name": "20i Ltd",
+      "location": "Nottingham, GB",
+      "country": "United Kingdom",
+      "host": "speedtest1.20i.com:8080",
+      "port": 8080,
+      "ip": "speedtest1.20i.com"
+    },
+    "result": {
+      "id": "55810",
+      "url": ""
+    },
+    "direction": "45",
+    "direction_degrees": 45,
+    "tilt": 35
+  },
+  {
+    "timestamp": "2025-06-30T16:50:39.563Z",
+    "download": {
+      "bandwidth": 134567890.98765432,
+      "bytes": 168776543,
+      "elapsed": 0,
+      "mbps": 134.567890987654
+    },
+    "upload": {
+      "bandwidth": 27123456.667788,
+      "bytes": 34567890,
+      "elapsed": 0,
+      "mbps": 27.123456667788
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 31.456
+    },
+    "server": {
+      "id": "57115",
+      "name": "Clouvider Ltd",
+      "location": "Manchester, GB",
+      "country": "United Kingdom",
+      "host": "man.speedtest.clouvider.net:8080",
+      "port": 8080,
+      "ip": "man.speedtest.clouvider.net"
+    },
+    "result": {
+      "id": "57115",
+      "url": ""
+    },
+    "direction": "45",
+    "direction_degrees": 45,
+    "tilt": 35
+  }
+]

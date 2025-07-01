@@ -1,0 +1,667 @@
+[
+  {
+    "timestamp": "2025-07-01T05:11:26.395Z",
+    "download": {
+      "bandwidth": 176432334.35878634,
+      "bytes": 220642156,
+      "elapsed": 0,
+      "mbps": 176.43233435878633
+    },
+    "upload": {
+      "bandwidth": 25796723.064782515,
+      "bytes": 32391168,
+      "elapsed": 0,
+      "mbps": 25.796723064782515
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 27.951
+    },
+    "server": {
+      "id": "67542",
+      "name": "FibreNest",
+      "location": "Slough, GB",
+      "country": "United Kingdom",
+      "host": "st-6.fibrenest.com:8080",
+      "port": 8080,
+      "ip": "st-6.fibrenest.com"
+    },
+    "result": {
+      "id": "67542",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T05:12:28.271Z",
+    "download": {
+      "bandwidth": 133456505.9480915,
+      "bytes": 166975100,
+      "elapsed": 0,
+      "mbps": 133.45650594809152
+    },
+    "upload": {
+      "bandwidth": 9490600.078346675,
+      "bytes": 12255232,
+      "elapsed": 0,
+      "mbps": 9.490600078346676
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 28.949
+    },
+    "server": {
+      "id": "67542",
+      "name": "FibreNest",
+      "location": "Slough, GB",
+      "country": "United Kingdom",
+      "host": "st-6.fibrenest.com:8080",
+      "port": 8080,
+      "ip": "st-6.fibrenest.com"
+    },
+    "result": {
+      "id": "67542",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T05:22:49.954Z",
+    "download": {
+      "bandwidth": 131428570.2007158,
+      "bytes": 164407814,
+      "elapsed": 0,
+      "mbps": 131.4285702007158
+    },
+    "upload": {
+      "bandwidth": 21666061.607626934,
+      "bytes": 27893760,
+      "elapsed": 0,
+      "mbps": 21.666061607626933
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 31.96
+    },
+    "server": {
+      "id": "69431",
+      "name": "Cilix Limited",
+      "location": "Bracknell, GB",
+      "country": "United Kingdom",
+      "host": "speedtest-3.lon1.cilix.cloud:8080",
+      "port": 8080,
+      "ip": "speedtest-3.lon1.cilix.cloud"
+    },
+    "result": {
+      "id": "69431",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T05:42:49.846Z",
+    "download": {
+      "bandwidth": 222640008.7142531,
+      "bytes": 278403644,
+      "elapsed": 0,
+      "mbps": 222.6400087142531
+    },
+    "upload": {
+      "bandwidth": 14446781.791885149,
+      "bytes": 18472960,
+      "elapsed": 0,
+      "mbps": 14.446781791885149
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 31.867
+    },
+    "server": {
+      "id": "67542",
+      "name": "FibreNest",
+      "location": "Slough, GB",
+      "country": "United Kingdom",
+      "host": "st-6.fibrenest.com:8080",
+      "port": 8080,
+      "ip": "st-6.fibrenest.com"
+    },
+    "result": {
+      "id": "67542",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T05:52:50.281Z",
+    "download": {
+      "bandwidth": 112705582.70768608,
+      "bytes": 141199642,
+      "elapsed": 0,
+      "mbps": 112.70558270768608
+    },
+    "upload": {
+      "bandwidth": 22679205.94571449,
+      "bytes": 29401088,
+      "elapsed": 0,
+      "mbps": 22.67920594571449
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 39.67
+    },
+    "server": {
+      "id": "67542",
+      "name": "FibreNest",
+      "location": "Slough, GB",
+      "country": "United Kingdom",
+      "host": "st-6.fibrenest.com:8080",
+      "port": 8080,
+      "ip": "st-6.fibrenest.com"
+    },
+    "result": {
+      "id": "67542",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T06:12:50.182Z",
+    "download": {
+      "bandwidth": 157882258.1926111,
+      "bytes": 197930620,
+      "elapsed": 0,
+      "mbps": 157.8822581926111
+    },
+    "upload": {
+      "bandwidth": 14511861.708283404,
+      "bytes": 18186240,
+      "elapsed": 0,
+      "mbps": 14.511861708283403
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 43.844
+    },
+    "server": {
+      "id": "32950",
+      "name": "Box Broadband Ltd",
+      "location": "London, GB",
+      "country": "United Kingdom",
+      "host": "speedtest.boxbroadband.co.uk:8080",
+      "port": 8080,
+      "ip": "speedtest.boxbroadband.co.uk"
+    },
+    "result": {
+      "id": "32950",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T06:22:50.019Z",
+    "download": {
+      "bandwidth": 120701110.63437718,
+      "bytes": 151085574,
+      "elapsed": 0,
+      "mbps": 120.70111063437719
+    },
+    "upload": {
+      "bandwidth": 28393152.271717574,
+      "bytes": 35610624,
+      "elapsed": 0,
+      "mbps": 28.393152271717575
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 40.682
+    },
+    "server": {
+      "id": "69431",
+      "name": "Cilix Limited",
+      "location": "Bracknell, GB",
+      "country": "United Kingdom",
+      "host": "speedtest-3.lon1.cilix.cloud:8080",
+      "port": 8080,
+      "ip": "speedtest-3.lon1.cilix.cloud"
+    },
+    "result": {
+      "id": "69431",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T06:42:50.003Z",
+    "download": {
+      "bandwidth": 169465541.86203602,
+      "bytes": 213022812,
+      "elapsed": 0,
+      "mbps": 169.46554186203602
+    },
+    "upload": {
+      "bandwidth": 22959582.09498819,
+      "bytes": 28958720,
+      "elapsed": 0,
+      "mbps": 22.95958209498819
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 40.953
+    },
+    "server": {
+      "id": "69431",
+      "name": "Cilix Limited",
+      "location": "Bracknell, GB",
+      "country": "United Kingdom",
+      "host": "speedtest-3.lon1.cilix.cloud:8080",
+      "port": 8080,
+      "ip": "speedtest-3.lon1.cilix.cloud"
+    },
+    "result": {
+      "id": "69431",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T06:52:50.093Z",
+    "download": {
+      "bandwidth": 85292898.53674614,
+      "bytes": 106834696,
+      "elapsed": 0,
+      "mbps": 85.29289853674615
+    },
+    "upload": {
+      "bandwidth": 13518307.040792601,
+      "bytes": 17285120,
+      "elapsed": 0,
+      "mbps": 13.518307040792601
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 36.485
+    },
+    "server": {
+      "id": "32950",
+      "name": "Box Broadband Ltd",
+      "location": "London, GB",
+      "country": "United Kingdom",
+      "host": "speedtest.boxbroadband.co.uk:8080",
+      "port": 8080,
+      "ip": "speedtest.boxbroadband.co.uk"
+    },
+    "result": {
+      "id": "32950",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T07:12:50.047Z",
+    "download": {
+      "bandwidth": 24751395.168169875,
+      "bytes": 31088112,
+      "elapsed": 0,
+      "mbps": 24.751395168169875
+    },
+    "upload": {
+      "bandwidth": 21830464.10363552,
+      "bytes": 27877376,
+      "elapsed": 0,
+      "mbps": 21.83046410363552
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 37.2
+    },
+    "server": {
+      "id": "69431",
+      "name": "Cilix Limited",
+      "location": "Bracknell, GB",
+      "country": "United Kingdom",
+      "host": "speedtest-3.lon1.cilix.cloud:8080",
+      "port": 8080,
+      "ip": "speedtest-3.lon1.cilix.cloud"
+    },
+    "result": {
+      "id": "69431",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T07:22:50.267Z",
+    "download": {
+      "bandwidth": 45774882.136236906,
+      "bytes": 57282595,
+      "elapsed": 0,
+      "mbps": 45.774882136236904
+    },
+    "upload": {
+      "bandwidth": 12194737.656126995,
+      "bytes": 15523840,
+      "elapsed": 0,
+      "mbps": 12.194737656126994
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 39.572
+    },
+    "server": {
+      "id": "14679",
+      "name": "Hyperoptic Limited",
+      "location": "London, GB",
+      "country": "United Kingdom",
+      "host": "speedlon.hyperoptic.com:8080",
+      "port": 8080,
+      "ip": "speedlon.hyperoptic.com"
+    },
+    "result": {
+      "id": "14679",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T07:42:50.592Z",
+    "download": {
+      "bandwidth": 93625906.64604083,
+      "bytes": 117466276,
+      "elapsed": 0,
+      "mbps": 93.62590664604083
+    },
+    "upload": {
+      "bandwidth": 15602651.921166025,
+      "bytes": 20316160,
+      "elapsed": 0,
+      "mbps": 15.602651921166025
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 30.383
+    },
+    "server": {
+      "id": "47230",
+      "name": "Vorboss Limited",
+      "location": "London, GB",
+      "country": "United Kingdom",
+      "host": "speedtest-lon06.vorboss.net:8080",
+      "port": 8080,
+      "ip": "speedtest-lon06.vorboss.net"
+    },
+    "result": {
+      "id": "47230",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T07:52:50.112Z",
+    "download": {
+      "bandwidth": 135705558.04299548,
+      "bytes": 169811580,
+      "elapsed": 0,
+      "mbps": 135.70555804299548
+    },
+    "upload": {
+      "bandwidth": 15751914.331730502,
+      "bytes": 20176896,
+      "elapsed": 0,
+      "mbps": 15.751914331730502
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 30.513
+    },
+    "server": {
+      "id": "43721",
+      "name": "Lit Fibre Group Ltd.",
+      "location": "London, GB",
+      "country": "United Kingdom",
+      "host": "speedtest-1.litfibre.com:8080",
+      "port": 8080,
+      "ip": "speedtest-1.litfibre.com"
+    },
+    "result": {
+      "id": "43721",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T08:12:50.360Z",
+    "download": {
+      "bandwidth": 87140527.40778215,
+      "bytes": 109079716,
+      "elapsed": 0,
+      "mbps": 87.14052740778216
+    },
+    "upload": {
+      "bandwidth": 12348486.816897465,
+      "bytes": 16080896,
+      "elapsed": 0,
+      "mbps": 12.348486816897465
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 31.845
+    },
+    "server": {
+      "id": "65353",
+      "name": "Glide",
+      "location": "London, GB",
+      "country": "United Kingdom",
+      "host": "perf-01.ixn.as42689.net:8080",
+      "port": 8080,
+      "ip": "perf-01.ixn.as42689.net"
+    },
+    "result": {
+      "id": "65353",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T08:22:50.177Z",
+    "download": {
+      "bandwidth": 114823427.39166294,
+      "bytes": 143848848,
+      "elapsed": 0,
+      "mbps": 114.82342739166295
+    },
+    "upload": {
+      "bandwidth": 22606985.03607744,
+      "bytes": 28983296,
+      "elapsed": 0,
+      "mbps": 22.60698503607744
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 29.213
+    },
+    "server": {
+      "id": "26922",
+      "name": "toob Ltd",
+      "location": "London, GB",
+      "country": "United Kingdom",
+      "host": "speedtest.toob.co.uk:8080",
+      "port": 8080,
+      "ip": "speedtest.toob.co.uk"
+    },
+    "result": {
+      "id": "26922",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T08:42:50.703Z",
+    "download": {
+      "bandwidth": 15021668.605896182,
+      "bytes": 18883136,
+      "elapsed": 0,
+      "mbps": 15.021668605896183
+    },
+    "upload": {
+      "bandwidth": 5069623.269021124,
+      "bytes": 6610944,
+      "elapsed": 0,
+      "mbps": 5.069623269021124
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 34.375
+    },
+    "server": {
+      "id": "26922",
+      "name": "toob Ltd",
+      "location": "London, GB",
+      "country": "United Kingdom",
+      "host": "speedtest.toob.co.uk:8080",
+      "port": 8080,
+      "ip": "speedtest.toob.co.uk"
+    },
+    "result": {
+      "id": "26922",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T08:52:49.994Z",
+    "download": {
+      "bandwidth": 173328160.0091109,
+      "bytes": 217252716,
+      "elapsed": 0,
+      "mbps": 173.3281600091109
+    },
+    "upload": {
+      "bandwidth": 19034316.387383115,
+      "bytes": 23846912,
+      "elapsed": 0,
+      "mbps": 19.034316387383114
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 30.336
+    },
+    "server": {
+      "id": "65353",
+      "name": "Glide",
+      "location": "London, GB",
+      "country": "United Kingdom",
+      "host": "perf-01.ixn.as42689.net:8080",
+      "port": 8080,
+      "ip": "perf-01.ixn.as42689.net"
+    },
+    "result": {
+      "id": "65353",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T09:12:50.439Z",
+    "download": {
+      "bandwidth": 88835128.50427449,
+      "bytes": 111230116,
+      "elapsed": 0,
+      "mbps": 88.8351285042745
+    },
+    "upload": {
+      "bandwidth": 5348566.841017215,
+      "bytes": 6782976,
+      "elapsed": 0,
+      "mbps": 5.348566841017215
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 38.116
+    },
+    "server": {
+      "id": "26922",
+      "name": "toob Ltd",
+      "location": "London, GB",
+      "country": "United Kingdom",
+      "host": "speedtest.toob.co.uk:8080",
+      "port": 8080,
+      "ip": "speedtest.toob.co.uk"
+    },
+    "result": {
+      "id": "26922",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  },
+  {
+    "timestamp": "2025-07-01T09:22:50.766Z",
+    "download": {
+      "bandwidth": 93001055.64263755,
+      "bytes": 116462756,
+      "elapsed": 0,
+      "mbps": 93.00105564263755
+    },
+    "upload": {
+      "bandwidth": 4476699.764838922,
+      "bytes": 5750784,
+      "elapsed": 0,
+      "mbps": 4.476699764838922
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 43.609
+    },
+    "server": {
+      "id": "26922",
+      "name": "toob Ltd",
+      "location": "London, GB",
+      "country": "United Kingdom",
+      "host": "speedtest.toob.co.uk:8080",
+      "port": 8080,
+      "ip": "speedtest.toob.co.uk"
+    },
+    "result": {
+      "id": "26922",
+      "url": ""
+    },
+    "direction": "260",
+    "direction_degrees": 260,
+    "tilt": 10
+  }
+]

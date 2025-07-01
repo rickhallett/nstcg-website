@@ -1,0 +1,29 @@
+[
+  {
+    "timestamp": "2025-06-30T14:30:57.478Z",
+    "download": { "mbps": 147.61 },
+    "upload": { "mbps": 13.15 },
+    "ping": { "latency": 36.989 },
+    "direction": "300",
+    "direction_degrees": 300,
+    "tilt": 40
+  },
+  {
+    "timestamp": "2025-06-30T14:40:39.331Z",
+    "download": { "mbps": 155.57 },
+    "upload": { "mbps": 18.29 },
+    "ping": { "latency": 33.263 },
+    "direction": "300",
+    "direction_degrees": 300,
+    "tilt": 40
+  },
+  {
+    "timestamp": "2025-06-30T14:50:39.563Z",
+    "download": { "mbps": 121.04 },
+    "upload": { "mbps": 31.78 },
+    "ping": { "latency": 41.685 },
+    "direction": "300",
+    "direction_degrees": 300,
+    "tilt": 40
+  }
+]
