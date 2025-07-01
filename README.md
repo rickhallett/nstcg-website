@@ -103,3 +103,260 @@ Building an application with Principia.js is not just a task; it's a learning ex
 *   **You will build a system from the ground up:** The "Foundation-First" build order is a masterclass in project strategy. You will learn how to build a complex system by starting with a stable core and progressively adding layers of functionality, ensuring that each new piece rests on a tested and reliable foundation.
 
 This project is a dojo. It is a place to practice the art of software engineering with a clear philosophy and a structured approach. The result will not only be a functional website but also a more skilled and principled developer.
+
+# Starlink Speed Test Analysis
+
+A comprehensive Python script that analyzes Starlink speed test data with beautiful visualizations, comparative rankings, and command-line time series plotting using the Rich library and plotext.
+
+## ✨ Features
+
+### 🔍 Single File Analysis
+- **📊 Statistical Analysis**: Min, median, and max values for:
+  - Download speeds (Mbps)
+  - Upload speeds (Mbps)
+  - Latency (ms)
+- **📍 Antenna Configuration**: Analysis of direction and tilt angles
+- **📋 Test Summary**: Overview including test duration and averages
+- **🎯 Performance Assessment**: Overall rating based on download speeds
+- **📈 Time Series Plotting**: Optional command-line charts showing trends over time
+
+### 🏆 Comparative Analysis (`--all` mode)
+- **🔍 Auto-Discovery**: Finds and validates all JSON files in the directory
+- **📊 Multi-Dataset Rankings**: Comprehensive ranking across multiple criteria:
+  - Overall performance score (heuristic: `(download + upload) / latency`)
+  - Average metrics (download, upload, latency)
+  - Median metrics (more resistant to outliers)
+  - Peak performance (maximum speeds)
+  - Minimum performance (consistency analysis)
+- **🎨 Rich Formatting**: Beautiful terminal output with colors, tables, and panels
+- **📈 Multi-Line Time Series**: Compare trends across all datasets on the same plots
+- **🏆 Champion Detection**: Automatic winner announcement with scoring
+
+### 📈 Command-Line Plotting
+- **Real-time Terminal Charts**: Uses plotext for ASCII-based plotting
+- **Time Series Analysis**: Shows performance trends over time
+- **Multi-Dataset Comparison**: Overlay multiple datasets on the same charts
+- **Three Key Metrics**: Separate plots for download, upload, and latency
+- **Smart Time Handling**: Automatically detects timestamps vs. test sequences
+
+## 🚀 Installation
+
+1. **Install the required dependencies:**
+```bash
+pip install -r requirements.txt
+```
+
+Or install individually:
+```bash
+pip install rich plotext
+```
+
+## 📋 Usage
+
+### Single File Analysis
+
+Analyze a specific JSON file:
+```bash
+python speed_analysis.py -f sunbed.json
+```
+
+With time series plotting:
+```bash
+python speed_analysis.py -f sunbed.json --plots
+```
+
+### Comparative Analysis
+
+Analyze all JSON files in the current directory:
+```bash
+python speed_analysis.py --all
+```
+
+With time series plotting showing all datasets:
+```bash
+python speed_analysis.py --all --plots
+```
+
+### Command-line Options
+
+- `-f, --file`: Path to a specific JSON file containing speed test data
+- `-a, --all`: Analyze all JSON files in the current directory and provide comparative rankings
+- `--plots`: Show time series plots (requires plotext)
+- `-h, --help`: Show help message and exit
+
+**Note**: You must use either `-f` or `-a` (they are mutually exclusive).
+
+### Examples
+
+```bash
+# Analyze a specific file
+python speed_analysis.py -f sunbed.json
+
+# Analyze a file with plotting
+python speed_analysis.py -f table-garden.json --plots
+
+# Compare all datasets in directory
+python speed_analysis.py --all
+
+# Compare all datasets with time series plots
+python speed_analysis.py --all --plots
+
+# Show help
+python speed_analysis.py --help
+```
+
+## 📊 Expected Data Format
+
+The script expects JSON files with the following structure:
+
+```json
+[
+  {
+    "timestamp": "2025-06-30T14:30:57.478Z",
+    "download": {
+      "mbps": 147.61
+    },
+    "upload": {
+      "mbps": 13.15
+    },
+    "ping": {
+      "latency": 36.989
+    },
+    "direction": "300",
+    "direction_degrees": 300,
+    "tilt": 40
+  }
+]
+```
+
+**Required fields:**
+- `download.mbps`: Download speed in Mbps
+- `upload.mbps`: Upload speed in Mbps  
+- `ping.latency`: Latency in milliseconds
+
+**Optional fields:**
+- `timestamp`: ISO 8601 timestamp for time series analysis
+- `direction_degrees`: Antenna direction in degrees
+- `tilt`: Antenna tilt angle in degrees
+
+## 🎯 Performance Ratings
+
+### Single File Analysis
+- **Excellent** 🚀: > 100 Mbps average download
+- **Good** 👍: 50-100 Mbps average download  
+- **Fair** 📶: 25-50 Mbps average download
+- **Poor** 📶: < 25 Mbps average download
+
+## 🏆 Comparative Analysis Scoring
+
+When using `--all` mode, datasets are ranked using multiple criteria:
+
+### Overall Performance Score
+The primary ranking uses a heuristic formula:
+```
+Score = (Average Download + Average Upload) / Average Latency
+```
+This rewards high speeds and low latency, providing a balanced performance measure.
+
+### Ranking Categories
+1. **🎯 Overall Performance**: Based on the heuristic score above
+2. **📊 Average Metrics**: Mean values for download, upload, and latency
+3. **📊 Median Metrics**: Median values (more resistant to outliers)
+4. **🚀 Peak Performance**: Maximum speeds achieved
+5. **📉 Minimum Performance**: Consistency and reliability indicators
+
+## 📈 Time Series Plotting
+
+The `--plots` option provides visual time series analysis:
+
+### Features
+- **ASCII-based charts**: No GUI required, works in any terminal
+- **Multi-dataset overlay**: Compare multiple datasets on the same plot
+- **Smart time axis**: Uses actual timestamps when available, falls back to sequence numbers
+- **Three metric charts**: Separate plots for download, upload, and latency
+- **Color coding**: Different colors for each dataset line
+
+### Requirements
+The plotting feature requires the `plotext` library:
+```bash
+pip install plotext
+```
+
+If plotext is not available, the script will show a warning and continue without plots.
+
+## 📁 File Structure
+
+```
+StarLinkMini/
+├── speed_analysis.py      # Main analysis script
+├── requirements.txt       # Python dependencies
+├── README.md             # This documentation
+├── sunbed.json           # Sample speed test data
+├── chair-garden.json     # Sample speed test data
+└── table-garden.json     # Sample speed test data
+```
+
+## 🔧 Technical Details
+
+### Schema Validation
+The script automatically validates JSON files to ensure they contain the required speed test data structure. Invalid files are skipped with warnings.
+
+### Error Handling
+- Graceful handling of missing or corrupted JSON files
+- Automatic schema validation
+- Clear error messages and warnings
+- Continues processing valid files even if some are invalid
+
+### Performance
+- Efficient processing of large datasets
+- Silent analysis mode for comparative operations
+- Progress bars for long-running operations
+- Optimized memory usage
+
+## 🚀 Example Output
+
+### Single File Analysis
+```
+📋 Test Summary
+📋 Total Tests: 17
+⏱️ Test Duration: 2:39:59
+📊 Average Download: 101.46 Mbps
+📈 Average Upload: 18.52 Mbps
+⚡ Average Latency: 36.39 ms
+
+📊 Speed Test Statistics
+┌─────────────┬─────────┬────────┬─────────┬──────┐
+│ Metric      │ Minimum │ Median │ Maximum │ Unit │
+├─────────────┼─────────┼────────┼─────────┼──────┤
+│ 🔽 Download │ 24.35   │ 104.88 │ 219.73  │ Mbps │
+│ 🔼 Upload   │ 5.70    │ 19.86  │ 32.01   │ Mbps │
+│ 📡 Latency  │ 29.26   │ 35.22  │ 50.34   │ ms   │
+└─────────────┴─────────┴────────┴─────────┴──────┘
+
+🎯 Performance Assessment
+Overall Performance Rating: Excellent! 🚀
+```
+
+### Comparative Analysis
+```
+📊 Dataset Comparison Summary
+┌─────────────────┬───────┬────────┬────────┬─────────┬───────┬──────────┐
+│ Dataset         │ Tests │ Avg DL │ Avg UL │ Avg Lat │ Score │ Duration │
+├─────────────────┼───────┼────────┼────────┼─────────┼───────┼──────────┤
+│ Chair-Garden    │   2   │  133.1 │   28.7 │    25.5 │   6.4 │ 0:09:41  │
+│ Sunbed          │   3   │  141.4 │   21.1 │    37.3 │   4.4 │ 0:19:42  │
+│ Table-Garden    │  17   │  101.5 │   18.5 │    36.4 │   3.3 │ 2:39:59  │
+└─────────────────┴───────┴────────┴────────┴─────────┴───────┴──────────┘
+
+🎉 Champion Dataset
+🏆 Overall Winner: Chair-Garden
+Performance Score: 6.36 points
+```
+
+## 🤝 Contributing
+
+Feel free to submit issues, feature requests, or pull requests to improve the analysis capabilities.
+
+## 📄 License
+
+This project is open source and available under the MIT License.

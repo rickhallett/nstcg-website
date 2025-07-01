@@ -1,0 +1,18 @@
+timestamp,download_mbps,upload_mbps,ping_ms,server_name,server_location,direction,tilt
+2025-06-30T19:16:47.693Z,104.88,20.16,50.3,"Connect Fibre","Slough, GB",150,40
+2025-06-30T19:26:47.451Z,91.18,26.22,36.5,"Hyperoptic Limited","London, GB",150,40
+2025-06-30T19:36:47.502Z,110.84,10.22,33.5,"Hyperoptic Limited","London, GB",150,40
+2025-06-30T19:46:48.047Z,24.35,5.70,42.6,"Hyperoptic Limited","London, GB",150,40
+2025-06-30T19:56:47.594Z,119.76,29.44,31.1,"Vorboss Limited","London, GB",150,40
+2025-06-30T20:06:48.125Z,82.47,22.11,31.9,"FibreNest","Slough, GB",150,40
+2025-06-30T20:16:47.830Z,77.79,21.22,49.8,"FibreNest","Slough, GB",150,40
+2025-06-30T20:26:47.678Z,140.65,16.33,32.4,"Connect Fibre","Slough, GB",150,40
+2025-06-30T20:36:47.405Z,79.55,6.94,33.1,"Vorboss Limited","London, GB",150,40
+2025-06-30T20:46:48.089Z,64.09,11.13,32.6,"FibreNest","Slough, GB",150,40
+2025-06-30T20:56:47.091Z,136.77,24.49,29.3,"FibreNest","Slough, GB",150,40
+2025-06-30T21:06:47.400Z,114.51,22.88,36.3,"Hyperoptic Limited","London, GB",150,40
+2025-06-30T21:16:47.339Z,219.73,32.01,35.2,"FibreNest","Slough, GB",150,40
+2025-06-30T21:26:47.421Z,32.96,19.19,35.3,"FibreNest","Slough, GB",150,40
+2025-06-30T21:36:47.501Z,91.07,11.50,38.4,"Connect Fibre","Slough, GB",150,40
+2025-06-30T21:46:47.657Z,128.45,19.86,39.2,"FibreNest","Slough, GB",150,40
+2025-06-30T21:56:47.533Z,105.74,15.45,31.3,"Connect Fibre","Slough, GB",150,40

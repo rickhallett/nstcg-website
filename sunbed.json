@@ -1,0 +1,177 @@
+[
+  {
+    "timestamp": "2025-06-30T14:30:57.478Z",
+    "download": {
+      "bandwidth": 147611415.28147972,
+      "bytes": 184669820,
+      "elapsed": 0,
+      "mbps": 147.6114152814797
+    },
+    "upload": {
+      "bandwidth": 13150134.200986667,
+      "bytes": 17285120,
+      "elapsed": 0,
+      "mbps": 13.150134200986667
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 36.989
+    },
+    "server": {
+      "id": "10580",
+      "name": "aql",
+      "location": "Leeds, GB",
+      "country": "United Kingdom",
+      "host": "speedtest.aql.com:8080",
+      "port": 8080,
+      "ip": "speedtest.aql.com"
+    },
+    "result": {
+      "id": "10580",
+      "url": ""
+    },
+    "direction": "300",
+    "direction_degrees": 300,
+    "tilt": 40
+  },
+  {
+    "timestamp": "2025-06-30T14:40:39.331Z",
+    "download": {
+      "bandwidth": 155574056.25444505,
+      "bytes": 194653820,
+      "elapsed": 0,
+      "mbps": 155.57405625444505
+    },
+    "upload": {
+      "bandwidth": 18289529.947491273,
+      "bytes": 23289856,
+      "elapsed": 0,
+      "mbps": 18.289529947491275
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 33.263
+    },
+    "server": {
+      "id": "55810",
+      "name": "20i Ltd",
+      "location": "Nottingham, GB",
+      "country": "United Kingdom",
+      "host": "speedtest1.20i.com:8080",
+      "port": 8080,
+      "ip": "speedtest1.20i.com"
+    },
+    "result": {
+      "id": "55810",
+      "url": ""
+    },
+    "direction": "300",
+    "direction_degrees": 300,
+    "tilt": 40
+  },
+  {
+    "timestamp": "2025-06-30T14:50:39.563Z",
+    "download": {
+      "bandwidth": 121039333.38772973,
+      "bytes": 151341574,
+      "elapsed": 0,
+      "mbps": 121.03933338772974
+    },
+    "upload": {
+      "bandwidth": 31780295.868025318,
+      "bytes": 39804928,
+      "elapsed": 0,
+      "mbps": 31.780295868025316
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 41.685
+    },
+    "server": {
+      "id": "57115",
+      "name": "Clouvider Ltd",
+      "location": "Manchester, GB",
+      "country": "United Kingdom",
+      "host": "man.speedtest.clouvider.net:8080",
+      "port": 8080,
+      "ip": "man.speedtest.clouvider.net"
+    },
+    "result": {
+      "id": "57115",
+      "url": ""
+    },
+    "direction": "300",
+    "direction_degrees": 300,
+    "tilt": 40
+  },
+  {
+    "timestamp": "2025-06-30T15:00:39.517Z",
+    "download": {
+      "bandwidth": 55977898.15213189,
+      "bytes": 70383156,
+      "elapsed": 0,
+      "mbps": 55.97789815213189
+    },
+    "upload": {
+      "bandwidth": 22198615.483044032,
+      "bytes": 28336128,
+      "elapsed": 0,
+      "mbps": 22.198615483044033
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 34.969
+    },
+    "server": {
+      "id": "55810",
+      "name": "20i Ltd",
+      "location": "Nottingham, GB",
+      "country": "United Kingdom",
+      "host": "speedtest1.20i.com:8080",
+      "port": 8080,
+      "ip": "speedtest1.20i.com"
+    },
+    "result": {
+      "id": "55810",
+      "url": ""
+    },
+    "direction": "300",
+    "direction_degrees": 300,
+    "tilt": 40
+  },
+  {
+    "timestamp": "2025-06-30T15:10:39.747Z",
+    "download": {
+      "bandwidth": 163740843.8778573,
+      "bytes": 204852860,
+      "elapsed": 0,
+      "mbps": 163.7408438778573
+    },
+    "upload": {
+      "bandwidth": 14484222.177893579,
+      "bytes": 18685952,
+      "elapsed": 0,
+      "mbps": 14.48422217789358
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 38.043
+    },
+    "server": {
+      "id": "55810",
+      "name": "20i Ltd",
+      "location": "Nottingham, GB",
+      "country": "United Kingdom",
+      "host": "speedtest1.20i.com:8080",
+      "port": 8080,
+      "ip": "speedtest1.20i.com"
+    },
+    "result": {
+      "id": "55810",
+      "url": ""
+    },
+    "direction": "300",
+    "direction_degrees": 300,
+    "tilt": 40
+  }
+]

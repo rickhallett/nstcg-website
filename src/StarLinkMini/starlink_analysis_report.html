@@ -1,0 +1,252 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Starlink Speed Test Analysis Report</title>
+        <style>
+            body { 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                margin: 0;
+                padding: 20px;
+                background-color: #f5f5f5;
+            }
+            .container { 
+                max-width: 1200px;
+                margin: 0 auto;
+                background: white;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            }
+            h1, h2, h3 { color: #2c3e50; }
+            h1 { text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+            h2 { border-left: 4px solid #3498db; padding-left: 15px; margin-top: 30px; }
+            .summary-grid { 
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin: 20px 0;
+            }
+            .summary-card { 
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+            }
+            .summary-card h3 { color: white; margin-top: 0; }
+            .summary-card .value { font-size: 2em; font-weight: bold; }
+            .summary-card .unit { font-size: 0.8em; opacity: 0.8; }
+            table { 
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+                background: white;
+            }
+            th, td { 
+                padding: 12px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+            th { 
+                background-color: #3498db;
+                color: white;
+                font-weight: bold;
+            }
+            tr:nth-child(even) { background-color: #f2f2f2; }
+            tr:hover { background-color: #e8f4fd; }
+            .champion { 
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                margin: 20px 0;
+            }
+            .champion h2 { color: white; border: none; margin: 0; }
+            .metric-positive { color: #27ae60; font-weight: bold; }
+            .metric-negative { color: #e74c3c; font-weight: bold; }
+            .rank-1 { background-color: #f1c40f !important; }
+            .rank-2 { background-color: #95a5a6 !important; }
+            .rank-3 { background-color: #cd7f32 !important; }
+            .timestamp { 
+                text-align: center;
+                color: #7f8c8d;
+                font-style: italic;
+                margin-top: 30px;
+                border-top: 1px solid #eee;
+                padding-top: 15px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🛰️ Starlink Speed Test Analysis Report</h1>
+            
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h3>📊 Datasets Analyzed</h3>
+                    <div class="value">3</div>
+                </div>
+                <div class="summary-card">
+                    <h3>📈 Total Tests</h3>
+                    <div class="value">22</div>
+                </div>
+                <div class="summary-card">
+                    <h3>⚡ Best Download</h3>
+                    <div class="value">141.4</div>
+                    <div class="unit">Mbps</div>
+                </div>
+                <div class="summary-card">
+                    <h3>🏆 Champion</h3>
+                    <div class="value">Chair-Garden</div>
+                </div>
+            </div>
+    
+            <h2>📊 Dataset Comparison Overview</h2>
+            <table>
+                <tr>
+                    <th>Dataset</th>
+                    <th>Tests</th>
+                    <th>Avg Download (Mbps)</th>
+                    <th>Avg Upload (Mbps)</th>
+                    <th>Avg Latency (ms)</th>
+                    <th>Performance Score</th>
+                    <th>Duration</th>
+                </tr>
+    
+                <tr>
+                    <td><strong>Chair-Garden</strong></td>
+                    <td>2</td>
+                    <td class="metric-positive">133.1</td>
+                    <td class="metric-positive">28.7</td>
+                    <td class="metric-negative">25.5</td>
+                    <td><strong>6.36</strong></td>
+                    <td>0:09:41</td>
+                </tr>
+        
+                <tr>
+                    <td><strong>Sunbed</strong></td>
+                    <td>3</td>
+                    <td class="metric-positive">141.4</td>
+                    <td class="metric-positive">21.1</td>
+                    <td class="metric-negative">37.3</td>
+                    <td><strong>4.35</strong></td>
+                    <td>0:19:42</td>
+                </tr>
+        
+                <tr>
+                    <td><strong>Table-Garden</strong></td>
+                    <td>17</td>
+                    <td class="metric-positive">101.5</td>
+                    <td class="metric-positive">18.5</td>
+                    <td class="metric-negative">36.4</td>
+                    <td><strong>3.30</strong></td>
+                    <td>2:39:59</td>
+                </tr>
+        </table>
+            <h2>🏆 Performance Rankings</h2>
+            <h3>🎯 Overall Performance Score</h3>
+            <table>
+                <tr><th>Rank</th><th>Dataset</th><th>Score</th></tr>
+    
+                <tr class="rank-1">
+                    <td><strong>🥇</strong></td>
+                    <td>Chair-Garden</td>
+                    <td>6.36 pts</td>
+                </tr>
+        
+                <tr class="rank-2">
+                    <td><strong>🥈</strong></td>
+                    <td>Sunbed</td>
+                    <td>4.35 pts</td>
+                </tr>
+        
+                <tr class="rank-3">
+                    <td><strong>🥉</strong></td>
+                    <td>Table-Garden</td>
+                    <td>3.30 pts</td>
+                </tr>
+        </table>
+            <h2>📈 Consistency Analysis</h2>
+            <h3>🎯 Stability Scores (Higher = More Stable)</h3>
+            <table>
+                <tr>
+                    <th>Rank</th>
+                    <th>Dataset</th>
+                    <th>Download Stability</th>
+                    <th>Upload Stability</th>
+                    <th>Latency Stability</th>
+                    <th>Overall Stability</th>
+                </tr>
+    
+                <tr class="rank-1">
+                    <td><strong>🥇</strong></td>
+                    <td>Sunbed</td>
+                    <td>87.2</td>
+                    <td>54.3</td>
+                    <td>88.7</td>
+                    <td><strong>77.8</strong></td>
+                </tr>
+        
+                <tr class="rank-2">
+                    <td><strong>🥈</strong></td>
+                    <td>Chair-Garden</td>
+                    <td>53.9</td>
+                    <td>83.9</td>
+                    <td>85.2</td>
+                    <td><strong>72.3</strong></td>
+                </tr>
+        
+                <tr class="rank-3">
+                    <td><strong>🥉</strong></td>
+                    <td>Table-Garden</td>
+                    <td>56.1</td>
+                    <td>58.9</td>
+                    <td>83.2</td>
+                    <td><strong>65.1</strong></td>
+                </tr>
+        </table>
+            <h2>📊 Statistical Details</h2>
+            <h3>📏 Standard Deviations (Lower = More Consistent)</h3>
+            <table>
+                <tr><th>Dataset</th><th>Download (Mbps)</th><th>Upload (Mbps)</th><th>Latency (ms)</th></tr>
+    
+                <tr>
+                    <td><strong>Chair-Garden</strong></td>
+                    <td>61.37</td>
+                    <td>4.63</td>
+                    <td>3.77</td>
+                </tr>
+        
+                <tr>
+                    <td><strong>Sunbed</strong></td>
+                    <td>18.08</td>
+                    <td>9.62</td>
+                    <td>4.22</td>
+                </tr>
+        
+                <tr>
+                    <td><strong>Table-Garden</strong></td>
+                    <td>44.56</td>
+                    <td>7.61</td>
+                    <td>6.13</td>
+                </tr>
+        </table>
+            <div class="champion">
+                <h2>🎉 Champion Dataset</h2>
+                <h3>🏆 Overall Winner: Chair-Garden</h3>
+                <p><strong>Performance Score:</strong> 6.36 points</p>
+                <p><strong>Stability Score:</strong> 72.3/100</p>
+            </div>
+        
+            <div class="timestamp">
+                Report generated on 2025-06-30 23:42:30
+            </div>
+        </div>
+    </body>
+    </html>
+    
