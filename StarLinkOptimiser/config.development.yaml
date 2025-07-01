@@ -1,7 +1,0 @@
-# StarLinkOptimiser/config.development.yaml
-testName: development
-frequency: 60000 # 1 minute
-output: csv
-logging: true
-logFile: starlink-optimiser.log
-port: 3000
