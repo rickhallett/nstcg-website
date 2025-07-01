@@ -427,6 +427,6 @@ The following documents should be considered as part of the context for every se
 - @docs/workflow/fao_claude.md
 - @docs/principia.js.md
 - @docs/principia_modules.md
-- @.taskmaster/docs/StarLinkOptimiser.prd
 - @.cursor/rules/taskmaster/dev_workflow.mdc
-- @.cursor/rules/taskmaster/taskmaster.mdc
+
+Proceed like a master. See you at the finish line, my friend.
