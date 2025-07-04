@@ -1,0 +1,12 @@
+timestamp,download_mbps,upload_mbps,ping_ms,server_name,server_location,direction,tilt
+2025-07-04T19:44:50.759Z,101.57,13.88,24.6,"VeloxServ Communications","London, GB",300,40
+2025-07-04T19:55:12.501Z,166.97,7.81,35.2,"VeloxServ Communications","London, GB",300,40
+2025-07-04T20:15:12.681Z,64.16,13.67,32.7,"Zen Internet","London, GB",300,40
+2025-07-04T20:25:12.550Z,66.99,36.55,33.9,"Zen Internet","London, GB",300,40
+2025-07-04T20:35:12.800Z,64.99,7.72,25.2,"Zen Internet","London, GB",300,40
+2025-07-04T20:45:13.130Z,234.17,18.81,33.9,"VeloxServ Communications","London, GB",300,40
+2025-07-04T20:55:12.740Z,148.53,18.49,33.9,"Zen Internet","London, GB",300,40
+2025-07-04T21:15:13.317Z,141.91,22.56,33.1,"VeloxServ Communications","London, GB",300,40
+2025-07-04T21:25:20.391Z,25.91,29.17,33.2,"VeloxServ Communications","London, GB",300,40
+2025-07-04T21:35:12.791Z,107.01,11.08,30.6,"VeloxServ Communications","London, GB",300,40
+2025-07-04T21:45:13.254Z,102.50,12.82,42.6,"BRSK","London, GB",300,40

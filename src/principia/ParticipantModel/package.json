@@ -1,0 +1,31 @@
+{
+  "name": "@principia/participant-model",
+  "version": "1.0.0",
+  "description": "Participant business logic model for Principia.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "participant",
+    "model",
+    "business-logic",
+    "principia"
+  ],
+  "author": "Principia.js Team",
+  "license": "MIT",
+  "dependencies": {
+    "@principia/state-manager": "^1.0.0",
+    "@principia/event-bus": "^1.0.0",
+    "@principia/notion-service": "^1.0.0"
+  },
+  "devDependencies": {
+    "@principia/api-service": "^1.0.0",
+    "@principia/logger-service": "^1.0.0",
+    "bun-types": "latest",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@principia/component",
+  "version": "1.0.0",
+  "description": "Base component class for Principia.js UI components",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "component",
+    "ui",
+    "principia"
+  ],
+  "author": "Principia.js Team",
+  "license": "MIT",
+  "dependencies": {
+    "@principia/state-manager": "^1.0.0",
+    "@principia/event-bus": "^1.0.0",
+    "@principia/dom-diff": "^1.0.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "happy-dom": "^18.0.1",
+    "typescript": "^5.0.0"
+  }
+}

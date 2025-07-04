@@ -1,0 +1,91 @@
+timestamp,download_mbps,upload_mbps,ping_ms,server_name,server_location,direction,tilt
+2025-07-02T13:18:33.080Z,129.03,29.90,27.8,"ITS Technology Group","London, GB",288,40
+2025-07-02T13:28:55.959Z,23.88,6.33,41.8,"VeloxServ Communications","London, GB",288,40
+2025-07-02T13:38:55.162Z,115.97,28.40,39.8,"Zen Internet","London, GB",288,40
+2025-07-02T13:48:55.334Z,121.26,25.23,46.9,"YouFibre","London, GB",288,40
+2025-07-02T13:58:55.436Z,131.27,22.22,34.6,"FibreNest","Slough, GB",288,40
+2025-07-02T14:08:55.055Z,83.93,30.29,39.8,"FibreNest","Slough, GB",288,40
+2025-07-02T14:45:05.859Z,129.61,21.34,35.4,"YouFibre","London, GB",288,40
+2025-07-02T15:17:38.640Z,71.95,21.82,42.5,"FibreNest","Slough, GB",288,40
+2025-07-02T15:33:39.868Z,157.08,17.44,54.0,"FibreNest","Slough, GB",288,40
+2025-07-02T15:43:38.894Z,85.27,10.38,41.7,"YouFibre","London, GB",288,40
+2025-07-02T15:53:39.929Z,41.33,3.67,35.6,"Briant Broadband","London, GB",288,40
+2025-07-02T16:03:38.706Z,80.00,22.98,33.2,"Structured Communications","London, GB",288,40
+2025-07-02T16:13:38.535Z,92.66,6.54,37.8,"Structured Communications","London, GB",288,40
+2025-07-02T16:23:38.766Z,93.86,15.88,40.5,"Structured Communications","London, GB",288,40
+2025-07-02T16:33:38.250Z,127.69,19.32,30.9,"FibreNest","Slough, GB",288,40
+2025-07-02T16:43:39.462Z,48.36,15.30,47.8,"FibreNest","Slough, GB",288,40
+2025-07-02T16:53:38.724Z,39.74,25.19,37.1,"Briant Broadband","London, GB",288,40
+2025-07-02T17:13:38.299Z,104.98,14.67,33.7,"Trooli","Maidstone, GB",288,40
+2025-07-02T17:23:38.062Z,148.20,35.80,23.1,"Airband Community Internet","London, GB",288,40
+2025-07-02T17:43:38.341Z,29.64,13.74,32.6,"Airband Community Internet","London, GB",288,40
+2025-07-02T17:53:39.062Z,208.37,18.58,29.8,"VeloxServ Communications","London, GB",288,40
+2025-07-02T18:03:38.412Z,87.77,17.70,36.3,"Airband Community Internet","London, GB",288,40
+2025-07-02T18:13:38.764Z,52.22,12.75,39.1,"Airband Community Internet","London, GB",288,40
+2025-07-02T18:23:38.812Z,118.18,28.88,41.9,"VeloxServ Communications","London, GB",288,40
+2025-07-02T18:33:38.500Z,107.78,14.31,25.8,"Airband Community Internet","London, GB",288,40
+2025-07-02T18:43:38.570Z,111.81,15.79,34.6,"VeloxServ Communications","London, GB",288,40
+2025-07-02T18:53:38.313Z,104.95,13.32,31.3,"VeloxServ Communications","London, GB",288,40
+2025-07-02T19:13:38.504Z,42.46,26.40,32.6,"Airband Community Internet","London, GB",288,40
+2025-07-02T19:23:38.298Z,111.87,32.75,34.4,"VeloxServ Communications","London, GB",288,40
+2025-07-02T19:33:38.567Z,79.26,12.19,32.3,"Trooli","Maidstone, GB",288,40
+2025-07-02T19:43:38.233Z,251.96,37.23,29.1,"VeloxServ Communications","London, GB",288,40
+2025-07-02T19:53:38.483Z,115.46,21.87,33.6,"ITS Technology Group","London, GB",288,40
+2025-07-02T20:13:38.365Z,129.55,24.86,28.6,"ITS Technology Group","London, GB",288,40
+2025-07-02T20:23:38.510Z,32.32,31.23,34.4,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-02T20:33:38.252Z,86.48,28.01,31.3,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-02T20:43:38.753Z,127.06,26.63,41.5,"ITS Technology Group","London, GB",288,40
+2025-07-02T20:53:38.644Z,174.69,18.35,33.0,"ITS Technology Group","London, GB",288,40
+2025-07-02T21:13:38.709Z,160.16,15.93,34.5,"toob Ltd","London, GB",288,40
+2025-07-02T21:23:38.532Z,109.63,26.15,37.1,"ITS Technology Group","London, GB",288,40
+2025-07-02T21:33:38.669Z,130.79,36.42,42.6,"ITS Technology Group","London, GB",288,40
+2025-07-02T21:43:38.340Z,117.20,19.42,33.3,"ITS Technology Group","London, GB",288,40
+2025-07-02T21:53:38.824Z,37.84,9.69,33.0,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-02T22:13:38.535Z,52.16,3.26,30.4,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-02T22:23:38.364Z,148.91,20.18,32.8,"ITS Technology Group","London, GB",288,40
+2025-07-02T22:33:38.163Z,81.48,11.80,32.0,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-02T22:43:38.025Z,122.25,25.44,26.5,"ITS Technology Group","London, GB",288,40
+2025-07-02T22:53:38.592Z,23.97,22.07,29.9,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-02T23:13:38.678Z,143.45,7.82,33.6,"YouFibre","London, GB",288,40
+2025-07-02T23:23:38.433Z,60.45,21.85,31.8,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-02T23:33:38.663Z,125.60,16.74,29.8,"YouFibre","London, GB",288,40
+2025-07-02T23:43:38.364Z,47.56,16.67,33.0,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-02T23:53:38.181Z,80.96,25.62,26.6,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T00:13:38.273Z,105.49,17.44,32.5,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T00:23:38.687Z,138.18,23.72,42.6,"toob Ltd","London, GB",288,40
+2025-07-03T00:43:38.329Z,108.31,30.60,35.0,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T00:53:38.248Z,120.40,15.63,31.9,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T01:13:38.636Z,88.64,16.06,34.5,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T01:23:38.535Z,126.57,17.66,32.9,"toob Ltd","London, GB",288,40
+2025-07-03T01:33:38.635Z,128.05,13.02,30.3,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T01:43:38.496Z,93.86,14.64,30.1,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T01:53:44.202Z,66.01,19.92,30.4,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T02:13:38.497Z,87.11,33.12,36.6,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T02:23:38.237Z,69.10,12.51,27.8,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T02:43:38.148Z,98.00,30.43,27.8,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T02:53:38.584Z,122.59,19.19,30.7,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T03:13:39.154Z,121.70,19.06,44.2,"Glide","London, GB",288,40
+2025-07-03T03:23:38.362Z,84.05,11.80,29.0,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T03:33:38.297Z,79.56,27.30,31.7,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T03:43:38.443Z,114.20,17.11,35.2,"Glide","London, GB",288,40
+2025-07-03T03:53:38.774Z,76.02,15.89,36.4,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T04:13:38.151Z,61.82,31.97,26.5,"Lightning Fibre Ltd","London, GB",288,40
+2025-07-03T04:23:38.444Z,153.45,34.97,34.2,"IDNet","London, GB",288,40
+2025-07-03T04:43:38.697Z,160.56,18.39,38.6,"YouFibre","London, GB",288,40
+2025-07-03T04:53:38.923Z,132.86,12.93,38.9,"Box Broadband Ltd","London, GB",288,40
+2025-07-03T05:13:38.272Z,190.10,31.90,29.7,"Zen Internet","London, GB",288,40
+2025-07-03T05:23:39.256Z,181.49,21.35,44.4,"Zen Internet","London, GB",288,40
+2025-07-03T05:43:39.093Z,140.69,18.34,49.5,"Glide","London, GB",288,40
+2025-07-03T05:53:38.411Z,233.69,16.05,34.0,"Glide","London, GB",288,40
+2025-07-03T06:13:38.636Z,133.44,27.40,37.6,"Community Fibre Limited","London, GB",288,40
+2025-07-03T06:23:38.394Z,107.70,34.98,29.2,"Zen Internet","London, GB",288,40
+2025-07-03T06:33:38.719Z,124.41,20.95,39.9,"Zen Internet","London, GB",288,40
+2025-07-03T06:43:38.397Z,101.56,35.34,34.0,"Community Fibre Limited","London, GB",288,40
+2025-07-03T06:53:38.660Z,134.77,11.34,35.0,"KamaTera, Inc.","London, GB",288,40
+2025-07-03T07:13:38.883Z,208.56,14.67,33.8,"Glide","London, GB",288,40
+2025-07-03T07:23:39.495Z,127.97,20.71,54.1,"Box Broadband Ltd","London, GB",288,40
+2025-07-03T07:33:39.609Z,67.95,6.38,51.6,"Box Broadband Ltd","London, GB",288,40
+2025-07-03T07:43:38.515Z,140.14,19.73,28.6,"Zen Internet","London, GB",288,40
+2025-07-03T07:53:38.387Z,216.46,18.28,33.7,"Glide","London, GB",288,40
+2025-07-03T08:13:38.787Z,233.05,12.68,31.1,"VeloxServ Communications","London, GB",288,40
+2025-07-03T08:23:39.321Z,116.71,11.52,32.7,"VeloxServ Communications","London, GB",288,40

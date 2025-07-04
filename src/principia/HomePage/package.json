@@ -1,0 +1,31 @@
+{
+  "name": "@principia/home-page",
+  "version": "1.0.0",
+  "description": "HomePage view controller for Principia.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "view-controller",
+    "home-page",
+    "principia"
+  ],
+  "author": "Principia.js Team",
+  "license": "MIT",
+  "dependencies": {
+    "@principia/event-bus": "^1.0.0",
+    "@principia/state-manager": "^1.0.0",
+    "@principia/logger-service": "^1.0.0",
+    "@principia/user-model": "^1.0.0",
+    "@principia/participant-model": "^1.0.0",
+    "@principia/component": "^1.0.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.0.0"
+  }
+}

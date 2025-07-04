@@ -1,0 +1,30 @@
+{
+  "name": "@principia/router",
+  "version": "1.0.0",
+  "description": "SPA router for Principia.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "router",
+    "spa",
+    "navigation",
+    "principia"
+  ],
+  "author": "Principia.js Team",
+  "license": "MIT",
+  "dependencies": {
+    "@principia/event-bus": "^1.0.0",
+    "@principia/logger-service": "^1.0.0",
+    "@principia/iservice": "^1.0.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "happy-dom": "^18.0.1",
+    "typescript": "^5.0.0"
+  }
+}

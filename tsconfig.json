@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "module": "commonjs",
+    "target": "esnext",
+    "module": "esnext",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*.ts", "src/global.d.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/global.d.ts"
+  ]
 }

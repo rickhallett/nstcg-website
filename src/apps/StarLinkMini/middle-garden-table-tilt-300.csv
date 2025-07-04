@@ -1,0 +1,20 @@
+timestamp,download_mbps,upload_mbps,ping_ms,server_name,server_location,direction,tilt
+2025-07-02T05:50:03.253Z,91.77,16.00,40.7,"PQ.Hosting","Coventry, GB",300,40
+2025-07-02T06:10:25.454Z,157.14,24.17,41.4,"Quickline Communications","Barnsley, GB",300,40
+2025-07-02T06:20:25.424Z,149.46,14.36,39.6,"Quickline Communications","Barnsley, GB",300,40
+2025-07-02T06:40:25.357Z,165.83,25.45,42.5,"YouFibre","Manchester, GB",300,40
+2025-07-02T06:50:25.951Z,140.62,16.42,47.8,"YouFibre","Manchester, GB",300,40
+2025-07-02T07:10:25.462Z,147.34,27.64,39.4,"Quickline Communications","Barnsley, GB",300,40
+2025-07-02T07:20:26.278Z,106.69,31.62,43.6,"Quickline Communications","Barnsley, GB",300,40
+2025-07-02T07:40:25.552Z,98.88,22.13,44.5,"PQ.Hosting","Coventry, GB",300,40
+2025-07-02T07:50:25.252Z,92.33,20.51,39.1,"YouFibre","London, GB",300,40
+2025-07-02T08:10:25.018Z,97.60,11.14,32.6,"Orbital Net","London, GB",300,40
+2025-07-02T08:20:25.509Z,186.26,6.10,35.8,"Vodafone UK","London, GB",300,40
+2025-07-02T08:40:27.324Z,105.67,7.06,39.8,"Vodafone UK","London, GB",300,40
+2025-07-02T08:50:25.865Z,81.68,7.62,36.6,"Orbital Net","London, GB",300,40
+2025-07-02T09:10:25.507Z,64.67,10.24,33.0,"YouFibre","London, GB",300,40
+2025-07-02T09:20:25.305Z,239.35,23.15,33.2,"IDNet","London, GB",300,40
+2025-07-02T09:40:26.115Z,80.77,14.44,50.1,"YouFibre","London, GB",300,40
+2025-07-02T09:50:26.845Z,99.72,4.93,36.3,"Briant Broadband","London, GB",300,40
+2025-07-02T10:10:26.380Z,43.31,11.02,42.7,"YouFibre","London, GB",300,40
+2025-07-02T13:15:09.247Z,51.09,4.21,34.5,"KamaTera, Inc.","London, GB",300,40

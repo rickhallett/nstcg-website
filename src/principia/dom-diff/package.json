@@ -1,0 +1,25 @@
+{
+  "name": "@principia/dom-diff",
+  "version": "1.0.0",
+  "description": "DOM diffing and patching utility for Principia.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "dom",
+    "diff",
+    "virtual-dom",
+    "patch",
+    "principia"
+  ],
+  "author": "Principia.js Team",
+  "license": "MIT",
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.0.0"
+  }
+}
