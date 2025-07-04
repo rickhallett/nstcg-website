@@ -1,0 +1,35 @@
+{
+  "name": "@principia/app",
+  "version": "1.0.0",
+  "description": "Main entry point for Principia.js application",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "app",
+    "entry-point",
+    "principia"
+  ],
+  "author": "Principia.js Team",
+  "license": "MIT",
+  "dependencies": {
+    "@principia/event-bus": "^1.0.0",
+    "@principia/state-manager": "^1.0.0",
+    "@principia/logger-service": "^1.0.0",
+    "@principia/error-handler-service": "^1.0.0",
+    "@principia/router": "^1.0.0",
+    "@principia/api-service": "^1.0.0",
+    "@principia/notion-service": "^1.0.0",
+    "@principia/user-model": "^1.0.0",
+    "@principia/participant-model": "^1.0.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.0.0",
+    "happy-dom": "^15.0.0"
+  }
+}
