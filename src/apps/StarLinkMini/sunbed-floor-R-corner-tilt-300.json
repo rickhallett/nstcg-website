@@ -383,5 +383,40 @@
     "direction": "300",
     "direction_degrees": 300,
     "tilt": 40
+  },
+  {
+    "timestamp": "2025-07-04T21:55:12.594Z",
+    "download": {
+      "bandwidth": 114125599.63422275,
+      "bytes": 142715162,
+      "elapsed": 0,
+      "mbps": 114.12559963422275
+    },
+    "upload": {
+      "bandwidth": 24277862.372713394,
+      "bytes": 30736384,
+      "elapsed": 0,
+      "mbps": 24.277862372713393
+    },
+    "ping": {
+      "jitter": 0,
+      "latency": 31.118
+    },
+    "server": {
+      "id": "40788",
+      "name": "Zen Internet",
+      "location": "London, GB",
+      "country": "United Kingdom",
+      "host": "speedtest02a.web.zen.net.uk:8080",
+      "port": 8080,
+      "ip": "speedtest02a.web.zen.net.uk"
+    },
+    "result": {
+      "id": "40788",
+      "url": ""
+    },
+    "direction": "300",
+    "direction_degrees": 300,
+    "tilt": 40
   }
 ]

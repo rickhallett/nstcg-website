@@ -1,8 +1,9 @@
 {
   "scripts": {
     "test": "bun test/runTests.ts",
-    "build:principia": "bun src/principia/build.js",
-    "clean:principia": "bun src/principia/build.js clean",
+    "test:principia": "cd src/principia && bun test",
+    "build:principia": "node scripts/build-principia.js",
+    "clean:principia": "cd src/principia && npm run clean",
     "build": "bun run build:principia"
   },
   "devDependencies": {

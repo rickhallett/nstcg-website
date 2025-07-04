@@ -10,3 +10,4 @@ timestamp,download_mbps,upload_mbps,ping_ms,server_name,server_location,directio
 2025-07-04T21:25:20.391Z,25.91,29.17,33.2,"VeloxServ Communications","London, GB",300,40
 2025-07-04T21:35:12.791Z,107.01,11.08,30.6,"VeloxServ Communications","London, GB",300,40
 2025-07-04T21:45:13.254Z,102.50,12.82,42.6,"BRSK","London, GB",300,40
+2025-07-04T21:55:12.594Z,114.13,24.28,31.1,"Zen Internet","London, GB",300,40

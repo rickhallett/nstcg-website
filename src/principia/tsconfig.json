@@ -1,12 +1,30 @@
 {
-  "files": [],
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["index.ts"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"],
   "references": [
     { "path": "./ApplicationError" },
     { "path": "./IService" },
     { "path": "./EventBus" },
+    { "path": "./StateManager" },
     { "path": "./LoggerService" },
     { "path": "./ErrorHandlerService" },
-    { "path": "./StateManager" },
+    { "path": "./dom-diff" },
+    { "path": "./Component" },
+    { "path": "./ApiService" },
+    { "path": "./NotionService" },
+    { "path": "./UserModel" },
+    { "path": "./ParticipantModel" },
+    { "path": "./Router" },
+    { "path": "./HomePage" },
+    { "path": "./app" },
     { "path": "./ServiceRegistry" }
   ]
 }

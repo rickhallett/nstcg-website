@@ -1,0 +1,46 @@
+{
+  "name": "@principia/core",
+  "version": "1.0.0",
+  "description": "Principia.js - A principled vanilla JavaScript framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npm run build:modules && tsc",
+    "build:modules": "npm run build:eventbus && npm run build:statemanager && npm run build:logger && npm run build:errorhandler && npm run build:domdiff && npm run build:component && npm run build:apiservice && npm run build:notionservice && npm run build:usermodel && npm run build:participantmodel && npm run build:router && npm run build:homepage && npm run build:app",
+    "build:eventbus": "cd EventBus && npm run build && cd ..",
+    "build:statemanager": "cd StateManager && npm run build && cd ..",
+    "build:logger": "cd LoggerService && npm run build && cd ..",
+    "build:errorhandler": "cd ErrorHandlerService && npm run build && cd ..",
+    "build:domdiff": "cd dom-diff && npm run build && cd ..",
+    "build:component": "cd Component && npm run build && cd ..",
+    "build:apiservice": "cd ApiService && npm run build && cd ..",
+    "build:notionservice": "cd NotionService && npm run build && cd ..",
+    "build:usermodel": "cd UserModel && npm run build && cd ..",
+    "build:participantmodel": "cd ParticipantModel && npm run build && cd ..",
+    "build:router": "cd Router && npm run build && cd ..",
+    "build:homepage": "cd HomePage && npm run build && cd ..",
+    "build:app": "cd app && npm run build && cd ..",
+    "test": "bun test",
+    "clean": "rm -rf dist && npm run clean:modules",
+    "clean:modules": "cd EventBus && npm run clean && cd .. && cd StateManager && npm run clean && cd .. && cd LoggerService && npm run clean && cd .. && cd ErrorHandlerService && npm run clean && cd .. && cd dom-diff && npm run clean && cd .. && cd Component && npm run clean && cd .. && cd ApiService && npm run clean && cd .. && cd NotionService && npm run clean && cd .. && cd UserModel && npm run clean && cd .. && cd ParticipantModel && npm run clean && cd .. && cd Router && npm run clean && cd .. && cd HomePage && npm run clean && cd .. && cd app && npm run clean && cd .."
+  },
+  "keywords": [
+    "framework",
+    "vanilla-js",
+    "principia",
+    "tdd",
+    "event-driven",
+    "state-management"
+  ],
+  "author": "Principia.js Team",
+  "license": "MIT",
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.0.0",
+    "happy-dom": "^15.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}
