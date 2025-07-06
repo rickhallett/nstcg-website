@@ -6,4 +6,6 @@
  */
 
 export { EventBus } from './EventBus';
+export { ManagedEventBus } from './ManagedEventBus';
 export type { EventHandler, EventName, EventBusInterface } from './EventBus';
+export type { EventOwner } from './ManagedEventBus';
