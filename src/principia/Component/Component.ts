@@ -61,7 +61,7 @@ export abstract class Component {
   /**
    * Flag to track if component is attached
    */
-  private isAttached: boolean = false;
+  protected isAttached: boolean = false;
 
   /**
    * Create a new component instance
