@@ -9,6 +9,7 @@
   "devDependencies": {
     "@babel/core": "^7.27.7",
     "@babel/preset-env": "^7.27.2",
+    "@happy-dom/global-registrator": "^18.0.1",
     "@types/bun": "latest",
     "@types/jest": "^30.0.0",
     "babel-jest": "^30.0.2",
