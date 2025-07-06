@@ -6,4 +6,5 @@
  */
 
 export { StateManager } from './StateManager';
+export { TypedStateManager } from './TypedStateManager';
 export type { StateUpdateBatch, StateChangedEvent } from './types';
